@@ -31,25 +31,29 @@
             lblMail = new Label();
             lblName = new Label();
             btnDangXuat = new Button();
+            lblSDT = new Label();
+            picAVT = new PictureBox();
+            btnAVT = new Button();
+            ((System.ComponentModel.ISupportInitialize)picAVT).BeginInit();
             SuspendLayout();
             // 
             // lblMail
             // 
             lblMail.AutoSize = true;
-            lblMail.Location = new Point(133, 111);
+            lblMail.Location = new Point(136, 179);
             lblMail.Name = "lblMail";
-            lblMail.Size = new Size(39, 15);
+            lblMail.Size = new Size(36, 15);
             lblMail.TabIndex = 0;
-            lblMail.Text = "Email:";
+            lblMail.Text = "Email";
             // 
             // lblName
             // 
             lblName.AutoSize = true;
             lblName.Location = new Point(133, 65);
             lblName.Name = "lblName";
-            lblName.Size = new Size(42, 15);
+            lblName.Size = new Size(25, 15);
             lblName.TabIndex = 1;
-            lblName.Text = "Name:";
+            lblName.Text = "Tên";
             // 
             // btnDangXuat
             // 
@@ -61,17 +65,49 @@
             btnDangXuat.UseVisualStyleBackColor = true;
             btnDangXuat.Click += btnDangXuat_Click;
             // 
+            // lblSDT
+            // 
+            lblSDT.AutoSize = true;
+            lblSDT.Location = new Point(133, 118);
+            lblSDT.Name = "lblSDT";
+            lblSDT.Size = new Size(26, 15);
+            lblSDT.TabIndex = 3;
+            lblSDT.Text = "SDT";
+            // 
+            // picAVT
+            // 
+            picAVT.Location = new Point(508, 12);
+            picAVT.Name = "picAVT";
+            picAVT.Size = new Size(250, 250);
+            picAVT.SizeMode = PictureBoxSizeMode.StretchImage;
+            picAVT.TabIndex = 4;
+            picAVT.TabStop = false;
+            // 
+            // btnAVT
+            // 
+            btnAVT.Location = new Point(604, 299);
+            btnAVT.Name = "btnAVT";
+            btnAVT.Size = new Size(75, 23);
+            btnAVT.TabIndex = 5;
+            btnAVT.Text = "Đổi Avatar";
+            btnAVT.UseVisualStyleBackColor = true;
+            btnAVT.Click += btnAVT_Click;
+            // 
             // Form_TTTKHOAN
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(btnAVT);
+            Controls.Add(picAVT);
+            Controls.Add(lblSDT);
             Controls.Add(btnDangXuat);
             Controls.Add(lblName);
             Controls.Add(lblMail);
             Name = "Form_TTTKHOAN";
             Text = "Form_TTTKHOAN";
             Load += Form_TTTKHOAN_Load;
+            ((System.ComponentModel.ISupportInitialize)picAVT).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -81,5 +117,8 @@
         private Label lblMail;
         private Label lblName;
         private Button btnDangXuat;
+        private Label lblSDT;
+        private PictureBox picAVT;
+        private Button btnAVT;
     }
 }

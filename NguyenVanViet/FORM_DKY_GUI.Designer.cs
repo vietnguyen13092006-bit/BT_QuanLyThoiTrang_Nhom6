@@ -37,6 +37,8 @@
             txtEmail = new TextBox();
             TxtCP = new TextBox();
             label4 = new Label();
+            lblSDT = new Label();
+            txtSDT = new TextBox();
             SuspendLayout();
             // 
             // label1
@@ -44,9 +46,9 @@
             label1.AutoSize = true;
             label1.Location = new Point(151, 83);
             label1.Name = "label1";
-            label1.Size = new Size(41, 15);
+            label1.Size = new Size(28, 15);
             label1.TabIndex = 0;
-            label1.Text = "NAME";
+            label1.Text = "Tên:";
             label1.Click += label1_Click;
             // 
             // btnSend
@@ -62,11 +64,11 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(151, 183);
+            label3.Location = new Point(151, 147);
             label3.Name = "label3";
-            label3.Size = new Size(68, 15);
+            label3.Size = new Size(60, 15);
             label3.TabIndex = 3;
-            label3.Text = "PASSWORD";
+            label3.Text = "Mật khẩu:";
             // 
             // txtName
             // 
@@ -77,7 +79,7 @@
             // 
             // txtPW
             // 
-            txtPW.Location = new Point(293, 183);
+            txtPW.Location = new Point(293, 147);
             txtPW.Name = "txtPW";
             txtPW.Size = new Size(100, 23);
             txtPW.TabIndex = 7;
@@ -85,22 +87,22 @@
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(151, 139);
+            label5.Location = new Point(532, 147);
             label5.Name = "label5";
-            label5.Size = new Size(41, 15);
+            label5.Size = new Size(39, 15);
             label5.TabIndex = 10;
-            label5.Text = "EMAIL";
+            label5.Text = "Email:";
             // 
             // txtEmail
             // 
-            txtEmail.Location = new Point(293, 131);
+            txtEmail.Location = new Point(597, 139);
             txtEmail.Name = "txtEmail";
             txtEmail.Size = new Size(100, 23);
             txtEmail.TabIndex = 11;
             // 
             // TxtCP
             // 
-            TxtCP.Location = new Point(293, 237);
+            TxtCP.Location = new Point(293, 219);
             TxtCP.Name = "TxtCP";
             TxtCP.Size = new Size(100, 23);
             TxtCP.TabIndex = 8;
@@ -108,17 +110,35 @@
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(151, 237);
+            label4.Location = new Point(151, 227);
             label4.Name = "label4";
-            label4.Size = new Size(124, 15);
+            label4.Size = new Size(112, 15);
             label4.TabIndex = 9;
-            label4.Text = "CONFIRM PASSWORD";
+            label4.Text = "Xác nhận mật khẩu:";
             // 
-            // Form1
+            // lblSDT
+            // 
+            lblSDT.AutoSize = true;
+            lblSDT.Location = new Point(532, 80);
+            lblSDT.Name = "lblSDT";
+            lblSDT.Size = new Size(29, 15);
+            lblSDT.TabIndex = 12;
+            lblSDT.Text = "SDT:";
+            // 
+            // txtSDT
+            // 
+            txtSDT.Location = new Point(597, 75);
+            txtSDT.Name = "txtSDT";
+            txtSDT.Size = new Size(100, 23);
+            txtSDT.TabIndex = 13;
+            // 
+            // FORM_DKY_GUI
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(txtSDT);
+            Controls.Add(lblSDT);
             Controls.Add(txtEmail);
             Controls.Add(label5);
             Controls.Add(label4);
@@ -128,7 +148,7 @@
             Controls.Add(label3);
             Controls.Add(btnSend);
             Controls.Add(label1);
-            Name = "Form1";
+            Name = "FORM_DKY_GUI";
             Text = "Form1";
             Load += Form1_Load;
             ResumeLayout(false);
@@ -146,5 +166,8 @@
         private TextBox txtEmail;
         private TextBox TxtCP;
         private Label label4;
+        private Label label2;
+        private Label lblSDT;
+        private TextBox txtSDT;
     }
 }

@@ -35,6 +35,7 @@ namespace FORM_DKY
             string email = txtEmail.Text.Trim();
             string password = txtPW.Text.Trim();
             string confirmPassword = TxtCP.Text.Trim();
+            string sdt = txtSDT.Text.Trim();
 
             if (string.IsNullOrEmpty(fullName) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(confirmPassword))
             {
@@ -54,7 +55,7 @@ namespace FORM_DKY
                 try
                 {
                     conn.Open();
-                    string insertQuery = "INSERT INTO Users (Username, PassW, Email) VALUES (@Username, @PassW, @email)";
+                    string insertQuery = "INSERT INTO Users (Username, PassW, Email, SDT) VALUES (@Username, @PassW, @email, @SDT)";
 
                     using (SqlCommand cmd = new SqlCommand(insertQuery, conn))
                     {
@@ -64,6 +65,8 @@ namespace FORM_DKY
                         cmd.Parameters.AddWithValue("@Email", string.IsNullOrEmpty(email) ? (object)DBNull.Value : email);
 
                         cmd.Parameters.AddWithValue("@PassW", password);
+
+                        cmd.Parameters.AddWithValue("@SDT", sdt);
 
                         cmd.ExecuteNonQuery();
 

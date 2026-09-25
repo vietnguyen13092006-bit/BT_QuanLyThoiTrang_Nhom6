@@ -18,9 +18,16 @@ namespace FORM_DKY
             InitializeComponent();
             sidebarTimer.Interval = 10;
             sidebarTimer.Tick += sidebarTimer_Tick;
-            
-        }
 
+            ApplyFlatButton(btnMenu);
+            ApplyFlatButton(btn_TrangChu);
+            ApplyFlatButton(btnDangNhap);
+        }
+        private void ApplyFlatButton(Button btn)
+        {
+            btn.FlatStyle = FlatStyle.Flat;
+            btn.FlatAppearance.BorderSize = 0;
+        }
         private void openChildForm(Form childForm)
         {
             if (activeForm != null)
@@ -31,6 +38,9 @@ namespace FORM_DKY
             childForm.FormBorderStyle = FormBorderStyle.None; // Xóa thanh tiêu đề và nút X _
             childForm.Dock = DockStyle.Fill;                 // Tự giãn nở kín panel
 
+            // Cập nhật form con
+            childForm.FormClosed += ChildForm_FormClosed;
+
             // Thêm Form con vào panelChildForm và hiển thị
             panelchildform.Controls.Add(childForm);
             panelchildform.Tag = childForm;
@@ -38,9 +48,41 @@ namespace FORM_DKY
             childForm.Show();
         }
 
+        private void ChildForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            CapNhatGiaoDienNutTaiKhoan();
+        }
+
+        private void  CapNhatGiaoDienNutTaiKhoan()
+        {
+            if(isSidebarExpanded)
+            {
+                if(!string.IsNullOrEmpty(FormDangNhap.Ten))
+                {
+                    btnDangNhap.Text = "  " + FormDangNhap.Ten;
+                }
+                else 
+                {
+                    btnDangNhap.Text = "Đăng nhập";                
+                }
+            }
+            else
+            {
+                btnDangNhap.Text = "👤";
+            }
+        }
+
+
         private void btnDangNhap_Click(object sender, EventArgs e)
         {
-            openChildForm(new FormDangNhap());
+            if (string.IsNullOrEmpty(FormDangNhap.Ten))
+            {
+                openChildForm(new FormDangNhap());
+            }
+            else
+            {
+                openChildForm(new Form_TTTKHOAN());
+            }
         }
         private void btn_TrangChu_Click(object sender, EventArgs e)
         {
@@ -86,7 +128,7 @@ namespace FORM_DKY
                     isSidebarExpanded = true;
                     sidebarTimer.Stop();
                     btn_TrangChu.Text = "Trang chủ";
-                    btnDangNhap.Text = "Đăng nhập";
+                    CapNhatGiaoDienNutTaiKhoan();
                 }
             }
 
