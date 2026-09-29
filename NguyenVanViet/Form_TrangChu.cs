@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using FORM_DKY.GiaoDien;
 using Microsoft.Data.SqlClient;
 
 namespace FORM_DKY
@@ -22,6 +23,7 @@ namespace FORM_DKY
             ApplyFlatButton(btnMenu);
             ApplyFlatButton(btn_TrangChu);
             ApplyFlatButton(btnDangNhap);
+            ApplyFlatButton(btnQlyQAo);
         }
         private void ApplyFlatButton(Button btn)
         {
@@ -53,17 +55,17 @@ namespace FORM_DKY
             CapNhatGiaoDienNutTaiKhoan();
         }
 
-        private void  CapNhatGiaoDienNutTaiKhoan()
+        private void CapNhatGiaoDienNutTaiKhoan()
         {
-            if(isSidebarExpanded)
+            if (isSidebarExpanded)
             {
-                if(!string.IsNullOrEmpty(FormDangNhap.Ten))
+                if (!string.IsNullOrEmpty(FormDangNhap.Ten))
                 {
                     btnDangNhap.Text = "  " + FormDangNhap.Ten;
                 }
-                else 
+                else
                 {
-                    btnDangNhap.Text = "Đăng nhập";                
+                    btnDangNhap.Text = "Đăng nhập";
                 }
             }
             else
@@ -86,11 +88,11 @@ namespace FORM_DKY
         }
         private void btn_TrangChu_Click(object sender, EventArgs e)
         {
-            if(activeForm != null)
+            if (activeForm != null)
             {
                 activeForm.Close();
                 activeForm = null;
-            }    
+            }
         }
         private void btnMenu_Click(object sender, EventArgs e)
         {
@@ -115,6 +117,7 @@ namespace FORM_DKY
                     sidebarTimer.Stop();
                     btn_TrangChu.Text = "🏠";
                     btnDangNhap.Text = "👤";
+                    btnQlyQAo.Text = "🛍️";
                     //btn_TrangChu.Text = "";
                     //btnDangNhap.Text = "";
                 }
@@ -128,10 +131,23 @@ namespace FORM_DKY
                     isSidebarExpanded = true;
                     sidebarTimer.Stop();
                     btn_TrangChu.Text = "Trang chủ";
+                    btnQlyQAo.Text = "Quản lý";
                     CapNhatGiaoDienNutTaiKhoan();
                 }
             }
 
+        }
+
+        private void btnQlyQAo_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(FormDangNhap.Ten))
+            {
+                MessageBox.Show("Bạn cần đăng nhập để xem quản lý cửa hàng", "Thông báo", MessageBoxButtons.OK); ;
+            }
+            else
+            {
+                openChildForm(new FrmSanPham());
+            }
         }
     }
 }

@@ -7,8 +7,8 @@ namespace FORM_DKY
 {
     public partial class FORM_DKY_GUI : Form
     {
-        private string connectionString = @"Data Source=localhost\SQLEXPRESS01;Initial Catalog=TAIKHOAN;Integrated Security=True;TrustServerCertificate=True";
-
+        //private string connectionString = @"Data Source=localhost\SQLEXPRESS01;Initial Catalog=TAIKHOAN;Integrated Security=True;TrustServerCertificate=True";
+        string connectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=TAIKHOAN;Integrated Security=True;TrustServerCertificate=True";
         public FORM_DKY_GUI()
         {
             InitializeComponent();

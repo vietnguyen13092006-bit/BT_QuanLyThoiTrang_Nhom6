@@ -15,7 +15,8 @@ namespace FORM_DKY
         public static string Mail { get; set; } = "";
         public static string SDT { get; set; } = "";
         public static string AvatarPath { get; set; } = "";
-        private string connectionString = @"Data Source=localhost\SQLEXPRESS01;Initial Catalog=TAIKHOAN;Integrated Security=True;TrustServerCertificate=True";
+        //private string connectionString = @"Data Source=localhost\SQLEXPRESS01;Initial Catalog=TAIKHOAN;Integrated Security=True;TrustServerCertificate=True";
+        string connectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=TAIKHOAN;Integrated Security=True;TrustServerCertificate=True";
         public FormDangNhap()
         {
             InitializeComponent();

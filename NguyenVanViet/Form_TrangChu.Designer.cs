@@ -34,8 +34,9 @@
             btn_TrangChu = new Button();
             btnMenu = new Button();
             panelchildform = new Panel();
-            sidebarTimer = new System.Windows.Forms.Timer(components);
             pictureBox1 = new PictureBox();
+            sidebarTimer = new System.Windows.Forms.Timer(components);
+            btnQlyQAo = new Button();
             panelsidebar.SuspendLayout();
             panelchildform.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
@@ -44,6 +45,7 @@
             // panelsidebar
             // 
             panelsidebar.BackColor = Color.SlateGray;
+            panelsidebar.Controls.Add(btnQlyQAo);
             panelsidebar.Controls.Add(btnDangNhap);
             panelsidebar.Controls.Add(btn_TrangChu);
             panelsidebar.Controls.Add(btnMenu);
@@ -108,12 +110,6 @@
             panelchildform.Size = new Size(750, 450);
             panelchildform.TabIndex = 8;
             // 
-            // sidebarTimer
-            // 
-            sidebarTimer.Enabled = true;
-            sidebarTimer.Interval = 10;
-            sidebarTimer.Tick += sidebarTimer_Tick;
-            // 
             // pictureBox1
             // 
             pictureBox1.Location = new Point(239, 12);
@@ -121,6 +117,26 @@
             pictureBox1.Size = new Size(256, 79);
             pictureBox1.TabIndex = 0;
             pictureBox1.TabStop = false;
+            // 
+            // sidebarTimer
+            // 
+            sidebarTimer.Enabled = true;
+            sidebarTimer.Interval = 10;
+            sidebarTimer.Tick += sidebarTimer_Tick;
+            // 
+            // btnQlyQAo
+            // 
+            btnQlyQAo.Dock = DockStyle.Top;
+            btnQlyQAo.FlatAppearance.BorderSize = 0;
+            btnQlyQAo.FlatStyle = FlatStyle.Flat;
+            btnQlyQAo.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            btnQlyQAo.Location = new Point(0, 69);
+            btnQlyQAo.Name = "btnQlyQAo";
+            btnQlyQAo.Padding = new Padding(15, 0, 0, 0);
+            btnQlyQAo.Size = new Size(50, 23);
+            btnQlyQAo.TabIndex = 4;
+            btnQlyQAo.UseVisualStyleBackColor = true;
+            btnQlyQAo.Click += btnQlyQAo_Click;
             // 
             // Form_TrangChu
             // 
@@ -146,5 +162,6 @@
         private Panel panelchildform;
         private System.Windows.Forms.Timer sidebarTimer;
         private PictureBox pictureBox1;
+        private Button btnQlyQAo;
     }
 }

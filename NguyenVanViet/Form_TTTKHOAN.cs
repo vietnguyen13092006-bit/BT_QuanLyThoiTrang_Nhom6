@@ -19,7 +19,8 @@ namespace FORM_DKY
         private void Form_TTTKHOAN_Load(object sender, EventArgs e)
         {
             lblName.Text = "Tên: " + FormDangNhap.Ten;
-            string connectionString = @"Data Source=localhost\SQLEXPRESS01;Initial Catalog=TAIKHOAN;Integrated Security=True;TrustServerCertificate=True";
+            //string connectionString = @"Data Source=localhost\SQLEXPRESS01;Initial Catalog=TAIKHOAN;Integrated Security=True;TrustServerCertificate=True";
+            string connectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=TAIKHOAN;Integrated Security=True;TrustServerCertificate=True";
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 try
@@ -51,7 +52,7 @@ namespace FORM_DKY
             }
             else
             {
-                picAVT.Image = Properties.Resources.AVT_DEFAULT;
+                picAVT.Image = null;
             }
         }
 
