@@ -37,7 +37,14 @@ namespace FORM_DKY
         private void openChildForm(Form childForm)
         {
             if (activeForm != null)
+            {
                 activeForm.Close();
+                activeForm.Dispose();
+                activeForm = null;
+            }
+            txtTkiem.Visible = false;
+            btnTimKiem.Visible = false;
+            DANHMUC.Visible = false;
 
             activeForm = childForm;
             childForm.TopLevel = false;
@@ -49,7 +56,6 @@ namespace FORM_DKY
 
             // Thêm Form con vào panelChildForm và hiển thị
             panelchildform.Controls.Add(childForm);
-            panelchildform.Tag = childForm;
             childForm.BringToFront();
             childForm.Show();
         }
@@ -90,13 +96,21 @@ namespace FORM_DKY
                 openChildForm(new Form_TTTKHOAN());
             }
         }
+
         private void btn_TrangChu_Click(object sender, EventArgs e)
         {
+            // 1. Nếu đang mở Form con khác (Đăng nhập / Quản lý / TTKHoan), hãy ĐÓNG NÓ LẠI
             if (activeForm != null)
             {
                 activeForm.Close();
+                activeForm.Dispose();
                 activeForm = null;
             }
+
+            txtTkiem.Visible = true;
+            btnTimKiem.Visible = true;
+            DANHMUC.Visible = true;
+            TaiDanhSachSP();
         }
         private void btnMenu_Click(object sender, EventArgs e)
         {
@@ -105,10 +119,6 @@ namespace FORM_DKY
 
 
         // Khi di chuột RA KHỎI vùng Sidebar -> Cho Timer chạy để THU GỌN MENU IN
-        private void Form_Menu_Load(object sender, EventArgs e)
-        {
-
-        }
         private void sidebarTimer_Tick(object sender, EventArgs e)
         {
             if (isSidebarExpanded)
@@ -183,37 +193,34 @@ namespace FORM_DKY
 
         }
 
-           private void Form_TrangChu_Load(object sender, EventArgs e)
+        private void Form_TrangChu_Load(object sender, EventArgs e)
         {
-            // 1. Ép thanh tìm kiếm và nút bấm ra làm con trực tiếp của Form (không nằm trong panel/flow nào nữa)
-            txtTkiem.Parent = this;
-            btnTimKiem.Parent = this;
+            // 1. Đưa các control Tìm kiếm và DANHMUC vào BÊN TRONG panelchildform (để không bị panel che)
+            panelchildform.Controls.Add(txtTkiem);
+            panelchildform.Controls.Add(btnTimKiem);
+            panelchildform.Controls.Add(DANHMUC);
 
-            // 2. Tắt Dock = Fill của DANHMUC
-            DANHMUC.Dock = DockStyle.None;
-
-            // 3. Chỉnh kích thước ô tìm kiếm cho rộng rãi
+            // 2. Vị trí TextBox & Nút Tìm kiếm
             txtTkiem.Size = new Size(250, 30);
-            btnTimKiem.Size = new Size(80, 30);
+            txtTkiem.Location = new Point(20, 12);
 
-            // 4. Tính toán căn ra CHÍNH GIỮA chiều ngang Form
-            int totalWidth = txtTkiem.Width + btnTimKiem.Width + 10;
-            int startX = (this.ClientSize.Width - totalWidth) / 2;
+            btnTimKiem.Size = new Size(90, 30);
+            btnTimKiem.Location = new Point(280, 11);
 
-            txtTkiem.Location = new Point(startX, 15);
-            btnTimKiem.Location = new Point(startX + txtTkiem.Width + 10, 14);
-
-            // 5. Đặt DANHMUC bên dưới khoảng trống (Y = 60)
-            DANHMUC.Location = new Point(10, 60);
-            DANHMUC.Size = new Size(this.ClientSize.Width - 20, this.ClientSize.Height - 70);
+            // 3. Định vị FlowLayoutPanel DANHMUC nằm ngay dưới thanh tìm kiếm
+            DANHMUC.Dock = DockStyle.None;
+            DANHMUC.Location = new Point(10, 50);
+            DANHMUC.Size = new Size(panelchildform.ClientSize.Width - 20, panelchildform.ClientSize.Height - 60);
             DANHMUC.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
-            // 6. Ép hiển thị lên trên cùng
-            txtTkiem.Visible = true;
-            btnTimKiem.Visible = true;
             txtTkiem.BringToFront();
             btnTimKiem.BringToFront();
+            DANHMUC.BringToFront();
+
+            // 4. Tải danh sách sản phẩm
+            TaiDanhSachSP();
         }
+
 
         private void panelchildform_Paint(object sender, PaintEventArgs e)
         {
