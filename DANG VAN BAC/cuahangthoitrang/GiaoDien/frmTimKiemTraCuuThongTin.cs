@@ -1,3 +1,5 @@
+using cuahangthoitrang;
+using Microsoft.Data.SqlClient; // Nếu dự án báo lỗi dòng này, hãy đổi thành: using System.Data.SqlClient;
 using System;
 using System.Data;
 using System.Drawing;
@@ -7,349 +9,350 @@ namespace QuanLyCuaHangThoiTrang.GiaoDien
 {
     public partial class frmTimKiemTraCuuThongTin : Form
     {
-        // Khai báo các Control giao diện (Kèm kiểu Nullable ? để tránh lỗi CS0115 và Nullable Warning)
-        private Label? lblTitle, lblTuKhoa, lblTuNgay, lblDenNgay, lblBangChinh, lblBangChiTiet;
-        private TextBox? txtTuKhoa;
-        private DateTimePicker? dtpTuNgay, dtpDenNgay;
-        private Button? btnTimKiem, btnLamMoi, btnThoat;
-        private DataGridView? dgvKetQua, dgvChiTiet;
-        private Panel? pnlHeader, pnlBottom;
-
         public frmTimKiemTraCuuThongTin()
         {
-            this.Text = "Hệ Thống Tra Cứu & Tìm Kiếm Thông Tin (Chế Độ Test Demo)";
-            this.Size = new Size(1100, 700);
-            this.StartPosition = FormStartPosition.CenterScreen;
-            this.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-
-            // Tự dựng giao diện bằng Pure Code C#
-            InitializePureCodeComponents();
+            InitializeComponent();
         }
 
-        private void InitializePureCodeComponents()
+        private void frmTimKiemTraCuuThongTin_Load_1(object sender, EventArgs e)
         {
-            // 1. Tiêu đề
-            lblTitle = new Label
-            {
-                Text = "TRA CỨU VÀ TÌM KIẾM THÔNG TIN CỬA HÀNG THỜI TRANG",
-                Font = new Font("Segoe UI", 14F, FontStyle.Bold),
-                ForeColor = Color.Navy,
-                Dock = DockStyle.Top,
-                Height = 40,
-                TextAlign = ContentAlignment.MiddleCenter
-            };
+            // Thiết lập ngày mặc định (từ đầu tháng đến hôm nay)
+            DateTime now = DateTime.Now;
+            dtpTuNgay.Value = new DateTime(now.Year, now.Month, 1);
+            dtpDenNgay.Value = now;
 
-            // 2. Khung Tìm Kiếm Top Panel
-            pnlHeader = new Panel
-            {
-                Dock = DockStyle.Top,
-                Height = 110,
-                BackColor = Color.FromArgb(240, 243, 246),
-                Padding = new Padding(10)
-            };
-
-            lblTuKhoa = new Label { Text = "Từ khóa tìm kiếm:", Location = new Point(20, 20), AutoSize = true };
-            txtTuKhoa = new TextBox { Location = new Point(140, 16), Width = 200 };
-
-            lblTuNgay = new Label { Text = "Từ ngày:", Location = new Point(360, 20), AutoSize = true };
-            dtpTuNgay = new DateTimePicker { Location = new Point(430, 16), Width = 130, Format = DateTimePickerFormat.Short };
-
-            lblDenNgay = new Label { Text = "Đến ngày:", Location = new Point(580, 20), AutoSize = true };
-            dtpDenNgay = new DateTimePicker { Location = new Point(660, 16), Width = 130, Format = DateTimePickerFormat.Short };
-
-            btnTimKiem = new Button
-            {
-                Text = "🔍 Tìm Kiếm",
-                Location = new Point(140, 58),
-                Width = 120,
-                Height = 35,
-                BackColor = Color.FromArgb(0, 122, 204),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat
-            };
-            btnTimKiem.Click += BtnTimKiem_Click;
-
-            btnLamMoi = new Button
-            {
-                Text = "🔄 Làm Mới",
-                Location = new Point(270, 58),
-                Width = 100,
-                Height = 35,
-                BackColor = Color.FromArgb(108, 117, 125),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat
-            };
-            btnLamMoi.Click += BtnLamMoi_Click;
-
-            pnlHeader.Controls.AddRange(new Control[] {
-                lblTuKhoa, txtTuKhoa, lblTuNgay, dtpTuNgay, lblDenNgay, dtpDenNgay, btnTimKiem, btnLamMoi
-            });
-
-            // 3. Bảng Kết Quả Chính (dgvKetQua)
-            lblBangChinh = new Label
-            {
-                Text = "KẾT QUẢ TRA CỨU CHÍNH:",
-                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
-                Location = new Point(20, 160),
-                AutoSize = true
-            };
-
-            dgvKetQua = new DataGridView
-            {
-                Location = new Point(20, 185),
-                Size = new Size(1040, 220),
-                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                AllowUserToAddRows = false,
-                ReadOnly = false,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect
-            };
-            dgvKetQua.CellClick += DgvKetQua_CellClick;
-            dgvKetQua.CellValueChanged += DgvKetQua_CellValueChanged;
-
-            // 4. Bảng Chi Tiết Mặt Hàng (dgvChiTiet)
-            lblBangChiTiet = new Label
-            {
-                Text = "CHI TIẾT MẶT HÀNG (HÓA ĐƠN / PHIẾU NHẬP):",
-                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
-                Location = new Point(20, 415),
-                AutoSize = true,
-                Visible = false
-            };
-
-            dgvChiTiet = new DataGridView
-            {
-                Location = new Point(20, 440),
-                Size = new Size(1040, 170),
-                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                AllowUserToAddRows = false,
-                ReadOnly = true,
-                Visible = false
-            };
-
-            // 5. Bottom Panel Nút Thoát
-            pnlBottom = new Panel { Dock = DockStyle.Bottom, Height = 45 };
-            btnThoat = new Button
-            {
-                Text = "🚪 Thoát",
-                Size = new Size(90, 32),
-                Anchor = AnchorStyles.Right | AnchorStyles.Bottom,
-                Location = new Point(970, 5)
-            };
-            btnThoat.Click += (s, e) => this.Close();
-            pnlBottom.Controls.Add(btnThoat);
-
-            // Add các Control vào Form
-            this.Controls.Add(dgvChiTiet);
-            this.Controls.Add(lblBangChiTiet);
-            this.Controls.Add(dgvKetQua);
-            this.Controls.Add(lblBangChinh);
-            this.Controls.Add(pnlHeader);
-            this.Controls.Add(lblTitle);
-            this.Controls.Add(pnlBottom);
-
-            dtpTuNgay.Value = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-            dtpDenNgay.Value = DateTime.Now;
+            // Load danh sách hóa đơn ban đầu
+            LoadDanhSachHoaDon();
         }
 
-        // ==========================================
-        // LOGIC TRA CỨU & DỮ LIỆU GIẢ (MOCK DATA)
-        // ==========================================
-
-        private void BtnTimKiem_Click(object? sender, EventArgs e)
+        // --- HÀM TẢI DANH SÁCH HÓA ĐƠN ---
+        private void LoadDanhSachHoaDon()
         {
-            string tuKhoa = txtTuKhoa?.Text.Trim().ToLower() ?? "";
-
-            // 1. Nhận diện Tra cứu Hóa Đơn (Hỗ trợ gõ: hd, hoa don, hóa đơn, hoá đơn)
-            if (tuKhoa.StartsWith("hd") ||
-                tuKhoa.Contains("hoa don") ||
-                tuKhoa.Contains("hóa đơn") ||
-                tuKhoa.Contains("hoá đơn"))
+            try
             {
-                HienThiBangChiTiet(true);
-                LoadMockDataHoaDon();
-            }
-            // 2. Nhận diện Tra cứu Phiếu Nhập (Hỗ trợ gõ: pn, phieu nhap, phiếu nhập, phIếu nhập)
-            else if (tuKhoa.StartsWith("pn") ||
-                     tuKhoa.Contains("phieu nhap") ||
-                     tuKhoa.Contains("phiếu nhập") ||
-                     tuKhoa.Contains("phiếu nhập"))
-            {
-                HienThiBangChiTiet(true);
-                LoadMockDataPhieuNhap();
-            }
-            // 3. Tra cứu Sản Phẩm / Tồn Kho (Mặc định)
-            else
-            {
-                HienThiBangChiTiet(false);
-                LoadMockDataSanPham();
-            }
-        }
+                string tuKhoa = txtTuKhoa.Text.Trim();
+                DateTime tuNgay = dtpTuNgay.Value.Date;
+                DateTime denNgay = dtpDenNgay.Value.Date.AddDays(1).AddSeconds(-1);
 
-        private void HienThiBangChiTiet(bool visible)
-        {
-            if (lblBangChiTiet != null) lblBangChiTiet.Visible = visible;
-            if (dgvChiTiet != null) dgvChiTiet.Visible = visible;
-            if (dgvKetQua != null) dgvKetQua.Height = visible ? 220 : 390;
-        }
+                string query = @"SELECT h.MaHD AS [Mã Hóa Đơn], 
+                                       h.NgayLap AS [Ngày Lập], 
+                                       k.TenKH AS [Khách Hàng], 
+                                       n.TenNV AS [Nhân Viên Lập], 
+                                       h.TongTien AS [Tổng Tiền]
+                                FROM HoaDon h
+                                LEFT JOIN KhachHang k ON h.MaKH = k.MaKH
+                                LEFT JOIN NhanVien n ON h.MaNV = n.MaNV
+                                WHERE h.NgayLap BETWEEN @TuNgay AND @DenNgay
+                                  AND (h.MaHD LIKE @TuKhoa OR k.TenKH LIKE @TuKhoa OR n.TenNV LIKE @TuKhoa)";
 
-        // --- 1. MOCK DATA HÓA ĐƠN ---
-        private void LoadMockDataHoaDon()
-        {
-            DataTable dt = new DataTable();
-            dt.Columns.Add("Mã Hóa Đơn");
-            dt.Columns.Add("Ngày Lập");
-            dt.Columns.Add("Khách Hàng");
-            dt.Columns.Add("Nhân Viên Bán");
-            dt.Columns.Add("Tổng Tiền");
+                SqlParameter[] parameters = new SqlParameter[]
+                {
+                    new SqlParameter("@TuNgay", tuNgay),
+                    new SqlParameter("@DenNgay", denNgay),
+                    new SqlParameter("@TuKhoa", "%" + tuKhoa + "%")
+                };
 
-            dt.Rows.Add("HD001", "25/09/2026", "Nguyễn Văn A", "Trần Thị B", "850,000 VNĐ");
-            dt.Rows.Add("HD002", "26/09/2026", "Lê Thị C", "Trần Thị B", "1,200,000 VNĐ");
-
-            if (dgvKetQua != null)
-            {
-                dgvKetQua.DataSource = null;
-                dgvKetQua.Columns.Clear();
-                dgvKetQua.DataSource = dt;
-            }
-        }
-
-        // --- 2. MOCK DATA PHIẾU NHẬP ---
-        private void LoadMockDataPhieuNhap()
-        {
-            DataTable dt = new DataTable();
-            dt.Columns.Add("Mã Phiếu Nhập");
-            dt.Columns.Add("Ngày Nhập");
-            dt.Columns.Add("Nhà Cung Cấp");
-            dt.Columns.Add("Nhân Viên Nhập");
-            dt.Columns.Add("Tổng Tiền Nhập");
-
-            dt.Rows.Add("PN001", "20/09/2026", "Công ty May Mặc Việt Tiến", "Nguyễn Văn A", "15,000,000 VNĐ");
-            dt.Rows.Add("PN002", "22/09/2026", "Xưởng Thời Trang PT2000", "Trần Thị B", "8,500,000 VNĐ");
-
-            if (dgvKetQua != null)
-            {
-                dgvKetQua.DataSource = null;
-                dgvKetQua.Columns.Clear();
-                dgvKetQua.DataSource = dt;
-            }
-        }
-
-        // --- 3. MOCK DATA SẢN PHẨM & TỒN KHO ---
-        private void LoadMockDataSanPham()
-        {
-            DataTable dt = new DataTable();
-            dt.Columns.Add("Mã SP");
-            dt.Columns.Add("Tên Sản Phẩm");
-            dt.Columns.Add("Màu Sắc");
-            dt.Columns.Add("Giá Bán");
-
-            dt.Rows.Add("SP01", "Áo sơ mi Nam", "Trắng", "250,000 VNĐ");
-            dt.Rows.Add("SP02", "Quần Jeans Nữ", "Xanh", "450,000 VNĐ");
-
-            if (dgvKetQua != null)
-            {
-                dgvKetQua.DataSource = null;
-                dgvKetQua.Columns.Clear();
+                DataTable dt = DatabaseHelper.GetData(query, parameters);
                 dgvKetQua.DataSource = dt;
 
-                // CỘT Ô SỔ XUỐNG CHỌN SIZE
-                DataGridViewComboBoxColumn cboSize = new DataGridViewComboBoxColumn();
-                cboSize.HeaderText = "Chọn Size";
-                cboSize.Name = "colSize";
-                cboSize.Items.AddRange("S", "M", "L", "XL");
-                dgvKetQua.Columns.Add(cboSize);
-
-                // CỘT HIỂN THỊ SỐ LƯỢNG TỒN
-                dgvKetQua.Columns.Add("colTonKho", "Số Lượng Tồn");
+                // Xóa dữ liệu bảng chi tiết
+                dgvChiTiet.DataSource = null;
             }
-        }
-
-        // --- SỰ KIỆN CLICK VÀO DÒNG ĐỂ XEM CHI TIẾT ---
-        private void DgvKetQua_CellClick(object? sender, DataGridViewCellEventArgs e)
-        {
-            if (dgvKetQua == null || e.RowIndex < 0) return;
-
-            // Click dòng Hóa Đơn
-            if (dgvKetQua.Columns.Contains("Mã Hóa Đơn"))
+            catch (Exception ex)
             {
-                string? maHD = dgvKetQua.Rows[e.RowIndex].Cells["Mã Hóa Đơn"].Value?.ToString();
-
-                DataTable dt = new DataTable();
-                dt.Columns.Add("Mã SP");
-                dt.Columns.Add("Tên Sản Phẩm");
-                dt.Columns.Add("Màu");
-                dt.Columns.Add("Size");
-                dt.Columns.Add("Số Lượng");
-                dt.Columns.Add("Đơn Giá Bán");
-                dt.Columns.Add("Thành Tiền");
-
-                if (maHD == "HD001")
-                {
-                    dt.Rows.Add("SP01", "Áo sơ mi Nam", "Trắng", "M", "2", "250,000", "500,000");
-                    dt.Rows.Add("SP02", "Quần Tây Nam", "Đen", "L", "1", "350,000", "350,000");
-                }
-                else
-                {
-                    dt.Rows.Add("SP03", "Váy Nữ Công Sở", "Đỏ", "S", "2", "600,000", "1,200,000");
-                }
-
-                if (dgvChiTiet != null) dgvChiTiet.DataSource = dt;
-            }
-            // Click dòng Phiếu Nhập
-            else if (dgvKetQua.Columns.Contains("Mã Phiếu Nhập"))
-            {
-                string? maPN = dgvKetQua.Rows[e.RowIndex].Cells["Mã Phiếu Nhập"].Value?.ToString();
-
-                DataTable dt = new DataTable();
-                dt.Columns.Add("Mã SP");
-                dt.Columns.Add("Tên Sản Phẩm");
-                dt.Columns.Add("Màu");
-                dt.Columns.Add("Size");
-                dt.Columns.Add("Số Lượng Nhập");
-                dt.Columns.Add("Giá Nhập Kho");
-                dt.Columns.Add("Thành Tiền");
-
-                if (maPN == "PN001")
-                {
-                    dt.Rows.Add("SP01", "Áo sơ mi Nam", "Trắng", "L", "50", "150,000", "7,500,000");
-                    dt.Rows.Add("SP01", "Áo sơ mi Nam", "Trắng", "M", "50", "150,000", "7,500,000");
-                }
-                else
-                {
-                    dt.Rows.Add("SP02", "Quần Jeans Nữ", "Xanh", "S", "30", "283,333", "8,500,000");
-                }
-
-                if (dgvChiTiet != null) dgvChiTiet.DataSource = dt;
+                MessageBox.Show("Lỗi tải dữ liệu: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // --- SỰ KIỆN CHỌN SIZE TRÊN BẢNG SẢN PHẨM -> NHẢY SỐ TỒN KHO ---
-        private void DgvKetQua_CellValueChanged(object? sender, DataGridViewCellEventArgs e)
+        // --- HÀM TẢI CHI TIẾT HÓA ĐƠN ---
+        private void LoadChiTietHoaDon(string maHD)
         {
-            if (dgvKetQua != null && e.RowIndex >= 0 && dgvKetQua.Columns.Contains("colSize") && e.ColumnIndex == dgvKetQua.Columns["colSize"].Index)
+            try
             {
-                string? size = dgvKetQua.Rows[e.RowIndex].Cells["colSize"].Value?.ToString();
+                string query = @"SELECT c.MaSP AS [Mã SP], 
+                                       s.TenSP AS [Tên Sản Phẩm], 
+                                       c.Size AS [Kích Thước], 
+                                       c.SoLuong AS [Số Lượng], 
+                                       c.DonGia AS [Đơn Giá], 
+                                       c.ThanhTien AS [Thành Tiền]
+                                FROM ChiTietHoaDon c
+                                JOIN SanPham s ON c.MaSP = s.MaSP
+                                WHERE c.MaHD = @MaHD";
 
-                int tonKhoGia = 0;
-                if (size == "S") tonKhoGia = 5;
-                else if (size == "M") tonKhoGia = 15;
-                else if (size == "L") tonKhoGia = 8;
-                else if (size == "XL") tonKhoGia = 2;
+                SqlParameter[] parameters = new SqlParameter[]
+                {
+                    new SqlParameter("@MaHD", maHD)
+                };
 
-                dgvKetQua.Rows[e.RowIndex].Cells["colTonKho"].Value = tonKhoGia + " cái";
+                DataTable dtChiTiet = DatabaseHelper.GetData(query, parameters);
+                dgvChiTiet.DataSource = dtChiTiet;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi tải chi tiết hóa đơn: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // --- NÚT LÀM MỚI ---
-        private void BtnLamMoi_Click(object? sender, EventArgs e)
+        // Nút Tìm Kiếm
+        private void btnTimKiem_Click(object sender, EventArgs e)
         {
-            if (txtTuKhoa != null) txtTuKhoa.Clear();
-            if (dgvKetQua != null) dgvKetQua.DataSource = null;
-            if (dgvChiTiet != null) dgvChiTiet.DataSource = null;
-            HienThiBangChiTiet(false);
-            txtTuKhoa?.Focus();
+            LoadDanhSachHoaDon();
         }
+
+        // Nút Làm Mới
+        private void button2_Click(object sender, EventArgs e)
+        {
+            txtTuKhoa.Clear();
+            DateTime now = DateTime.Now;
+            dtpTuNgay.Value = new DateTime(now.Year, now.Month, 1);
+            dtpDenNgay.Value = now;
+
+            LoadDanhSachHoaDon();
+        }
+
+        // Sự kiện click vào 1 dòng ở Bảng Hóa Đơn
+        private void dgvKetQua_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && dgvKetQua.Rows[e.RowIndex].Cells["Mã Hóa Đơn"].Value != null)
+            {
+                string maHD = dgvKetQua.Rows[e.RowIndex].Cells["Mã Hóa Đơn"].Value.ToString();
+                LoadChiTietHoaDon(maHD);
+            }
+        }
+
+        // Nút Thoát
+        private void btnThoat_Click(object sender, EventArgs e)
+        {
+            DialogResult dr = MessageBox.Show("Bạn có muốn thoát giao diện tra cứu?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (dr == DialogResult.Yes)
+            {
+                this.Close();
+            }
+        }
+
+        private void dtpTuNgay_ValueChanged(object sender, EventArgs e) { }
+        private void dtpDenNgay_ValueChanged(object sender, EventArgs e) { }
+        private void label2_Click(object sender, EventArgs e) { }
+
+        #region Component Designer generated code
+        private void InitializeComponent()
+        {
+            lblTitle = new Label();
+            lblTuKhoa = new Label();
+            txtTuKhoa = new TextBox();
+            dtpTuNgay = new DateTimePicker();
+            lblTuNgay = new Label();
+            dtpDenNgay = new DateTimePicker();
+            lblDenNgay = new Label();
+            btnTimKiem = new Button();
+            btnLamMoi = new Button();
+            dgvKetQua = new DataGridView();
+            lblBangChinh = new Label();
+            pnlHeader = new Panel();
+            lblBangChiTiet = new Label();
+            dgvChiTiet = new DataGridView();
+            btnThoat = new Button();
+            ((System.ComponentModel.ISupportInitialize)dgvKetQua).BeginInit();
+            pnlHeader.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvChiTiet).BeginInit();
+            SuspendLayout();
+            // 
+            // lblTitle
+            // 
+            lblTitle.AutoSize = true;
+            lblTitle.Font = new Font("Segoe UI", 13.2000008F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblTitle.Location = new Point(131, 9);
+            lblTitle.Name = "lblTitle";
+            lblTitle.Size = new Size(519, 31);
+            lblTitle.TabIndex = 0;
+            lblTitle.Text = "TRA CỨU VÀ TÌM KIẾM THÔNG TIN CỬA HÀNG";
+            // 
+            // lblTuKhoa
+            // 
+            lblTuKhoa.AutoSize = true;
+            lblTuKhoa.Location = new Point(3, 50);
+            lblTuKhoa.Name = "lblTuKhoa";
+            lblTuKhoa.Size = new Size(69, 20);
+            lblTuKhoa.TabIndex = 1;
+            lblTuKhoa.Text = "Từ khóa :";
+            lblTuKhoa.Click += label2_Click;
+            // 
+            // txtTuKhoa
+            // 
+            txtTuKhoa.Location = new Point(75, 48);
+            txtTuKhoa.Name = "txtTuKhoa";
+            txtTuKhoa.Size = new Size(125, 27);
+            txtTuKhoa.TabIndex = 2;
+            // 
+            // dtpTuNgay
+            // 
+            dtpTuNgay.Format = DateTimePickerFormat.Short;
+            dtpTuNgay.Location = new Point(277, 50);
+            dtpTuNgay.Name = "dtpTuNgay";
+            dtpTuNgay.Size = new Size(140, 27);
+            dtpTuNgay.TabIndex = 3;
+            dtpTuNgay.ValueChanged += dtpTuNgay_ValueChanged;
+            // 
+            // lblTuNgay
+            // 
+            lblTuNgay.AutoSize = true;
+            lblTuNgay.Location = new Point(206, 51);
+            lblTuNgay.Name = "lblTuNgay";
+            lblTuNgay.Size = new Size(65, 20);
+            lblTuNgay.TabIndex = 4;
+            lblTuNgay.Text = "Từ ngày:";
+            // 
+            // dtpDenNgay
+            // 
+            dtpDenNgay.Format = DateTimePickerFormat.Short;
+            dtpDenNgay.Location = new Point(504, 50);
+            dtpDenNgay.Name = "dtpDenNgay";
+            dtpDenNgay.Size = new Size(140, 27);
+            dtpDenNgay.TabIndex = 5;
+            dtpDenNgay.ValueChanged += dtpDenNgay_ValueChanged;
+            // 
+            // lblDenNgay
+            // 
+            lblDenNgay.AutoSize = true;
+            lblDenNgay.Location = new Point(423, 55);
+            lblDenNgay.Name = "lblDenNgay";
+            lblDenNgay.Size = new Size(75, 20);
+            lblDenNgay.TabIndex = 6;
+            lblDenNgay.Text = "Đến ngày:";
+            // 
+            // btnTimKiem
+            // 
+            btnTimKiem.BackColor = Color.FromArgb(0, 122, 204);
+            btnTimKiem.ForeColor = Color.White;
+            btnTimKiem.Location = new Point(54, 118);
+            btnTimKiem.Name = "btnTimKiem";
+            btnTimKiem.Size = new Size(130, 37);
+            btnTimKiem.TabIndex = 7;
+            btnTimKiem.Text = "🔍 Tìm Kiếm";
+            btnTimKiem.UseVisualStyleBackColor = false;
+            btnTimKiem.Click += btnTimKiem_Click;
+            // 
+            // btnLamMoi
+            // 
+            btnLamMoi.BackColor = Color.Olive;
+            btnLamMoi.ForeColor = SystemColors.Info;
+            btnLamMoi.Location = new Point(206, 118);
+            btnLamMoi.Name = "btnLamMoi";
+            btnLamMoi.Size = new Size(122, 37);
+            btnLamMoi.TabIndex = 8;
+            btnLamMoi.Text = "🔄 Làm Mới";
+            btnLamMoi.UseVisualStyleBackColor = false;
+            btnLamMoi.Click += button2_Click;
+            // 
+            // dgvKetQua
+            // 
+            dgvKetQua.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvKetQua.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvKetQua.Location = new Point(0, 186);
+            dgvKetQua.Name = "dgvKetQua";
+            dgvKetQua.ReadOnly = true;
+            dgvKetQua.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgvKetQua.RowHeadersWidth = 51;
+            dgvKetQua.Size = new Size(746, 188);
+            dgvKetQua.TabIndex = 9;
+            dgvKetQua.CellClick += dgvKetQua_CellClick; // Đã thêm đăng ký sự kiện click dòng
+            // 
+            // lblBangChinh
+            // 
+            lblBangChinh.AutoSize = true;
+            lblBangChinh.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblBangChinh.Location = new Point(12, 161);
+            lblBangChinh.Name = "lblBangChinh";
+            lblBangChinh.Size = new Size(147, 20);
+            lblBangChinh.TabIndex = 11;
+            lblBangChinh.Text = "KẾT QUẢ TRA CỨU:";
+            // 
+            // pnlHeader
+            // 
+            pnlHeader.Controls.Add(btnTimKiem);
+            pnlHeader.Controls.Add(btnLamMoi);
+            pnlHeader.Controls.Add(lblTuKhoa);
+            pnlHeader.Controls.Add(dtpDenNgay);
+            pnlHeader.Controls.Add(lblTitle);
+            pnlHeader.Controls.Add(lblDenNgay);
+            pnlHeader.Controls.Add(txtTuKhoa);
+            pnlHeader.Controls.Add(lblTuNgay);
+            pnlHeader.Controls.Add(dtpTuNgay);
+            pnlHeader.Dock = DockStyle.Top;
+            pnlHeader.Location = new Point(0, 0);
+            pnlHeader.Name = "pnlHeader";
+            pnlHeader.Size = new Size(756, 158);
+            pnlHeader.TabIndex = 12;
+            // 
+            // lblBangChiTiet
+            // 
+            lblBangChiTiet.AutoSize = true;
+            lblBangChiTiet.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblBangChiTiet.Location = new Point(12, 377);
+            lblBangChiTiet.Name = "lblBangChiTiet";
+            lblBangChiTiet.Size = new Size(165, 20);
+            lblBangChiTiet.TabIndex = 13;
+            lblBangChiTiet.Text = "DANH SÁCH CHI TIẾT:";
+            // 
+            // dgvChiTiet
+            // 
+            dgvChiTiet.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvChiTiet.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvChiTiet.Location = new Point(0, 400);
+            dgvChiTiet.Name = "dgvChiTiet";
+            dgvChiTiet.ReadOnly = true;
+            dgvChiTiet.RowHeadersWidth = 51;
+            dgvChiTiet.Size = new Size(746, 188);
+            dgvChiTiet.TabIndex = 14;
+            // 
+            // btnThoat
+            // 
+            btnThoat.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            btnThoat.Location = new Point(586, 609);
+            btnThoat.Name = "btnThoat";
+            btnThoat.Size = new Size(130, 41);
+            btnThoat.TabIndex = 15;
+            btnThoat.Text = "🚪 Thoát";
+            btnThoat.UseVisualStyleBackColor = true;
+            btnThoat.Click += btnThoat_Click;
+            // 
+            // frmTimKiemTraCuuThongTin
+            // 
+            ClientSize = new Size(756, 662);
+            Controls.Add(btnThoat);
+            Controls.Add(dgvChiTiet);
+            Controls.Add(lblBangChiTiet);
+            Controls.Add(lblBangChinh);
+            Controls.Add(dgvKetQua);
+            Controls.Add(pnlHeader);
+            Name = "frmTimKiemTraCuuThongTin";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "TRA CỨU VÀ TÌM KIẾM THÔNG TIN CỬA HÀNG";
+            Load += frmTimKiemTraCuuThongTin_Load_1;
+            ((System.ComponentModel.ISupportInitialize)dgvKetQua).EndInit();
+            pnlHeader.ResumeLayout(false);
+            pnlHeader.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvChiTiet).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
+
+        }
+
+        private Label lblTitle;
+        private Label lblTuKhoa;
+        private TextBox txtTuKhoa;
+        private Label lblTuNgay;
+        private DateTimePicker dtpDenNgay;
+        private Label lblDenNgay;
+        private Button btnTimKiem;
+        private Button btnLamMoi;
+        private DataGridView dgvKetQua;
+        private Label lblBangChinh;
+        private Panel pnlHeader;
+        private Label lblBangChiTiet;
+        private DataGridView dgvChiTiet;
+        private Button btnThoat;
+        private DateTimePicker dtpTuNgay;
+        #endregion
     }
 }
