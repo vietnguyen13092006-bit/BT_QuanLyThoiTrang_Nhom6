@@ -36,3 +36,5 @@ GO
 -- 5. Xem lại dữ liệu vừa tạo
 SELECT * FROM SanPham;
 GO
+ALTER TABLE SanPham
+ADD HinhAnh Varchar(200)
