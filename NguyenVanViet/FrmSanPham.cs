@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data;
-using System.Data.SqlClient;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 using Microsoft.Data.SqlClient;
 
@@ -9,17 +9,22 @@ namespace FORM_DKY.GiaoDien
 {
     public partial class FrmSanPham : Form
     {
-        // Khai báo các Control với dấu ? (Nullable) để không bị báo warning Nullability
+        // Khai báo các Control
         private Label? lblTieuDe, lblThongTin, lblMaSanPham, lblTenSanPham, lblLoaiSanPham, lblMauSac, lblSize, lblGiaNhap, lblGiaBan, lblGhiChu, lblTimKiem;
         private TextBox? txtMaSanPham, txtTenSanPham, txtMauSac, txtGiaNhap, txtGiaBan, txtGhiChu, txtTimKiem;
         private ComboBox? cboLoaiSanPham, cboSize;
         private Button? btnThem, btnSua, btnXoa, btnLamMoi, btnTimKiem;
         private DataGridView? dgvSanPham;
 
+        private PictureBox picHinhAnh = null!;
+        private Button btnChonAnh = null!;
+        private string tenFileAnh = ""; // Chuỗi lưu tên file để lưu xuống SQL (vd: "sp01.jpg")
+
         public FrmSanPham()
         {
             KhoiTaoForm();
             KhoiTaoGiaoDien();
+            TaoGiaoDienChonAnh();
             TaiDanhSachSanPham();
         }
 
@@ -51,7 +56,7 @@ namespace FORM_DKY.GiaoDien
             lblTenSanPham = TaoLabel("Tên sản phẩm:", 410, 115, 120, 30);
             txtTenSanPham = TaoTextBox(540, 115, 250, 30);
 
-            // Hàng 2 (Loại SP: Rộng 130px, ComboBox dạng DropDown gõ chữ thoải mái)
+            // Hàng 2
             lblLoaiSanPham = TaoLabel("Loại sản phẩm:", 30, 160, 130, 30);
             cboLoaiSanPham = new ComboBox
             {
@@ -150,6 +155,78 @@ namespace FORM_DKY.GiaoDien
         private TextBox TaoTextBox(int x, int y, int width, int height) => new TextBox { Location = new Point(x, y), Size = new Size(width, height) };
         private Button TaoButton(string text, int x, int y, int width, int height) => new Button { Text = text, Location = new Point(x, y), Size = new Size(width, height), Cursor = Cursors.Hand };
 
+        // 2. Tạo PictureBox và Button Chọn Ảnh bằng Code tay
+        private void TaoGiaoDienChonAnh()
+        {
+            picHinhAnh = new PictureBox
+            {
+                Size = new Size(160, 160),
+                Location = new Point(830, 115), // Dịch sang góc phải ngang hàng với thông tin
+                BorderStyle = BorderStyle.FixedSingle,
+                SizeMode = PictureBoxSizeMode.Zoom,
+                BackColor = Color.White
+            };
+
+            btnChonAnh = new Button
+            {
+                Text = "Thêm ảnh",
+                Size = new Size(100, 32),
+                Location = new Point(860, 280), // Đặt ngay bên dưới PictureBox
+                Cursor = Cursors.Hand
+            };
+
+            btnChonAnh.Click += BtnChonAnh_Click;
+
+            this.Controls.Add(picHinhAnh);
+            this.Controls.Add(btnChonAnh);
+
+            picHinhAnh.BringToFront();
+            btnChonAnh.BringToFront();
+        }
+
+        private void BtnChonAnh_Click(object? sender, EventArgs e)
+        {
+            OpenFileDialog open = new OpenFileDialog();
+            open.Filter = "Image Files(*.jpg; *.jpeg; *.png)|*.jpg; *.jpeg; *.png";
+
+            if (open.ShowDialog() == DialogResult.OK)
+            {
+                tenFileAnh = Path.GetFileName(open.FileName);
+                string folderImages = Path.Combine(Application.StartupPath, "Images");
+
+                if (!Directory.Exists(folderImages))
+                {
+                    Directory.CreateDirectory(folderImages);
+                }
+
+                string pathLuu = Path.Combine(folderImages, tenFileAnh);
+                if (!File.Exists(pathLuu))
+                {
+                    File.Copy(open.FileName, pathLuu, true);
+                }
+
+                // Hiển thị ảnh bằng Stream để không bị khóa file
+                HienThiAnh(pathLuu);
+            }
+        }
+
+        private void HienThiAnh(string path)
+        {
+            if (picHinhAnh.Image != null)
+            {
+                picHinhAnh.Image.Dispose();
+                picHinhAnh.Image = null;
+            }
+
+            if (!string.IsNullOrEmpty(path) && File.Exists(path))
+            {
+                using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read))
+                {
+                    picHinhAnh.Image = Image.FromStream(stream);
+                }
+            }
+        }
+
         private void TaiDanhSachSanPham()
         {
             string sql = @"SELECT 
@@ -161,7 +238,8 @@ namespace FORM_DKY.GiaoDien
                             GiaNhap AS [Giá nhập], 
                             GiaBan AS [Giá bán], 
                             SoLuongTon AS [Tồn], 
-                            GhiChu AS [Ghi chú] 
+                            GhiChu AS [Ghi chú],
+                            HinhAnh AS [Hình ảnh]
                           FROM SanPham";
             DataTable dt = Database.GetData(sql);
             if (dgvSanPham != null) dgvSanPham.DataSource = dt;
@@ -198,8 +276,8 @@ namespace FORM_DKY.GiaoDien
             decimal.TryParse(txtGiaNhap.Text, out decimal giaNhap);
             decimal.TryParse(txtGiaBan.Text, out decimal giaBan);
 
-            string insertSql = @"INSERT INTO SanPham (MaSanPham, TenSanPham, LoaiSanPham, MauSac, Size, GiaNhap, GiaBan, SoLuongTon, GhiChu)
-                                VALUES (@Ma, @Ten, @Loai, @Mau, @Size, @GiaNhap, @GiaBan, 0, @GhiChu)";
+            string insertSql = @"INSERT INTO SanPham (MaSanPham, TenSanPham, LoaiSanPham, MauSac, Size, GiaNhap, GiaBan, SoLuongTon, GhiChu, HinhAnh)
+                                VALUES (@Ma, @Ten, @Loai, @Mau, @Size, @GiaNhap, @GiaBan, 0, @GhiChu, @HinhAnh)";
 
             SqlParameter[] sqlParams =
             {
@@ -210,7 +288,8 @@ namespace FORM_DKY.GiaoDien
                 new SqlParameter("@Size", cboSize.Text.Trim()),
                 new SqlParameter("@GiaNhap", giaNhap),
                 new SqlParameter("@GiaBan", giaBan),
-                new SqlParameter("@GhiChu", txtGhiChu.Text.Trim())
+                new SqlParameter("@GhiChu", txtGhiChu.Text.Trim()),
+                new SqlParameter("@HinhAnh", string.IsNullOrEmpty(tenFileAnh) ? (object)DBNull.Value : tenFileAnh)
             };
 
             if (Database.ExecuteNonQuery(insertSql, sqlParams) > 0)
@@ -225,7 +304,7 @@ namespace FORM_DKY.GiaoDien
         {
             if (dgvSanPham == null || dgvSanPham.CurrentRow == null || txtMaSanPham == null || txtTenSanPham == null || cboLoaiSanPham == null || txtMauSac == null || cboSize == null || txtGiaNhap == null || txtGiaBan == null || txtGhiChu == null)
             {
-                MessageBox.Show("Vui lòng chọn sản phẩm cần sửa!");
+                MessageBox.Show("Vui lòng chọn sản phẩm cần sửa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -239,7 +318,8 @@ namespace FORM_DKY.GiaoDien
                                     Size = @Size, 
                                     GiaNhap = @GiaNhap, 
                                     GiaBan = @GiaBan, 
-                                    GhiChu = @GhiChu 
+                                    GhiChu = @GhiChu,
+                                    HinhAnh = @HinhAnh
                                 WHERE MaSanPham = @Ma";
 
             SqlParameter[] sqlParams =
@@ -251,7 +331,8 @@ namespace FORM_DKY.GiaoDien
                 new SqlParameter("@Size", cboSize.Text.Trim()),
                 new SqlParameter("@GiaNhap", giaNhap),
                 new SqlParameter("@GiaBan", giaBan),
-                new SqlParameter("@GhiChu", txtGhiChu.Text.Trim())
+                new SqlParameter("@GhiChu", txtGhiChu.Text.Trim()),
+                new SqlParameter("@HinhAnh", string.IsNullOrEmpty(tenFileAnh) ? (object)DBNull.Value : tenFileAnh)
             };
 
             if (Database.ExecuteNonQuery(updateSql, sqlParams) > 0)
@@ -266,7 +347,7 @@ namespace FORM_DKY.GiaoDien
         {
             if (dgvSanPham == null || dgvSanPham.CurrentRow == null || txtMaSanPham == null)
             {
-                MessageBox.Show("Vui lòng chọn sản phẩm cần xóa!");
+                MessageBox.Show("Vui lòng chọn sản phẩm cần xóa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -304,6 +385,13 @@ namespace FORM_DKY.GiaoDien
             txtGhiChu?.Clear();
             txtTimKiem?.Clear();
 
+            tenFileAnh = "";
+            if (picHinhAnh.Image != null)
+            {
+                picHinhAnh.Image.Dispose();
+                picHinhAnh.Image = null;
+            }
+
             if (txtMaSanPham != null) txtMaSanPham.ReadOnly = false;
             if (cboLoaiSanPham != null) cboLoaiSanPham.Text = "";
             if (cboSize != null) cboSize.Text = "";
@@ -325,7 +413,8 @@ namespace FORM_DKY.GiaoDien
                             GiaNhap AS [Giá nhập], 
                             GiaBan AS [Giá bán], 
                             SoLuongTon AS [Tồn], 
-                            GhiChu AS [Ghi chú] 
+                            GhiChu AS [Ghi chú],
+                            HinhAnh AS [Hình ảnh]
                           FROM SanPham
                           WHERE MaSanPham LIKE @TuKhoa 
                              OR TenSanPham LIKE @TuKhoa 
@@ -352,7 +441,16 @@ namespace FORM_DKY.GiaoDien
             if (txtGiaBan != null) txtGiaBan.Text = row.Cells["Giá bán"].Value?.ToString();
             if (txtGhiChu != null) txtGhiChu.Text = row.Cells["Ghi chú"].Value?.ToString();
 
+            // Lấy tên file ảnh từ DataGridView và hiển thị
+            tenFileAnh = row.Cells["Hình ảnh"].Value != DBNull.Value ? row.Cells["Hình ảnh"].Value?.ToString() ?? "" : "";
+            string path = Path.Combine(Application.StartupPath, "Images", tenFileAnh);
+            HienThiAnh(path);
+
             if (txtMaSanPham != null) txtMaSanPham.ReadOnly = true;
+        }
+
+        private void FrmSanPham_Load(object sender, EventArgs e)
+        {
         }
     }
 }

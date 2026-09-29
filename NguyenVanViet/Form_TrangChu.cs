@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Printing;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Windows.Forms;
 using FORM_DKY.GiaoDien;
@@ -17,6 +19,8 @@ namespace FORM_DKY
         public Form_TrangChu()
         {
             InitializeComponent();
+
+            TaiDanhSachSP();
             sidebarTimer.Interval = 10;
             sidebarTimer.Tick += sidebarTimer_Tick;
 
@@ -148,6 +152,72 @@ namespace FORM_DKY
             {
                 openChildForm(new FrmSanPham());
             }
+        }
+
+        private void btnTimKiem_Click(object sender, EventArgs e)
+        {
+            string TuKhoa = txtTkiem.Text.Trim();
+            MessageBox.Show("Bạn vừa tìm kiếm: " + TuKhoa);
+        }
+        private void TaiDanhSachSP()
+        {
+            DANHMUC.Controls.Clear();
+            string sql = "SELECT* FROM SanPham";
+            DataTable dt = Database.GetData(sql);
+            if (dt != null && dt.Rows.Count > 0)
+            {
+                foreach (DataRow row in dt.Rows)
+                {
+                    ShowSP SP = new ShowSP();
+                    string ma = row["MaSanPham"] != DBNull.Value ? row["MaSanPham"].ToString() : "";
+                    string ten = row["TenSanPham"] != DBNull.Value ? row["TenSanPham"].ToString() : "";
+                    decimal gia = row["GiaBan"] != DBNull.Value ? Convert.ToDecimal(row["GiaBan"]) : 0;
+                    string mau = dt.Columns.Contains("MauSac") && row["MauSac"] != DBNull.Value ? row["MauSac"].ToString() : "";
+                    string size = dt.Columns.Contains("Size") && row["Size"] != DBNull.Value ? row["Size"].ToString() : "";
+                    string ghiChu = dt.Columns.Contains("GhiChu") && row["GhiChu"] != DBNull.Value ? row["GhiChu"].ToString() : "";
+                    string hinh = row["HinhAnh"] != DBNull.Value ? row["HinhAnh"].ToString() : "";
+                    SP.ThongTinSP(ma, ten, gia, mau, size, ghiChu,hinh);
+                    DANHMUC.Controls.Add(SP);
+                }
+            }
+
+        }
+
+           private void Form_TrangChu_Load(object sender, EventArgs e)
+        {
+            // 1. Ép thanh tìm kiếm và nút bấm ra làm con trực tiếp của Form (không nằm trong panel/flow nào nữa)
+            txtTkiem.Parent = this;
+            btnTimKiem.Parent = this;
+
+            // 2. Tắt Dock = Fill của DANHMUC
+            DANHMUC.Dock = DockStyle.None;
+
+            // 3. Chỉnh kích thước ô tìm kiếm cho rộng rãi
+            txtTkiem.Size = new Size(250, 30);
+            btnTimKiem.Size = new Size(80, 30);
+
+            // 4. Tính toán căn ra CHÍNH GIỮA chiều ngang Form
+            int totalWidth = txtTkiem.Width + btnTimKiem.Width + 10;
+            int startX = (this.ClientSize.Width - totalWidth) / 2;
+
+            txtTkiem.Location = new Point(startX, 15);
+            btnTimKiem.Location = new Point(startX + txtTkiem.Width + 10, 14);
+
+            // 5. Đặt DANHMUC bên dưới khoảng trống (Y = 60)
+            DANHMUC.Location = new Point(10, 60);
+            DANHMUC.Size = new Size(this.ClientSize.Width - 20, this.ClientSize.Height - 70);
+            DANHMUC.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+
+            // 6. Ép hiển thị lên trên cùng
+            txtTkiem.Visible = true;
+            btnTimKiem.Visible = true;
+            txtTkiem.BringToFront();
+            btnTimKiem.BringToFront();
+        }
+
+        private void panelchildform_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }

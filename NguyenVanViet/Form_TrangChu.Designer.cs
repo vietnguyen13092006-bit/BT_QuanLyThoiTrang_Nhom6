@@ -30,16 +30,18 @@
         {
             components = new System.ComponentModel.Container();
             panelsidebar = new Panel();
+            btnQlyQAo = new Button();
             btnDangNhap = new Button();
             btn_TrangChu = new Button();
             btnMenu = new Button();
             panelchildform = new Panel();
-            pictureBox1 = new PictureBox();
+            DANHMUC = new FlowLayoutPanel();
+            txtTkiem = new TextBox();
+            btnTimKiem = new Button();
             sidebarTimer = new System.Windows.Forms.Timer(components);
-            btnQlyQAo = new Button();
             panelsidebar.SuspendLayout();
             panelchildform.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            DANHMUC.SuspendLayout();
             SuspendLayout();
             // 
             // panelsidebar
@@ -56,6 +58,20 @@
             panelsidebar.Name = "panelsidebar";
             panelsidebar.Size = new Size(50, 450);
             panelsidebar.TabIndex = 7;
+            // 
+            // btnQlyQAo
+            // 
+            btnQlyQAo.Dock = DockStyle.Top;
+            btnQlyQAo.FlatAppearance.BorderSize = 0;
+            btnQlyQAo.FlatStyle = FlatStyle.Flat;
+            btnQlyQAo.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            btnQlyQAo.Location = new Point(0, 69);
+            btnQlyQAo.Name = "btnQlyQAo";
+            btnQlyQAo.Padding = new Padding(15, 0, 0, 0);
+            btnQlyQAo.Size = new Size(50, 23);
+            btnQlyQAo.TabIndex = 4;
+            btnQlyQAo.UseVisualStyleBackColor = true;
+            btnQlyQAo.Click += btnQlyQAo_Click;
             // 
             // btnDangNhap
             // 
@@ -103,40 +119,47 @@
             // panelchildform
             // 
             panelchildform.BackColor = SystemColors.ButtonFace;
-            panelchildform.Controls.Add(pictureBox1);
+            panelchildform.Controls.Add(DANHMUC);
             panelchildform.Dock = DockStyle.Fill;
             panelchildform.Location = new Point(50, 0);
             panelchildform.Name = "panelchildform";
             panelchildform.Size = new Size(750, 450);
             panelchildform.TabIndex = 8;
+            panelchildform.Paint += panelchildform_Paint;
             // 
-            // pictureBox1
+            // DANHMUC
             // 
-            pictureBox1.Location = new Point(239, 12);
-            pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(256, 79);
-            pictureBox1.TabIndex = 0;
-            pictureBox1.TabStop = false;
+            DANHMUC.AutoScroll = true;
+            DANHMUC.Controls.Add(txtTkiem);
+            DANHMUC.Controls.Add(btnTimKiem);
+            DANHMUC.Dock = DockStyle.Fill;
+            DANHMUC.Location = new Point(0, 0);
+            DANHMUC.Name = "DANHMUC";
+            DANHMUC.Size = new Size(750, 450);
+            DANHMUC.TabIndex = 2;
+            // 
+            // txtTkiem
+            // 
+            txtTkiem.Location = new Point(3, 3);
+            txtTkiem.Name = "txtTkiem";
+            txtTkiem.Size = new Size(350, 23);
+            txtTkiem.TabIndex = 0;
+            // 
+            // btnTimKiem
+            // 
+            btnTimKiem.Location = new Point(359, 3);
+            btnTimKiem.Name = "btnTimKiem";
+            btnTimKiem.Size = new Size(75, 23);
+            btnTimKiem.TabIndex = 1;
+            btnTimKiem.Text = "TÌm kiếm";
+            btnTimKiem.UseVisualStyleBackColor = true;
+            btnTimKiem.Click += btnTimKiem_Click;
             // 
             // sidebarTimer
             // 
             sidebarTimer.Enabled = true;
             sidebarTimer.Interval = 10;
             sidebarTimer.Tick += sidebarTimer_Tick;
-            // 
-            // btnQlyQAo
-            // 
-            btnQlyQAo.Dock = DockStyle.Top;
-            btnQlyQAo.FlatAppearance.BorderSize = 0;
-            btnQlyQAo.FlatStyle = FlatStyle.Flat;
-            btnQlyQAo.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            btnQlyQAo.Location = new Point(0, 69);
-            btnQlyQAo.Name = "btnQlyQAo";
-            btnQlyQAo.Padding = new Padding(15, 0, 0, 0);
-            btnQlyQAo.Size = new Size(50, 23);
-            btnQlyQAo.TabIndex = 4;
-            btnQlyQAo.UseVisualStyleBackColor = true;
-            btnQlyQAo.Click += btnQlyQAo_Click;
             // 
             // Form_TrangChu
             // 
@@ -147,10 +170,11 @@
             Controls.Add(panelsidebar);
             Name = "Form_TrangChu";
             Text = "Form_TrangChu";
-            Load += Form_Menu_Load;
+            Load += Form_TrangChu_Load;
             panelsidebar.ResumeLayout(false);
             panelchildform.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+            DANHMUC.ResumeLayout(false);
+            DANHMUC.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -161,7 +185,9 @@
         private Button btnDangNhap;
         private Panel panelchildform;
         private System.Windows.Forms.Timer sidebarTimer;
-        private PictureBox pictureBox1;
         private Button btnQlyQAo;
+        private FlowLayoutPanel DANHMUC;
+        private Button btnTimKiem;
+        private TextBox txtTkiem;
     }
 }
