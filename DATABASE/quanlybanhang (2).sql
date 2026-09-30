@@ -1,2 +1,0 @@
-ALTER LOGIN admin_shop WITH PASSWORD = '123456';
-ALTER LOGIN admin_shop ENABLE;
