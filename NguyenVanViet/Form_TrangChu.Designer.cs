@@ -30,25 +30,22 @@
         {
             components = new System.ComponentModel.Container();
             panelsidebar = new Panel();
-            btnQlyQAo = new Button();
             btnDangNhap = new Button();
+            btnHdon = new Button();
+            btnQlyQAo = new Button();
             btn_TrangChu = new Button();
             btnMenu = new Button();
             panelchildform = new Panel();
-            DANHMUC = new FlowLayoutPanel();
-            txtTkiem = new TextBox();
-            btnTimKiem = new Button();
             sidebarTimer = new System.Windows.Forms.Timer(components);
             panelsidebar.SuspendLayout();
-            panelchildform.SuspendLayout();
-            DANHMUC.SuspendLayout();
             SuspendLayout();
             // 
             // panelsidebar
             // 
             panelsidebar.BackColor = Color.SlateGray;
-            panelsidebar.Controls.Add(btnQlyQAo);
             panelsidebar.Controls.Add(btnDangNhap);
+            panelsidebar.Controls.Add(btnHdon);
+            panelsidebar.Controls.Add(btnQlyQAo);
             panelsidebar.Controls.Add(btn_TrangChu);
             panelsidebar.Controls.Add(btnMenu);
             panelsidebar.Dock = DockStyle.Left;
@@ -59,33 +56,47 @@
             panelsidebar.Size = new Size(50, 450);
             panelsidebar.TabIndex = 7;
             // 
-            // btnQlyQAo
-            // 
-            btnQlyQAo.Dock = DockStyle.Top;
-            btnQlyQAo.FlatAppearance.BorderSize = 0;
-            btnQlyQAo.FlatStyle = FlatStyle.Flat;
-            btnQlyQAo.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            btnQlyQAo.Location = new Point(0, 69);
-            btnQlyQAo.Name = "btnQlyQAo";
-            btnQlyQAo.Padding = new Padding(15, 0, 0, 0);
-            btnQlyQAo.Size = new Size(50, 23);
-            btnQlyQAo.TabIndex = 4;
-            btnQlyQAo.UseVisualStyleBackColor = true;
-            btnQlyQAo.Click += btnQlyQAo_Click;
-            // 
             // btnDangNhap
             // 
             btnDangNhap.Dock = DockStyle.Top;
             btnDangNhap.FlatAppearance.BorderSize = 0;
             btnDangNhap.FlatStyle = FlatStyle.Flat;
             btnDangNhap.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            btnDangNhap.Location = new Point(0, 46);
+            btnDangNhap.Location = new Point(0, 92);
             btnDangNhap.Name = "btnDangNhap";
             btnDangNhap.Padding = new Padding(15, 0, 0, 0);
             btnDangNhap.Size = new Size(50, 23);
             btnDangNhap.TabIndex = 3;
             btnDangNhap.UseVisualStyleBackColor = true;
             btnDangNhap.Click += btnDangNhap_Click;
+            // 
+            // btnHdon
+            // 
+            btnHdon.Dock = DockStyle.Top;
+            btnHdon.FlatAppearance.BorderSize = 0;
+            btnHdon.FlatStyle = FlatStyle.Flat;
+            btnHdon.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            btnHdon.Location = new Point(0, 69);
+            btnHdon.Name = "btnHdon";
+            btnHdon.Padding = new Padding(15, 0, 0, 0);
+            btnHdon.Size = new Size(50, 23);
+            btnHdon.TabIndex = 5;
+            btnHdon.UseVisualStyleBackColor = true;
+            btnHdon.Click += btnHdon_Click;
+            // 
+            // btnQlyQAo
+            // 
+            btnQlyQAo.Dock = DockStyle.Top;
+            btnQlyQAo.FlatAppearance.BorderSize = 0;
+            btnQlyQAo.FlatStyle = FlatStyle.Flat;
+            btnQlyQAo.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            btnQlyQAo.Location = new Point(0, 46);
+            btnQlyQAo.Name = "btnQlyQAo";
+            btnQlyQAo.Padding = new Padding(15, 0, 0, 0);
+            btnQlyQAo.Size = new Size(50, 23);
+            btnQlyQAo.TabIndex = 4;
+            btnQlyQAo.UseVisualStyleBackColor = true;
+            btnQlyQAo.Click += btnQlyQAo_Click;
             // 
             // btn_TrangChu
             // 
@@ -119,41 +130,12 @@
             // panelchildform
             // 
             panelchildform.BackColor = SystemColors.ButtonFace;
-            panelchildform.Controls.Add(DANHMUC);
             panelchildform.Dock = DockStyle.Fill;
             panelchildform.Location = new Point(50, 0);
             panelchildform.Name = "panelchildform";
             panelchildform.Size = new Size(750, 450);
             panelchildform.TabIndex = 8;
             panelchildform.Paint += panelchildform_Paint;
-            // 
-            // DANHMUC
-            // 
-            DANHMUC.AutoScroll = true;
-            DANHMUC.Controls.Add(txtTkiem);
-            DANHMUC.Controls.Add(btnTimKiem);
-            DANHMUC.Dock = DockStyle.Fill;
-            DANHMUC.Location = new Point(0, 0);
-            DANHMUC.Name = "DANHMUC";
-            DANHMUC.Size = new Size(750, 450);
-            DANHMUC.TabIndex = 2;
-            // 
-            // txtTkiem
-            // 
-            txtTkiem.Location = new Point(3, 3);
-            txtTkiem.Name = "txtTkiem";
-            txtTkiem.Size = new Size(350, 23);
-            txtTkiem.TabIndex = 0;
-            // 
-            // btnTimKiem
-            // 
-            btnTimKiem.Location = new Point(359, 3);
-            btnTimKiem.Name = "btnTimKiem";
-            btnTimKiem.Size = new Size(75, 23);
-            btnTimKiem.TabIndex = 1;
-            btnTimKiem.Text = "TÌm kiếm";
-            btnTimKiem.UseVisualStyleBackColor = true;
-            btnTimKiem.Click += btnTimKiem_Click;
             // 
             // sidebarTimer
             // 
@@ -172,9 +154,6 @@
             Text = "Form_TrangChu";
             Load += Form_TrangChu_Load;
             panelsidebar.ResumeLayout(false);
-            panelchildform.ResumeLayout(false);
-            DANHMUC.ResumeLayout(false);
-            DANHMUC.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -186,8 +165,6 @@
         private Panel panelchildform;
         private System.Windows.Forms.Timer sidebarTimer;
         private Button btnQlyQAo;
-        private FlowLayoutPanel DANHMUC;
-        private Button btnTimKiem;
-        private TextBox txtTkiem;
+        private Button btnHdon;
     }
 }

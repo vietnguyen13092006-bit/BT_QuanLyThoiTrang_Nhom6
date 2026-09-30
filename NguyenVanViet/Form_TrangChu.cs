@@ -42,9 +42,6 @@ namespace FORM_DKY
                 activeForm.Dispose();
                 activeForm = null;
             }
-            txtTkiem.Visible = false;
-            btnTimKiem.Visible = false;
-            DANHMUC.Visible = false;
 
             activeForm = childForm;
             childForm.TopLevel = false;
@@ -106,10 +103,6 @@ namespace FORM_DKY
                 activeForm.Dispose();
                 activeForm = null;
             }
-
-            txtTkiem.Visible = true;
-            btnTimKiem.Visible = true;
-            DANHMUC.Visible = true;
             TaiDanhSachSP();
         }
         private void btnMenu_Click(object sender, EventArgs e)
@@ -132,6 +125,7 @@ namespace FORM_DKY
                     btn_TrangChu.Text = "🏠";
                     btnDangNhap.Text = "👤";
                     btnQlyQAo.Text = "🛍️";
+                    btnHdon.Text = "🧾";
                     //btn_TrangChu.Text = "";
                     //btnDangNhap.Text = "";
                 }
@@ -145,7 +139,8 @@ namespace FORM_DKY
                     isSidebarExpanded = true;
                     sidebarTimer.Stop();
                     btn_TrangChu.Text = "Trang chủ";
-                    btnQlyQAo.Text = "Quản lý";
+                    btnQlyQAo.Text = "Qly quần áo";
+                    btnHdon.Text = "Qly hóa đơn";
                     CapNhatGiaoDienNutTaiKhoan();
                 }
             }
@@ -156,7 +151,7 @@ namespace FORM_DKY
         {
             if (string.IsNullOrEmpty(FormDangNhap.Ten))
             {
-                MessageBox.Show("Bạn cần đăng nhập để xem quản lý cửa hàng", "Thông báo", MessageBoxButtons.OK); ;
+                MessageBox.Show("Bạn cần đăng nhập để xem quản lý quần áo", "Thông báo", MessageBoxButtons.OK); ;
             }
             else
             {
@@ -164,60 +159,18 @@ namespace FORM_DKY
             }
         }
 
-        private void btnTimKiem_Click(object sender, EventArgs e)
-        {
-            string TuKhoa = txtTkiem.Text.Trim();
-            MessageBox.Show("Bạn vừa tìm kiếm: " + TuKhoa);
-        }
         private void TaiDanhSachSP()
         {
-            DANHMUC.Controls.Clear();
-            string sql = "SELECT* FROM SanPham";
-            DataTable dt = Database.GetData(sql);
-            if (dt != null && dt.Rows.Count > 0)
-            {
-                foreach (DataRow row in dt.Rows)
-                {
-                    ShowSP SP = new ShowSP();
-                    string ma = row["MaSanPham"] != DBNull.Value ? row["MaSanPham"].ToString() : "";
-                    string ten = row["TenSanPham"] != DBNull.Value ? row["TenSanPham"].ToString() : "";
-                    decimal gia = row["GiaBan"] != DBNull.Value ? Convert.ToDecimal(row["GiaBan"]) : 0;
-                    string mau = dt.Columns.Contains("MauSac") && row["MauSac"] != DBNull.Value ? row["MauSac"].ToString() : "";
-                    string size = dt.Columns.Contains("Size") && row["Size"] != DBNull.Value ? row["Size"].ToString() : "";
-                    string ghiChu = dt.Columns.Contains("GhiChu") && row["GhiChu"] != DBNull.Value ? row["GhiChu"].ToString() : "";
-                    string hinh = row["HinhAnh"] != DBNull.Value ? row["HinhAnh"].ToString() : "";
-                    SP.ThongTinSP(ma, ten, gia, mau, size, ghiChu,hinh);
-                    DANHMUC.Controls.Add(SP);
-                }
-            }
-
+            panelchildform.Controls.Clear();
+            ShowSP showtt = new ShowSP();
+            showtt.Dock = DockStyle.Fill;
+            panelchildform.Controls.Add(showtt);
+            showtt.BringToFront();
+            showtt.Show();
         }
 
         private void Form_TrangChu_Load(object sender, EventArgs e)
         {
-            // 1. Đưa các control Tìm kiếm và DANHMUC vào BÊN TRONG panelchildform (để không bị panel che)
-            panelchildform.Controls.Add(txtTkiem);
-            panelchildform.Controls.Add(btnTimKiem);
-            panelchildform.Controls.Add(DANHMUC);
-
-            // 2. Vị trí TextBox & Nút Tìm kiếm
-            txtTkiem.Size = new Size(250, 30);
-            txtTkiem.Location = new Point(20, 12);
-
-            btnTimKiem.Size = new Size(90, 30);
-            btnTimKiem.Location = new Point(280, 11);
-
-            // 3. Định vị FlowLayoutPanel DANHMUC nằm ngay dưới thanh tìm kiếm
-            DANHMUC.Dock = DockStyle.None;
-            DANHMUC.Location = new Point(10, 50);
-            DANHMUC.Size = new Size(panelchildform.ClientSize.Width - 20, panelchildform.ClientSize.Height - 60);
-            DANHMUC.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-
-            txtTkiem.BringToFront();
-            btnTimKiem.BringToFront();
-            DANHMUC.BringToFront();
-
-            // 4. Tải danh sách sản phẩm
             TaiDanhSachSP();
         }
 
@@ -225,6 +178,18 @@ namespace FORM_DKY
         private void panelchildform_Paint(object sender, PaintEventArgs e)
         {
 
+        }
+
+        private void btnHdon_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(FormDangNhap.Ten))
+            {
+                MessageBox.Show("Bạn cần đăng nhập để xem quản lý hóa đơn", "Thông báo", MessageBoxButtons.OK); ;
+            }
+            else
+            {
+                openChildForm(new quanlyhoadon());
+            }
         }
     }
 }

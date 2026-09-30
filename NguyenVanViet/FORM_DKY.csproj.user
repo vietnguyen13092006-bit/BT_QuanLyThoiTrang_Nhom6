@@ -16,6 +16,9 @@
     <Compile Update="FrmSanPham.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="quanlyhoadon.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="ShowSP.cs">
       <SubType>UserControl</SubType>
     </Compile>
