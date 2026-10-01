@@ -1,4 +1,4 @@
-﻿namespace FORM_DKY.GiaoDien
+﻿namespace FORM_DKY
 {
     partial class FrmSanPham
     {
@@ -28,18 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
-            SuspendLayout();
-            // 
-            // FrmSanPham
-            // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(700, 338);
-            Margin = new Padding(3, 2, 3, 2);
-            Name = "FrmSanPham";
-            Text = "FrmSanPham";
-            Load += FrmSanPham_Load;
-            ResumeLayout(false);
+            this.components = new System.ComponentModel.Container();
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(1100, 700);
+            this.Text = "FrmSanPham";
         }
 
         #endregion

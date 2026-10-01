@@ -19,6 +19,14 @@ namespace FORM_DKY
         private void Form_TTTKHOAN_Load(object sender, EventArgs e)
         {
             lblName.Text = "Tên: " + FormDangNhap.Ten;
+            lblMail.Parent = pictureBox1;
+            lblName.Parent = pictureBox1;
+            lblSDT.Parent = pictureBox1;
+
+            lblMail.BackColor = Color.Transparent;
+            lblName.BackColor = Color.Transparent;
+            lblSDT.BackColor = Color.Transparent;
+
             //string connectionString = @"Data Source=localhost\SQLEXPRESS01;Initial Catalog=TAIKHOAN;Integrated Security=True;TrustServerCertificate=True";
             string connectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=TAIKHOAN;Integrated Security=True;TrustServerCertificate=True";
             using (SqlConnection conn = new SqlConnection(connectionString))
@@ -26,7 +34,7 @@ namespace FORM_DKY
                 try
                 {
                     conn.Open();
-                    string query = "SELECT SDT, Email FROM Users WHERE Username = @Username";
+                    string query = "SELECT SDT, Email, AvatarPath FROM Users WHERE Username = @Username";
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
                         cmd.Parameters.AddWithValue("@Username", FormDangNhap.Ten);
@@ -36,6 +44,10 @@ namespace FORM_DKY
                             {
                                 lblSDT.Text = "SĐT: " + (dr["SDT"] != DBNull.Value ? dr["SDT"].ToString() : "Chưa có");
                                 lblMail.Text = "Email: " + (dr["Email"] != DBNull.Value ? dr["Email"].ToString() : "Chưa có");
+                                if (dr["AvatarPath"] != DBNull.Value)
+                                {
+                                    FormDangNhap.AvatarPath = dr["AvatarPath"].ToString();
+                                }
                             }
                         }
                     }
@@ -44,8 +56,8 @@ namespace FORM_DKY
                 {
                     MessageBox.Show("Lỗi kết nối CSDL: " + ex.Message, "Lỗi");
                 }
-           
-            }    
+
+            }
             if (!string.IsNullOrEmpty(FormDangNhap.AvatarPath) && File.Exists(FormDangNhap.AvatarPath))
             {
                 picAVT.Image = Image.FromFile(FormDangNhap.AvatarPath);
@@ -91,10 +103,32 @@ namespace FORM_DKY
             }
         }
 
-        private void CapNhatAvatarVaoDatabase(string username, string avatarPath)
+            private void CapNhatAvatarVaoDatabase(string username, string AvatarPath)
         {
-            // Viết câu lệnh UPDATE vào SQL Server ở đây
             string query = "UPDATE Users SET AvatarPath = @AvatarPath WHERE Username = @Username";
+            string connectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=TAIKHOAN;Integrated Security=True;TrustServerCertificate=True";
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@AvatarPath", AvatarPath);
+                        cmd.Parameters.AddWithValue("@Username", username);
+
+                        int rows = cmd.ExecuteNonQuery();
+                        if (rows > 0)
+                        {
+                            MessageBox.Show("Đã cập nhật ảnh đại diện thành công!", "Thông báo");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Lỗi cập nhật ảnh vào CSDL: " + ex.Message, "Lỗi");
+                }
+            }
         }
     }
 }

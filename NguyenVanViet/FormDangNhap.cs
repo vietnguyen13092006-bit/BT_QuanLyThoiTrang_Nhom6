@@ -70,16 +70,29 @@ namespace FORM_DKY
             }
         }
 
-        private void button2_Click(object sender, EventArgs e)
-        {
-            FORM_DKY_GUI frmLogin = new FORM_DKY_GUI();
-            frmLogin.Show();
-            this.Hide();
-        }
-
         private void FormDangNhap_Load(object sender, EventArgs e)
         {
+            // 1. Ép Panel làm con của PictureBox để nhận nền trong suốt từ ảnh mới
+            panel1.Parent = pictureBox1;
+            panel1.BackColor = Color.Transparent;
 
+            // 2. Tự động căn giữa Panel ngang & dọc
+            CanGiuaPanel();
+        }
+
+        private void FormDangNhap_Resize(object sender, EventArgs e)
+        {
+            // Giữ Panel luôn ở chính giữa khi phóng to / thu nhỏ Form
+            CanGiuaPanel();
+        }
+
+        private void CanGiuaPanel()
+        {
+            if (pictureBox1 != null && panel1 != null)
+            {
+                panel1.Left = (pictureBox1.Width - panel1.Width) / 2;
+                panel1.Top = (pictureBox1.Height - panel1.Height) / 2;
+            }
         }
     }
 }

@@ -1,456 +1,429 @@
-﻿using System;
+﻿using FORM_DKY;
+using Microsoft.Data.SqlClient;
+using System;
 using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
 
-namespace FORM_DKY.GiaoDien
+namespace FORM_DKY
 {
     public partial class FrmSanPham : Form
     {
-        // Khai báo các Control
-        private Label? lblTieuDe, lblThongTin, lblMaSanPham, lblTenSanPham, lblLoaiSanPham, lblMauSac, lblSize, lblGiaNhap, lblGiaBan, lblGhiChu, lblTimKiem;
-        private TextBox? txtMaSanPham, txtTenSanPham, txtMauSac, txtGiaNhap, txtGiaBan, txtGhiChu, txtTimKiem;
-        private ComboBox? cboLoaiSanPham, cboSize;
-        private Button? btnThem, btnSua, btnXoa, btnLamMoi, btnTimKiem;
-        private DataGridView? dgvSanPham;
-
-        private PictureBox picHinhAnh = null!;
-        private Button btnChonAnh = null!;
-        private string tenFileAnh = ""; // Chuỗi lưu tên file để lưu xuống SQL (vd: "sp01.jpg")
+        private string duongDanAnh = "";
 
         public FrmSanPham()
         {
-            KhoiTaoForm();
-            KhoiTaoGiaoDien();
-            TaoGiaoDienChonAnh();
+            InitializeComponent();
+            TaoGiaoDienResponsive();
             TaiDanhSachSanPham();
         }
 
-        private void KhoiTaoForm()
+        #region 1. TỰ ĐỘNG TẠO GIAO DIỆN RESPONSIVE (DOCK & TABLELAYOUTPANEL)
+
+        private TableLayoutPanel tlpMain = null!;
+        private TableLayoutPanel tlpInput = null!;
+        private FlowLayoutPanel flpButtons = null!;
+        private DataGridView dgvSanPham = null!;
+
+        private TextBox txtMaSP = null!;
+        private TextBox txtTenSP = null!;
+        private ComboBox cboLoaiSP = null!;
+        private ComboBox cboMauSac = null!;
+        private ComboBox cboSize = null!;
+        private NumericUpDown nudGiaNhap = null!;
+        private NumericUpDown nudGiaBan = null!;
+        private NumericUpDown nudSoLuong = null!;
+        private TextBox txtGhiChu = null!;
+        private TextBox txtTimKiem = null!;
+
+        private PictureBox picHinhAnh = null!;
+        private Button btnChonAnh = null!;
+        private Button btnThem = null!;
+        private Button btnSua = null!;
+        private Button btnXoa = null!;
+        private Button btnLamMoi = null!;
+
+        private void TaoGiaoDienResponsive()
         {
-            this.Text = "Quản lý sản phẩm";
-            this.Name = "FrmSanPham";
+            this.Text = "QUẢN LÝ SẢN PHẨM PHẦN MỀM THỜI TRANG";
+            this.Size = new Size(1100, 700);
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.Size = new Size(1200, 700);
-            this.MinimumSize = new Size(1000, 600);
-            this.BackColor = Color.White;
-            this.Font = new Font("Segoe UI", 10, FontStyle.Regular);
-        }
 
-        private void KhoiTaoGiaoDien()
-        {
+            // Layout chính chia làm 3 dòng: Tiêu đề (Auto), Khung nhập (Auto), Bảng dữ liệu (*)
+            tlpMain = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                RowCount = 3,
+                ColumnCount = 1,
+                Padding = new Padding(10)
+            };
+            tlpMain.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            tlpMain.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+            tlpMain.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+
             // Tiêu đề
-            lblTieuDe = new Label { Text = "QUẢN LÝ SẢN PHẨM", Font = new Font("Segoe UI", 20, FontStyle.Bold), TextAlign = ContentAlignment.MiddleCenter, Dock = DockStyle.Top, Height = 55 };
-            this.Controls.Add(lblTieuDe);
-
-            lblThongTin = TaoLabel("THÔNG TIN SẢN PHẨM", 30, 70, 300, 30);
-            lblThongTin.Font = new Font("Segoe UI", 12, FontStyle.Bold);
-            this.Controls.Add(lblThongTin);
-
-            // Hàng 1
-            lblMaSanPham = TaoLabel("Mã sản phẩm:", 30, 115, 120, 30);
-            txtMaSanPham = TaoTextBox(160, 115, 210, 30);
-
-            lblTenSanPham = TaoLabel("Tên sản phẩm:", 410, 115, 120, 30);
-            txtTenSanPham = TaoTextBox(540, 115, 250, 30);
-
-            // Hàng 2
-            lblLoaiSanPham = TaoLabel("Loại sản phẩm:", 30, 160, 130, 30);
-            cboLoaiSanPham = new ComboBox
+            Label lblTitle = new Label
             {
-                Name = "cboLoaiSanPham",
-                Location = new Point(160, 160),
-                Size = new Size(210, 30),
-                DropDownStyle = ComboBoxStyle.DropDown
+                Text = "QUẢN LÝ DANH MỤC SẢN PHẨM",
+                Font = new Font("Segoe UI", 16, FontStyle.Bold),
+                ForeColor = Color.DarkBlue,
+                Dock = DockStyle.Top,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Height = 40
             };
-            cboLoaiSanPham.Items.AddRange(new object[] { "Áo thun", "Áo sơ mi", "Áo polo", "Áo khoác", "Áo kiểu", "Quần jean", "Quần kaki", "Chân váy" });
-            this.Controls.Add(cboLoaiSanPham);
+            tlpMain.Controls.Add(lblTitle, 0, 0);
 
-            lblMauSac = TaoLabel("Màu sắc:", 410, 160, 120, 30);
-            txtMauSac = TaoTextBox(540, 160, 250, 30);
-
-            // Hàng 3
-            lblSize = TaoLabel("Size:", 30, 205, 120, 30);
-            cboSize = new ComboBox
+            // GroupBox chứa khung nhập thông tin
+            GroupBox gbThongTin = new GroupBox
             {
-                Name = "cboSize",
-                Location = new Point(160, 205),
-                Size = new Size(210, 30),
-                DropDownStyle = ComboBoxStyle.DropDown
+                Text = "Thông tin sản phẩm",
+                Font = new Font("Segoe UI", 10, FontStyle.Regular),
+                Dock = DockStyle.Top,
+                AutoSize = true,
+                Padding = new Padding(10)
             };
-            cboSize.Items.AddRange(new object[] { "S", "M", "L", "XL", "XXL", "FreeSize" });
-            this.Controls.Add(cboSize);
 
-            lblGiaNhap = TaoLabel("Giá nhập:", 410, 205, 120, 30);
-            txtGiaNhap = TaoTextBox(540, 205, 250, 30);
-
-            // Hàng 4
-            lblGiaBan = TaoLabel("Giá bán:", 30, 250, 120, 30);
-            txtGiaBan = TaoTextBox(160, 250, 210, 30);
-
-            lblGhiChu = TaoLabel("Ghi chú:", 410, 250, 120, 30);
-            txtGhiChu = new TextBox { Name = "txtGhiChu", Location = new Point(540, 250), Size = new Size(250, 55), Multiline = true };
-            this.Controls.Add(txtGhiChu);
-
-            // Các nút
-            btnThem = TaoButton("THÊM", 30, 320, 100, 40);
-            btnThem.Click += BtnThem_Click;
-
-            btnSua = TaoButton("SỬA", 145, 320, 100, 40);
-            btnSua.Click += BtnSua_Click;
-
-            btnXoa = TaoButton("XÓA", 260, 320, 100, 40);
-            btnXoa.Click += BtnXoa_Click;
-
-            btnLamMoi = TaoButton("LÀM MỚI", 375, 320, 110, 40);
-            btnLamMoi.Click += BtnLamMoi_Click;
-
-            lblTimKiem = TaoLabel("Tìm kiếm:", 520, 325, 80, 30);
-            txtTimKiem = TaoTextBox(605, 320, 200, 30);
-            btnTimKiem = TaoButton("TÌM KIẾM", 820, 320, 110, 40);
-            btnTimKiem.Click += BtnTimKiem_Click;
-
-            // Bảng DataGridView
-            dgvSanPham = new DataGridView
+            tlpInput = new TableLayoutPanel
             {
-                Name = "dgvSanPham",
-                Location = new Point(30, 385),
-                Size = new Size(1120, 230),
-                ReadOnly = true,
-                AllowUserToAddRows = false,
-                AllowUserToDeleteRows = false,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                MultiSelect = false,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
+                Dock = DockStyle.Top,
+                AutoSize = true,
+                ColumnCount = 5,
+                RowCount = 5
             };
-            dgvSanPham.CellClick += DgvSanPham_CellClick;
-            this.Controls.Add(dgvSanPham);
+            tlpInput.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100F));
+            tlpInput.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40F));
+            tlpInput.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100F));
+            tlpInput.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40F));
+            tlpInput.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
 
-            // Add các control lên Form
-            this.Controls.Add(lblMaSanPham);
-            this.Controls.Add(txtMaSanPham);
-            this.Controls.Add(lblTenSanPham);
-            this.Controls.Add(txtTenSanPham);
-            this.Controls.Add(lblLoaiSanPham);
-            this.Controls.Add(lblMauSac);
-            this.Controls.Add(txtMauSac);
-            this.Controls.Add(lblSize);
-            this.Controls.Add(lblGiaNhap);
-            this.Controls.Add(txtGiaNhap);
-            this.Controls.Add(lblGiaBan);
-            this.Controls.Add(txtGiaBan);
-            this.Controls.Add(lblGhiChu);
-            this.Controls.Add(btnThem);
-            this.Controls.Add(btnSua);
-            this.Controls.Add(btnXoa);
-            this.Controls.Add(btnLamMoi);
-            this.Controls.Add(lblTimKiem);
-            this.Controls.Add(txtTimKiem);
-            this.Controls.Add(btnTimKiem);
-        }
+            // Khởi tạo các Control nhập liệu
+            txtMaSP = new TextBox { Dock = DockStyle.Fill };
+            txtTenSP = new TextBox { Dock = DockStyle.Fill };
 
-        private Label TaoLabel(string text, int x, int y, int width, int height) => new Label { Text = text, Location = new Point(x, y), Size = new Size(width, height), TextAlign = ContentAlignment.MiddleLeft };
-        private TextBox TaoTextBox(int x, int y, int width, int height) => new TextBox { Location = new Point(x, y), Size = new Size(width, height) };
-        private Button TaoButton(string text, int x, int y, int width, int height) => new Button { Text = text, Location = new Point(x, y), Size = new Size(width, height), Cursor = Cursors.Hand };
+            cboLoaiSP = new ComboBox { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDown };
+            cboLoaiSP.Items.AddRange(new object[] { "Áo thun", "Áo sơ mi", "Quần jean", "Quần short", "Áo khoác", "Váy/Đầm" });
 
-        // 2. Tạo PictureBox và Button Chọn Ảnh bằng Code tay
-        private void TaoGiaoDienChonAnh()
-        {
+            cboMauSac = new ComboBox { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDown };
+            cboMauSac.Items.AddRange(new object[] { "Đen", "Trắng", "Xanh", "Đỏ", "Vàng", "Xám", "Nâu" });
+
+            cboSize = new ComboBox { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDown };
+            cboSize.Items.AddRange(new object[] { "S", "M", "L", "XL", "XXL", "28", "29", "30", "31", "32" });
+
+            // ✅ Đã sửa ThousandsSeparator có thêm chữ 's':
+            nudGiaNhap = new NumericUpDown { Dock = DockStyle.Fill, Maximum = 1000000000, Increment = 10000, ThousandsSeparator = true };
+            nudGiaBan = new NumericUpDown { Dock = DockStyle.Fill, Maximum = 1000000000, Increment = 10000, ThousandsSeparator = true };
+            nudSoLuong = new NumericUpDown { Dock = DockStyle.Fill, Maximum = 100000, Value = 1 };
+
+            txtGhiChu = new TextBox { Dock = DockStyle.Fill };
+
+            // PictureBox Ảnh
             picHinhAnh = new PictureBox
             {
-                Size = new Size(160, 160),
-                Location = new Point(830, 115), // Dịch sang góc phải ngang hàng với thông tin
                 BorderStyle = BorderStyle.FixedSingle,
                 SizeMode = PictureBoxSizeMode.Zoom,
-                BackColor = Color.White
+                Dock = DockStyle.Fill,
+                Height = 120
             };
 
-            btnChonAnh = new Button
-            {
-                Text = "Thêm ảnh",
-                Size = new Size(100, 32),
-                Location = new Point(860, 280), // Đặt ngay bên dưới PictureBox
-                Cursor = Cursors.Hand
-            };
-
+            btnChonAnh = new Button { Text = "Chọn Ảnh...", Dock = DockStyle.Bottom, Height = 30 };
             btnChonAnh.Click += BtnChonAnh_Click;
 
-            this.Controls.Add(picHinhAnh);
-            this.Controls.Add(btnChonAnh);
+            Panel pnlAnh = new Panel { Dock = DockStyle.Fill };
+            pnlAnh.Controls.Add(picHinhAnh);
+            pnlAnh.Controls.Add(btnChonAnh);
 
-            picHinhAnh.BringToFront();
-            btnChonAnh.BringToFront();
+            // Dòng 0: Mã SP - Giá Nhập - Khung Ảnh
+            tlpInput.Controls.Add(new Label { Text = "Mã SP:", Anchor = AnchorStyles.Left }, 0, 0);
+            tlpInput.Controls.Add(txtMaSP, 1, 0);
+            tlpInput.Controls.Add(new Label { Text = "Giá Nhập:", Anchor = AnchorStyles.Left }, 2, 0);
+            tlpInput.Controls.Add(nudGiaNhap, 3, 0);
+            tlpInput.Controls.Add(pnlAnh, 4, 0);
+            tlpInput.SetRowSpan(pnlAnh, 4);
+
+            // Dòng 1: Tên SP - Giá Bán
+            tlpInput.Controls.Add(new Label { Text = "Tên SP:", Anchor = AnchorStyles.Left }, 0, 1);
+            tlpInput.Controls.Add(txtTenSP, 1, 1);
+            tlpInput.Controls.Add(new Label { Text = "Giá Bán:", Anchor = AnchorStyles.Left }, 2, 1);
+            tlpInput.Controls.Add(nudGiaBan, 3, 1);
+
+            // Dòng 2: Loại SP - Số Lượng
+            tlpInput.Controls.Add(new Label { Text = "Loại SP:", Anchor = AnchorStyles.Left }, 0, 2);
+            tlpInput.Controls.Add(cboLoaiSP, 1, 2);
+            tlpInput.Controls.Add(new Label { Text = "Số Lượng:", Anchor = AnchorStyles.Left }, 2, 2);
+            tlpInput.Controls.Add(nudSoLuong, 3, 2);
+
+            // Dòng 3: Màu / Size - Ghi Chú
+            TableLayoutPanel tlpMauSize = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, Margin = new Padding(0) };
+            tlpMauSize.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45F));
+            tlpMauSize.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 45F));
+            tlpMauSize.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55F));
+            tlpMauSize.Controls.Add(cboMauSac, 0, 0);
+            tlpMauSize.Controls.Add(new Label { Text = "Size:", Anchor = AnchorStyles.None, TextAlign = ContentAlignment.MiddleCenter }, 1, 0);
+            tlpMauSize.Controls.Add(cboSize, 2, 0);
+
+            tlpInput.Controls.Add(new Label { Text = "Màu / Size:", Anchor = AnchorStyles.Left }, 0, 3);
+            tlpInput.Controls.Add(tlpMauSize, 1, 3);
+            tlpInput.Controls.Add(new Label { Text = "Ghi Chú:", Anchor = AnchorStyles.Left }, 2, 3);
+            tlpInput.Controls.Add(txtGhiChu, 3, 3);
+
+            // Dòng 4: Các Nút Thao Tác (Thêm, Sửa, Xóa, Làm mới) + Khung tìm kiếm
+            flpButtons = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoSize = true, FlowDirection = FlowDirection.LeftToRight };
+            btnThem = new Button { Text = "Thêm Mới", Width = 90, Height = 32, BackColor = Color.LightGreen };
+            btnSua = new Button { Text = "Cập Nhật", Width = 90, Height = 32, BackColor = Color.LightSkyBlue };
+            btnXoa = new Button { Text = "Xóa SP", Width = 90, Height = 32, BackColor = Color.MistyRose };
+            btnLamMoi = new Button { Text = "Làm Mới", Width = 90, Height = 32 };
+
+            btnThem.Click += BtnThem_Click;
+            btnSua.Click += BtnSua_Click;
+            btnXoa.Click += BtnXoa_Click;
+            btnLamMoi.Click += (s, e) => XoaTrangForm();
+
+            flpButtons.Controls.AddRange(new Control[] { btnThem, btnSua, btnXoa, btnLamMoi });
+
+            // Tìm kiếm
+            TableLayoutPanel tlpTimKiem = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2 };
+            tlpTimKiem.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 80F));
+            tlpTimKiem.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            txtTimKiem = new TextBox { Dock = DockStyle.Fill };
+            txtTimKiem.TextChanged += TxtTimKiem_TextChanged;
+            tlpTimKiem.Controls.Add(new Label { Text = "Tìm kiếm:", Anchor = AnchorStyles.Left }, 0, 0);
+            tlpTimKiem.Controls.Add(txtTimKiem, 1, 0);
+
+            tlpInput.Controls.Add(flpButtons, 0, 4);
+            tlpInput.SetColumnSpan(flpButtons, 2);
+            tlpInput.Controls.Add(tlpTimKiem, 2, 4);
+            tlpInput.SetColumnSpan(tlpTimKiem, 3);
+
+            gbThongTin.Controls.Add(tlpInput);
+            tlpMain.Controls.Add(gbThongTin, 0, 1);
+
+            // DataGridView Hàng hóa
+            dgvSanPham = new DataGridView
+            {
+                Dock = DockStyle.Fill,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                MultiSelect = false,
+                ReadOnly = true,
+                AllowUserToAddRows = false,
+                BackgroundColor = Color.White
+            };
+            dgvSanPham.CellClick += DgvSanPham_CellClick;
+
+            tlpMain.Controls.Add(dgvSanPham, 0, 2);
+            this.Controls.Add(tlpMain);
         }
 
-        private void BtnChonAnh_Click(object? sender, EventArgs e)
+        #endregion
+
+        #region 2. TẢI VÀ HIỂN THỊ DỮ LIỆU
+
+        private void TaiDanhSachSanPham(string tuKhoa = "")
         {
-            OpenFileDialog open = new OpenFileDialog();
-            open.Filter = "Image Files(*.jpg; *.jpeg; *.png)|*.jpg; *.jpeg; *.png";
+            string query = "SELECT MaSanPham, TenSanPham, LoaiSanPham, MauSac, Size, GiaNhap, GiaBan, SoLuongTon, GhiChu, HinhAnh FROM SanPham";
+            SqlParameter[]? parameters = null;
 
-            if (open.ShowDialog() == DialogResult.OK)
+            if (!string.IsNullOrEmpty(tuKhoa))
             {
-                tenFileAnh = Path.GetFileName(open.FileName);
-                string folderImages = Path.Combine(Application.StartupPath, "Images");
+                query += " WHERE MaSanPham LIKE @Keyword OR TenSanPham LIKE @Keyword OR LoaiSanPham LIKE @Keyword";
+                parameters = new SqlParameter[] { new SqlParameter("@Keyword", "%" + tuKhoa + "%") };
+            }
 
-                if (!Directory.Exists(folderImages))
-                {
-                    Directory.CreateDirectory(folderImages);
-                }
+            DataTable dt = Database.GetData(query, parameters);
+            dgvSanPham.DataSource = dt;
 
-                string pathLuu = Path.Combine(folderImages, tenFileAnh);
-                if (!File.Exists(pathLuu))
-                {
-                    File.Copy(open.FileName, pathLuu, true);
-                }
+            // Đổi tên tiêu đề cột DataGridView hiển thị tiếng Việt
+            if (dgvSanPham.Columns["MaSanPham"] != null) dgvSanPham.Columns["MaSanPham"].HeaderText = "Mã SP";
+            if (dgvSanPham.Columns["TenSanPham"] != null) dgvSanPham.Columns["TenSanPham"].HeaderText = "Tên Sản Phẩm";
+            if (dgvSanPham.Columns["LoaiSanPham"] != null) dgvSanPham.Columns["LoaiSanPham"].HeaderText = "Loại";
+            if (dgvSanPham.Columns["MauSac"] != null) dgvSanPham.Columns["MauSac"].HeaderText = "Màu";
+            if (dgvSanPham.Columns["Size"] != null) dgvSanPham.Columns["Size"].HeaderText = "Size";
+            if (dgvSanPham.Columns["GiaNhap"] != null) dgvSanPham.Columns["GiaNhap"].HeaderText = "Giá Nhập";
+            if (dgvSanPham.Columns["GiaBan"] != null) dgvSanPham.Columns["GiaBan"].HeaderText = "Giá Bán";
+            if (dgvSanPham.Columns["SoLuongTon"] != null) dgvSanPham.Columns["SoLuongTon"].HeaderText = "Số Lượng";
+            if (dgvSanPham.Columns["GhiChu"] != null) dgvSanPham.Columns["GhiChu"].HeaderText = "Ghi Chú";
+            if (dgvSanPham.Columns["HinhAnh"] != null) dgvSanPham.Columns["HinhAnh"].Visible = false; // Ẩn cột đường dẫn ảnh
+        }
 
-                // Hiển thị ảnh bằng Stream để không bị khóa file
-                HienThiAnh(pathLuu);
+        private void DgvSanPham_CellClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && dgvSanPham.CurrentRow != null)
+            {
+                DataGridViewRow row = dgvSanPham.CurrentRow;
+                txtMaSP.Text = row.Cells["MaSanPham"].Value?.ToString();
+                txtTenSP.Text = row.Cells["TenSanPham"].Value?.ToString();
+                cboLoaiSP.Text = row.Cells["LoaiSanPham"].Value?.ToString();
+                cboMauSac.Text = row.Cells["MauSac"].Value?.ToString();
+                cboSize.Text = row.Cells["Size"].Value?.ToString();
+
+                decimal.TryParse(row.Cells["GiaNhap"].Value?.ToString(), out decimal giaNhap);
+                nudGiaNhap.Value = giaNhap;
+
+                decimal.TryParse(row.Cells["GiaBan"].Value?.ToString(), out decimal giaBan);
+                nudGiaBan.Value = giaBan;
+
+                int.TryParse(row.Cells["SoLuongTon"].Value?.ToString(), out int soLuong);
+                nudSoLuong.Value = soLuong;
+
+                txtGhiChu.Text = row.Cells["GhiChu"].Value?.ToString();
+                duongDanAnh = row.Cells["HinhAnh"].Value?.ToString() ?? "";
+
+                HienThiAnh(duongDanAnh);
             }
         }
 
         private void HienThiAnh(string path)
         {
-            if (picHinhAnh.Image != null)
-            {
-                picHinhAnh.Image.Dispose();
-                picHinhAnh.Image = null;
-            }
-
             if (!string.IsNullOrEmpty(path) && File.Exists(path))
             {
-                using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read))
+                try
                 {
-                    picHinhAnh.Image = Image.FromStream(stream);
+                    using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
+                    {
+                        picHinhAnh.Image = Image.FromStream(fs);
+                    }
+                }
+                catch
+                {
+                    picHinhAnh.Image = null;
+                }
+            }
+            else
+            {
+                picHinhAnh.Image = null;
+            }
+        }
+
+        private void XoaTrangForm()
+        {
+            txtMaSP.Clear();
+            txtTenSP.Clear();
+            cboLoaiSP.SelectedIndex = -1;
+            cboMauSac.SelectedIndex = -1;
+            cboSize.SelectedIndex = -1;
+            nudGiaNhap.Value = 0;
+            nudGiaBan.Value = 0;
+            nudSoLuong.Value = 1;
+            txtGhiChu.Clear();
+            duongDanAnh = "";
+            picHinhAnh.Image = null;
+            txtMaSP.Focus();
+        }
+
+        #endregion
+
+        #region 3. THAO TÁC CRUD (THÊM, SỬA, XÓA, ẢNH, TÌM KIẾM)
+
+        private void BtnChonAnh_Click(object? sender, EventArgs e)
+        {
+            using (OpenFileDialog ofd = new OpenFileDialog())
+            {
+                ofd.Filter = "File Ảnh (*.jpg;*.jpeg;*.png)|*.jpg;*.jpeg;*.png";
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    duongDanAnh = ofd.FileName;
+                    HienThiAnh(duongDanAnh);
                 }
             }
         }
 
-        private void TaiDanhSachSanPham()
-        {
-            string sql = @"SELECT 
-                            MaSanPham AS [Mã], 
-                            TenSanPham AS [Tên], 
-                            LoaiSanPham AS [Loại], 
-                            MauSac AS [Màu], 
-                            Size AS [Size], 
-                            GiaNhap AS [Giá nhập], 
-                            GiaBan AS [Giá bán], 
-                            SoLuongTon AS [Tồn], 
-                            GhiChu AS [Ghi chú],
-                            HinhAnh AS [Hình ảnh]
-                          FROM SanPham";
-            DataTable dt = Database.GetData(sql);
-            if (dgvSanPham != null) dgvSanPham.DataSource = dt;
-        }
-
         private void BtnThem_Click(object? sender, EventArgs e)
         {
-            if (txtMaSanPham == null || txtTenSanPham == null || cboLoaiSanPham == null || txtMauSac == null || cboSize == null || txtGiaNhap == null || txtGiaBan == null || txtGhiChu == null) return;
-
-            if (string.IsNullOrWhiteSpace(txtMaSanPham.Text))
+            if (string.IsNullOrWhiteSpace(txtMaSP.Text) || string.IsNullOrWhiteSpace(txtTenSP.Text))
             {
-                MessageBox.Show("Vui lòng nhập mã sản phẩm!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtMaSanPham.Focus();
+                MessageBox.Show("Vui lòng nhập Mã và Tên sản phẩm!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(txtTenSanPham.Text))
+            string query = @"INSERT INTO SanPham (MaSanPham, TenSanPham, LoaiSanPham, MauSac, Size, GiaNhap, GiaBan, SoLuongTon, GhiChu, HinhAnh)
+                            VALUES (@Ma, @Ten, @Loai, @Mau, @Size, @GiaNhap, @GiaBan, @SoLuong, @GhiChu, @HinhAnh)";
+
+            SqlParameter[] parameters = new SqlParameter[]
             {
-                MessageBox.Show("Vui lòng nhập tên sản phẩm!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtTenSanPham.Focus();
-                return;
-            }
-
-            string checkQuery = "SELECT COUNT(*) FROM SanPham WHERE MaSanPham = @MaSanPham";
-            SqlParameter[] checkParams = { new SqlParameter("@MaSanPham", txtMaSanPham.Text.Trim()) };
-            DataTable checkDt = Database.GetData(checkQuery, checkParams);
-
-            if (checkDt != null && checkDt.Rows.Count > 0 && Convert.ToInt32(checkDt.Rows[0][0]) > 0)
-            {
-                MessageBox.Show("Mã sản phẩm đã tồn tại!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            decimal.TryParse(txtGiaNhap.Text, out decimal giaNhap);
-            decimal.TryParse(txtGiaBan.Text, out decimal giaBan);
-
-            string insertSql = @"INSERT INTO SanPham (MaSanPham, TenSanPham, LoaiSanPham, MauSac, Size, GiaNhap, GiaBan, SoLuongTon, GhiChu, HinhAnh)
-                                VALUES (@Ma, @Ten, @Loai, @Mau, @Size, @GiaNhap, @GiaBan, 0, @GhiChu, @HinhAnh)";
-
-            SqlParameter[] sqlParams =
-            {
-                new SqlParameter("@Ma", txtMaSanPham.Text.Trim()),
-                new SqlParameter("@Ten", txtTenSanPham.Text.Trim()),
-                new SqlParameter("@Loai", cboLoaiSanPham.Text.Trim()),
-                new SqlParameter("@Mau", txtMauSac.Text.Trim()),
-                new SqlParameter("@Size", cboSize.Text.Trim()),
-                new SqlParameter("@GiaNhap", giaNhap),
-                new SqlParameter("@GiaBan", giaBan),
-                new SqlParameter("@GhiChu", txtGhiChu.Text.Trim()),
-                new SqlParameter("@HinhAnh", string.IsNullOrEmpty(tenFileAnh) ? (object)DBNull.Value : tenFileAnh)
+                new SqlParameter("@Ma", txtMaSP.Text.Trim()),
+                new SqlParameter("@Ten", txtTenSP.Text.Trim()),
+                new SqlParameter("@Loai", (object?)cboLoaiSP.Text ?? DBNull.Value),
+                new SqlParameter("@Mau", (object?)cboMauSac.Text ?? DBNull.Value),
+                new SqlParameter("@Size", (object?)cboSize.Text ?? DBNull.Value),
+                new SqlParameter("@GiaNhap", nudGiaNhap.Value),
+                new SqlParameter("@GiaBan", nudGiaBan.Value),
+                new SqlParameter("@SoLuong", (int)nudSoLuong.Value),
+                new SqlParameter("@GhiChu", (object?)txtGhiChu.Text ?? DBNull.Value),
+                new SqlParameter("@HinhAnh", (object?)duongDanAnh ?? DBNull.Value)
             };
 
-            if (Database.ExecuteNonQuery(insertSql, sqlParams) > 0)
+            if (Database.ExecuteNonQuery(query, parameters) > 0)
             {
                 MessageBox.Show("Thêm sản phẩm thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 TaiDanhSachSanPham();
-                LamMoi();
+                XoaTrangForm();
             }
         }
 
         private void BtnSua_Click(object? sender, EventArgs e)
         {
-            if (dgvSanPham == null || dgvSanPham.CurrentRow == null || txtMaSanPham == null || txtTenSanPham == null || cboLoaiSanPham == null || txtMauSac == null || cboSize == null || txtGiaNhap == null || txtGiaBan == null || txtGhiChu == null)
+            if (string.IsNullOrWhiteSpace(txtMaSP.Text))
             {
-                MessageBox.Show("Vui lòng chọn sản phẩm cần sửa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng chọn sản phẩm cần sửa!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            decimal.TryParse(txtGiaNhap.Text, out decimal giaNhap);
-            decimal.TryParse(txtGiaBan.Text, out decimal giaBan);
+            string query = @"UPDATE SanPham 
+                            SET TenSanPham = @Ten, LoaiSanPham = @Loai, MauSac = @Mau, Size = @Size, 
+                                GiaNhap = @GiaNhap, GiaBan = @GiaBan, SoLuongTon = @SoLuong, 
+                                GhiChu = @GhiChu, HinhAnh = @HinhAnh 
+                            WHERE MaSanPham = @Ma";
 
-            string updateSql = @"UPDATE SanPham 
-                                SET TenSanPham = @Ten, 
-                                    LoaiSanPham = @Loai, 
-                                    MauSac = @Mau, 
-                                    Size = @Size, 
-                                    GiaNhap = @GiaNhap, 
-                                    GiaBan = @GiaBan, 
-                                    GhiChu = @GhiChu,
-                                    HinhAnh = @HinhAnh
-                                WHERE MaSanPham = @Ma";
-
-            SqlParameter[] sqlParams =
+            SqlParameter[] parameters = new SqlParameter[]
             {
-                new SqlParameter("@Ma", txtMaSanPham.Text.Trim()),
-                new SqlParameter("@Ten", txtTenSanPham.Text.Trim()),
-                new SqlParameter("@Loai", cboLoaiSanPham.Text.Trim()),
-                new SqlParameter("@Mau", txtMauSac.Text.Trim()),
-                new SqlParameter("@Size", cboSize.Text.Trim()),
-                new SqlParameter("@GiaNhap", giaNhap),
-                new SqlParameter("@GiaBan", giaBan),
-                new SqlParameter("@GhiChu", txtGhiChu.Text.Trim()),
-                new SqlParameter("@HinhAnh", string.IsNullOrEmpty(tenFileAnh) ? (object)DBNull.Value : tenFileAnh)
+                new SqlParameter("@Ma", txtMaSP.Text.Trim()),
+                new SqlParameter("@Ten", txtTenSP.Text.Trim()),
+                new SqlParameter("@Loai", (object?)cboLoaiSP.Text ?? DBNull.Value),
+                new SqlParameter("@Mau", (object?)cboMauSac.Text ?? DBNull.Value),
+                new SqlParameter("@Size", (object?)cboSize.Text ?? DBNull.Value),
+                new SqlParameter("@GiaNhap", nudGiaNhap.Value),
+                new SqlParameter("@GiaBan", nudGiaBan.Value),
+                new SqlParameter("@SoLuong", (int)nudSoLuong.Value),
+                new SqlParameter("@GhiChu", (object?)txtGhiChu.Text ?? DBNull.Value),
+                new SqlParameter("@HinhAnh", (object?)duongDanAnh ?? DBNull.Value)
             };
 
-            if (Database.ExecuteNonQuery(updateSql, sqlParams) > 0)
+            if (Database.ExecuteNonQuery(query, parameters) > 0)
             {
-                MessageBox.Show("Sửa sản phẩm thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Cập nhật thông tin thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 TaiDanhSachSanPham();
-                LamMoi();
+                XoaTrangForm();
             }
         }
 
         private void BtnXoa_Click(object? sender, EventArgs e)
         {
-            if (dgvSanPham == null || dgvSanPham.CurrentRow == null || txtMaSanPham == null)
+            if (string.IsNullOrWhiteSpace(txtMaSP.Text))
             {
-                MessageBox.Show("Vui lòng chọn sản phẩm cần xóa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng chọn sản phẩm cần xóa!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            string maSP = txtMaSanPham.Text.Trim();
-
-            DialogResult result = MessageBox.Show($"Bạn có chắc muốn xóa sản phẩm {maSP}?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-            if (result == DialogResult.Yes)
+            if (MessageBox.Show($"Bạn có chắc chắn muốn xóa sản phẩm [{txtMaSP.Text}] không?", "Xác nhận xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                string deleteSql = "DELETE FROM SanPham WHERE MaSanPham = @Ma";
-                SqlParameter[] sqlParams = { new SqlParameter("@Ma", maSP) };
+                string query = "DELETE FROM SanPham WHERE MaSanPham = @Ma";
+                SqlParameter[] parameters = new SqlParameter[] { new SqlParameter("@Ma", txtMaSP.Text.Trim()) };
 
-                if (Database.ExecuteNonQuery(deleteSql, sqlParams) > 0)
+                if (Database.ExecuteNonQuery(query, parameters) > 0)
                 {
                     MessageBox.Show("Xóa sản phẩm thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     TaiDanhSachSanPham();
-                    LamMoi();
+                    XoaTrangForm();
                 }
             }
         }
 
-        private void BtnLamMoi_Click(object? sender, EventArgs e)
+        private void TxtTimKiem_TextChanged(object? sender, EventArgs e)
         {
-            LamMoi();
-            TaiDanhSachSanPham();
+            TaiDanhSachSanPham(txtTimKiem.Text.Trim());
         }
 
-        private void LamMoi()
-        {
-            txtMaSanPham?.Clear();
-            txtTenSanPham?.Clear();
-            txtMauSac?.Clear();
-            txtGiaNhap?.Clear();
-            txtGiaBan?.Clear();
-            txtGhiChu?.Clear();
-            txtTimKiem?.Clear();
-
-            tenFileAnh = "";
-            if (picHinhAnh.Image != null)
-            {
-                picHinhAnh.Image.Dispose();
-                picHinhAnh.Image = null;
-            }
-
-            if (txtMaSanPham != null) txtMaSanPham.ReadOnly = false;
-            if (cboLoaiSanPham != null) cboLoaiSanPham.Text = "";
-            if (cboSize != null) cboSize.Text = "";
-            dgvSanPham?.ClearSelection();
-            txtMaSanPham?.Focus();
-        }
-
-        private void BtnTimKiem_Click(object? sender, EventArgs e)
-        {
-            if (txtTimKiem == null) return;
-            string tuKhoa = txtTimKiem.Text.Trim();
-
-            string sql = @"SELECT 
-                            MaSanPham AS [Mã], 
-                            TenSanPham AS [Tên], 
-                            LoaiSanPham AS [Loại], 
-                            MauSac AS [Màu], 
-                            Size AS [Size], 
-                            GiaNhap AS [Giá nhập], 
-                            GiaBan AS [Giá bán], 
-                            SoLuongTon AS [Tồn], 
-                            GhiChu AS [Ghi chú],
-                            HinhAnh AS [Hình ảnh]
-                          FROM SanPham
-                          WHERE MaSanPham LIKE @TuKhoa 
-                             OR TenSanPham LIKE @TuKhoa 
-                             OR LoaiSanPham LIKE @TuKhoa 
-                             OR MauSac LIKE @TuKhoa";
-
-            SqlParameter[] sqlParams = { new SqlParameter("@TuKhoa", "%" + tuKhoa + "%") };
-            DataTable dt = Database.GetData(sql, sqlParams);
-            if (dgvSanPham != null) dgvSanPham.DataSource = dt;
-        }
-
-        private void DgvSanPham_CellClick(object? sender, DataGridViewCellEventArgs e)
-        {
-            if (dgvSanPham == null || e.RowIndex < 0) return;
-
-            DataGridViewRow row = dgvSanPham.Rows[e.RowIndex];
-
-            if (txtMaSanPham != null) txtMaSanPham.Text = row.Cells["Mã"].Value?.ToString();
-            if (txtTenSanPham != null) txtTenSanPham.Text = row.Cells["Tên"].Value?.ToString();
-            if (cboLoaiSanPham != null) cboLoaiSanPham.Text = row.Cells["Loại"].Value?.ToString();
-            if (txtMauSac != null) txtMauSac.Text = row.Cells["Màu"].Value?.ToString();
-            if (cboSize != null) cboSize.Text = row.Cells["Size"].Value?.ToString();
-            if (txtGiaNhap != null) txtGiaNhap.Text = row.Cells["Giá nhập"].Value?.ToString();
-            if (txtGiaBan != null) txtGiaBan.Text = row.Cells["Giá bán"].Value?.ToString();
-            if (txtGhiChu != null) txtGhiChu.Text = row.Cells["Ghi chú"].Value?.ToString();
-
-            // Lấy tên file ảnh từ DataGridView và hiển thị
-            tenFileAnh = row.Cells["Hình ảnh"].Value != DBNull.Value ? row.Cells["Hình ảnh"].Value?.ToString() ?? "" : "";
-            string path = Path.Combine(Application.StartupPath, "Images", tenFileAnh);
-            HienThiAnh(path);
-
-            if (txtMaSanPham != null) txtMaSanPham.ReadOnly = true;
-        }
-
-        private void FrmSanPham_Load(object sender, EventArgs e)
-        {
-        }
+        #endregion
     }
 }

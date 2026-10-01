@@ -7,7 +7,6 @@ using System.Drawing.Printing;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Windows.Forms;
-using FORM_DKY.GiaoDien;
 using Microsoft.Data.SqlClient;
 
 namespace FORM_DKY
