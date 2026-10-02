@@ -18,6 +18,7 @@ namespace FORM_DKY
 
         private void Form_TTTKHOAN_Load(object sender, EventArgs e)
         {
+            pictureBox1.Image = ImageHelper.GetImage("NenTT.jpg");
             lblName.Text = "Tên: " + FormDangNhap.Ten;
             lblMail.Parent = pictureBox1;
             lblName.Parent = pictureBox1;

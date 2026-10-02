@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FORM_DKY_GUI));
             label1 = new Label();
             btnSend = new Button();
             label3 = new Label();
@@ -39,23 +40,27 @@
             label4 = new Label();
             lblSDT = new Label();
             txtSDT = new TextBox();
+            panel1 = new Panel();
+            panel1.SuspendLayout();
             SuspendLayout();
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(151, 83);
+            label1.Font = new Font("Segoe UI", 20F);
+            label1.Location = new Point(11, 22);
             label1.Name = "label1";
-            label1.Size = new Size(28, 15);
+            label1.Size = new Size(63, 37);
             label1.TabIndex = 0;
             label1.Text = "Tên:";
             label1.Click += label1_Click;
             // 
             // btnSend
             // 
-            btnSend.Location = new Point(355, 328);
+            btnSend.Font = new Font("Segoe UI", 20F);
+            btnSend.Location = new Point(455, 244);
             btnSend.Name = "btnSend";
-            btnSend.Size = new Size(75, 23);
+            btnSend.Size = new Size(107, 49);
             btnSend.TabIndex = 1;
             btnSend.Text = "SEND";
             btnSend.UseVisualStyleBackColor = true;
@@ -64,95 +69,111 @@
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(151, 147);
+            label3.Font = new Font("Segoe UI", 20F);
+            label3.Location = new Point(11, 86);
             label3.Name = "label3";
-            label3.Size = new Size(60, 15);
+            label3.Size = new Size(134, 37);
             label3.TabIndex = 3;
             label3.Text = "Mật khẩu:";
             // 
             // txtName
             // 
-            txtName.Location = new Point(293, 80);
+            txtName.Location = new Point(80, 34);
             txtName.Name = "txtName";
-            txtName.Size = new Size(100, 23);
+            txtName.Size = new Size(363, 23);
             txtName.TabIndex = 5;
             // 
             // txtPW
             // 
-            txtPW.Location = new Point(293, 147);
+            txtPW.Location = new Point(151, 100);
             txtPW.Name = "txtPW";
-            txtPW.Size = new Size(100, 23);
+            txtPW.Size = new Size(292, 23);
             txtPW.TabIndex = 7;
             // 
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(532, 147);
+            label5.Font = new Font("Segoe UI", 20F);
+            label5.Location = new Point(474, 86);
             label5.Name = "label5";
-            label5.Size = new Size(39, 15);
+            label5.Size = new Size(88, 37);
             label5.TabIndex = 10;
             label5.Text = "Email:";
             // 
             // txtEmail
             // 
-            txtEmail.Location = new Point(597, 139);
+            txtEmail.Location = new Point(568, 100);
             txtEmail.Name = "txtEmail";
-            txtEmail.Size = new Size(100, 23);
+            txtEmail.Size = new Size(151, 23);
             txtEmail.TabIndex = 11;
             // 
             // TxtCP
             // 
-            TxtCP.Location = new Point(293, 219);
+            TxtCP.Location = new Point(259, 171);
             TxtCP.Name = "TxtCP";
-            TxtCP.Size = new Size(100, 23);
+            TxtCP.Size = new Size(184, 23);
             TxtCP.TabIndex = 8;
             // 
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(151, 227);
+            label4.Font = new Font("Segoe UI", 20F);
+            label4.Location = new Point(11, 157);
             label4.Name = "label4";
-            label4.Size = new Size(112, 15);
+            label4.Size = new Size(248, 37);
             label4.TabIndex = 9;
             label4.Text = "Xác nhận mật khẩu:";
             // 
             // lblSDT
             // 
             lblSDT.AutoSize = true;
-            lblSDT.Location = new Point(532, 80);
+            lblSDT.Font = new Font("Segoe UI", 20F);
+            lblSDT.Location = new Point(478, 22);
             lblSDT.Name = "lblSDT";
-            lblSDT.Size = new Size(29, 15);
+            lblSDT.Size = new Size(69, 37);
             lblSDT.TabIndex = 12;
             lblSDT.Text = "SDT:";
             // 
             // txtSDT
             // 
-            txtSDT.Location = new Point(597, 75);
+            txtSDT.Location = new Point(568, 33);
             txtSDT.Name = "txtSDT";
-            txtSDT.Size = new Size(100, 23);
+            txtSDT.Size = new Size(151, 23);
             txtSDT.TabIndex = 13;
+            // 
+            // panel1
+            // 
+            panel1.BackColor = Color.Transparent;
+            panel1.Controls.Add(txtSDT);
+            panel1.Controls.Add(txtName);
+            panel1.Controls.Add(lblSDT);
+            panel1.Controls.Add(label1);
+            panel1.Controls.Add(txtEmail);
+            panel1.Controls.Add(btnSend);
+            panel1.Controls.Add(label5);
+            panel1.Controls.Add(label3);
+            panel1.Controls.Add(label4);
+            panel1.Controls.Add(txtPW);
+            panel1.Controls.Add(TxtCP);
+            panel1.Location = new Point(12, 41);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(758, 388);
+            panel1.TabIndex = 14;
             // 
             // FORM_DKY_GUI
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
             ClientSize = new Size(800, 450);
-            Controls.Add(txtSDT);
-            Controls.Add(lblSDT);
-            Controls.Add(txtEmail);
-            Controls.Add(label5);
-            Controls.Add(label4);
-            Controls.Add(TxtCP);
-            Controls.Add(txtPW);
-            Controls.Add(txtName);
-            Controls.Add(label3);
-            Controls.Add(btnSend);
-            Controls.Add(label1);
+            Controls.Add(panel1);
             Name = "FORM_DKY_GUI";
             Text = "Form1";
-            Load += Form1_Load;
+            Load += FORM_DKY_GUI_Load;
+            Resize += Form_DKY_Resize;
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
@@ -169,5 +190,6 @@
         private Label label2;
         private Label lblSDT;
         private TextBox txtSDT;
+        private Panel panel1;
     }
 }

@@ -36,9 +36,7 @@
             label2 = new Label();
             button2 = new Button();
             panel1 = new Panel();
-            pictureBox1 = new PictureBox();
             panel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
             // 
             // txtPW
@@ -108,6 +106,7 @@
             button2.TabIndex = 20;
             button2.Text = "Đăng ký ngay";
             button2.UseVisualStyleBackColor = true;
+            button2.Click += button2_Click;
             // 
             // panel1
             // 
@@ -126,32 +125,18 @@
             panel1.Size = new Size(892, 562);
             panel1.TabIndex = 21;
             // 
-            // pictureBox1
-            // 
-            pictureBox1.BackColor = Color.Transparent;
-            pictureBox1.BackgroundImage = Properties.Resources.NenDangNhap;
-            pictureBox1.BackgroundImageLayout = ImageLayout.Stretch;
-            pictureBox1.Dock = DockStyle.Fill;
-            pictureBox1.Location = new Point(0, 0);
-            pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(1059, 641);
-            pictureBox1.TabIndex = 22;
-            pictureBox1.TabStop = false;
-            // 
             // FormDangNhap
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1059, 641);
             Controls.Add(panel1);
-            Controls.Add(pictureBox1);
             Name = "FormDangNhap";
             Text = "FormDangNhap";
             Load += FormDangNhap_Load;
             Resize += FormDangNhap_Resize;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
         }
 
@@ -164,6 +149,5 @@
         private Label label2;
         private Button button2;
         private Panel panel1;
-        private PictureBox pictureBox1;
     }
 }

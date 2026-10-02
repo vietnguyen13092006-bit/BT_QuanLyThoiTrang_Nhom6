@@ -23,12 +23,23 @@ namespace FORM_DKY
         {
 
         }
-
-        private void Form1_Load(object sender, EventArgs e)
+        
+        private void Form_DKY_Resize(object sender, EventArgs e)
         {
-
+            // Giữ Panel luôn ở chính giữa khi phóng to / thu nhỏ Form
+            CanGiuaPanel();
         }
+        private void CanGiuaPanel()
+        {
+            if (panel1 != null)
+            {
+                // Tính toán vị trí X, Y để căn giữa Panel trong lòng Form
+                int x = (this.ClientSize.Width - panel1.Width) / 2;
+                int y = (this.ClientSize.Height - panel1.Height) / 2;
 
+                panel1.Location = new Point(x, y);
+            }
+        }
         private void btnSend_Click(object sender, EventArgs e)
         {
             string fullName = txtName.Text.Trim();
@@ -89,6 +100,21 @@ namespace FORM_DKY
                     MessageBox.Show("Lỗi lưu dữ liệu: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
+            }
+        }
+
+        private void FORM_DKY_GUI_Load(object sender, EventArgs e)
+        {
+            {
+                // 1. Gán ảnh nền trực tiếp cho Form từ thư mục Images
+                this.BackgroundImage = ImageHelper.GetImage("NenDKY.jpg"); // Đổi đúng tên file ảnh 
+                this.BackgroundImageLayout = ImageLayout.Stretch; // Hoặc Zoom tùy nhu cầu
+
+                // 2. Chỉnh Panel thành trong suốt
+                panel1.BackColor = Color.Transparent;
+
+                // 3. Gọi hàm căn giữa Panel ngay khi mở Form
+                CanGiuaPanel();
             }
         }
     }

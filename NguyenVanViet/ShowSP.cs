@@ -14,6 +14,7 @@ namespace FORM_DKY
         public ShowSP()
         {
             InitializeComponent();
+            panel1.BackgroundImage = ImageHelper.GetImage("LOGO.jpg");
         }     
     }
 }
