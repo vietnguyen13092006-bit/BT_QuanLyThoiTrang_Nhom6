@@ -187,7 +187,7 @@ namespace FORM_DKY
             }
             else
             {
-                openChildForm(new quanlyhoadon());
+                openChildForm(new FrmQuanLyHoaDonBanHang());
             }
         }
     }
