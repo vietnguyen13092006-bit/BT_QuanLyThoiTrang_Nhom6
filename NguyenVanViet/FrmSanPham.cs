@@ -50,7 +50,6 @@ namespace FORM_DKY
             this.Size = new Size(1100, 700);
             this.StartPosition = FormStartPosition.CenterScreen;
 
-            // Layout chính chia làm 3 dòng: Tiêu đề (Auto), Khung nhập (Auto), Bảng dữ liệu (*)
             tlpMain = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -97,7 +96,6 @@ namespace FORM_DKY
             tlpInput.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40F));
             tlpInput.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
 
-            // Khởi tạo các Control nhập liệu
             txtMaSP = new TextBox { Dock = DockStyle.Fill };
             txtTenSP = new TextBox { Dock = DockStyle.Fill };
 
@@ -110,14 +108,12 @@ namespace FORM_DKY
             cboSize = new ComboBox { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDown };
             cboSize.Items.AddRange(new object[] { "S", "M", "L", "XL", "XXL", "28", "29", "30", "31", "32" });
 
-            // ✅ Đã sửa ThousandsSeparator có thêm chữ 's':
             nudGiaNhap = new NumericUpDown { Dock = DockStyle.Fill, Maximum = 1000000000, Increment = 10000, ThousandsSeparator = true };
             nudGiaBan = new NumericUpDown { Dock = DockStyle.Fill, Maximum = 1000000000, Increment = 10000, ThousandsSeparator = true };
             nudSoLuong = new NumericUpDown { Dock = DockStyle.Fill, Maximum = 100000, Value = 1 };
 
             txtGhiChu = new TextBox { Dock = DockStyle.Fill };
 
-            // PictureBox Ảnh
             picHinhAnh = new PictureBox
             {
                 BorderStyle = BorderStyle.FixedSingle,
@@ -133,7 +129,7 @@ namespace FORM_DKY
             pnlAnh.Controls.Add(picHinhAnh);
             pnlAnh.Controls.Add(btnChonAnh);
 
-            // Dòng 0: Mã SP - Giá Nhập - Khung Ảnh
+            // Dòng 0
             tlpInput.Controls.Add(new Label { Text = "Mã SP:", Anchor = AnchorStyles.Left }, 0, 0);
             tlpInput.Controls.Add(txtMaSP, 1, 0);
             tlpInput.Controls.Add(new Label { Text = "Giá Nhập:", Anchor = AnchorStyles.Left }, 2, 0);
@@ -141,19 +137,19 @@ namespace FORM_DKY
             tlpInput.Controls.Add(pnlAnh, 4, 0);
             tlpInput.SetRowSpan(pnlAnh, 4);
 
-            // Dòng 1: Tên SP - Giá Bán
+            // Dòng 1
             tlpInput.Controls.Add(new Label { Text = "Tên SP:", Anchor = AnchorStyles.Left }, 0, 1);
             tlpInput.Controls.Add(txtTenSP, 1, 1);
             tlpInput.Controls.Add(new Label { Text = "Giá Bán:", Anchor = AnchorStyles.Left }, 2, 1);
             tlpInput.Controls.Add(nudGiaBan, 3, 1);
 
-            // Dòng 2: Loại SP - Số Lượng
+            // Dòng 2
             tlpInput.Controls.Add(new Label { Text = "Loại SP:", Anchor = AnchorStyles.Left }, 0, 2);
             tlpInput.Controls.Add(cboLoaiSP, 1, 2);
             tlpInput.Controls.Add(new Label { Text = "Số Lượng:", Anchor = AnchorStyles.Left }, 2, 2);
             tlpInput.Controls.Add(nudSoLuong, 3, 2);
 
-            // Dòng 3: Màu / Size - Ghi Chú
+            // Dòng 3
             TableLayoutPanel tlpMauSize = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, Margin = new Padding(0) };
             tlpMauSize.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45F));
             tlpMauSize.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 45F));
@@ -167,7 +163,7 @@ namespace FORM_DKY
             tlpInput.Controls.Add(new Label { Text = "Ghi Chú:", Anchor = AnchorStyles.Left }, 2, 3);
             tlpInput.Controls.Add(txtGhiChu, 3, 3);
 
-            // Dòng 4: Các Nút Thao Tác (Thêm, Sửa, Xóa, Làm mới) + Khung tìm kiếm
+            // Dòng 4
             flpButtons = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoSize = true, FlowDirection = FlowDirection.LeftToRight };
             btnThem = new Button { Text = "Thêm Mới", Width = 90, Height = 32, BackColor = Color.LightGreen };
             btnSua = new Button { Text = "Cập Nhật", Width = 90, Height = 32, BackColor = Color.LightSkyBlue };
@@ -177,11 +173,10 @@ namespace FORM_DKY
             btnThem.Click += BtnThem_Click;
             btnSua.Click += BtnSua_Click;
             btnXoa.Click += BtnXoa_Click;
-            btnLamMoi.Click += (s, e) => XoaTrangForm();
+            btnLamMoi.Click += (s, e) => { TaiDanhSachSanPham(); XoaTrangForm(); };
 
             flpButtons.Controls.AddRange(new Control[] { btnThem, btnSua, btnXoa, btnLamMoi });
 
-            // Tìm kiếm
             TableLayoutPanel tlpTimKiem = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2 };
             tlpTimKiem.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 80F));
             tlpTimKiem.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
@@ -210,6 +205,7 @@ namespace FORM_DKY
                 BackgroundColor = Color.White
             };
             dgvSanPham.CellClick += DgvSanPham_CellClick;
+            dgvSanPham.CellFormatting += DgvSanPham_CellFormatting; // Thêm cảnh báo sắp hết hàng
 
             tlpMain.Controls.Add(dgvSanPham, 0, 2);
             this.Controls.Add(tlpMain);
@@ -221,29 +217,51 @@ namespace FORM_DKY
 
         private void TaiDanhSachSanPham(string tuKhoa = "")
         {
-            string query = "SELECT MaSanPham, TenSanPham, LoaiSanPham, MauSac, Size, GiaNhap, GiaBan, SoLuongTon, GhiChu, HinhAnh FROM SanPham";
+            string query = "SELECT MaSP, TenSP, LoaiSP, MauSac, Size, GiaNhap, GiaBan, SoLuongTon, GhiChu, HinhAnh FROM SanPham";
             SqlParameter[]? parameters = null;
 
             if (!string.IsNullOrEmpty(tuKhoa))
             {
-                query += " WHERE MaSanPham LIKE @Keyword OR TenSanPham LIKE @Keyword OR LoaiSanPham LIKE @Keyword";
+                query += " WHERE MaSP LIKE @Keyword OR TenSP LIKE @Keyword OR LoaiSP LIKE @Keyword";
                 parameters = new SqlParameter[] { new SqlParameter("@Keyword", "%" + tuKhoa + "%") };
             }
 
             DataTable dt = Database.GetData(query, parameters);
             dgvSanPham.DataSource = dt;
 
-            // Đổi tên tiêu đề cột DataGridView hiển thị tiếng Việt
-            if (dgvSanPham.Columns["MaSanPham"] != null) dgvSanPham.Columns["MaSanPham"].HeaderText = "Mã SP";
-            if (dgvSanPham.Columns["TenSanPham"] != null) dgvSanPham.Columns["TenSanPham"].HeaderText = "Tên Sản Phẩm";
-            if (dgvSanPham.Columns["LoaiSanPham"] != null) dgvSanPham.Columns["LoaiSanPham"].HeaderText = "Loại";
+            if (dgvSanPham.Columns["MaSP"] != null) dgvSanPham.Columns["MaSP"].HeaderText = "Mã SP";
+            if (dgvSanPham.Columns["TenSP"] != null) dgvSanPham.Columns["TenSP"].HeaderText = "Tên Sản Phẩm";
+            if (dgvSanPham.Columns["LoaiSP"] != null) dgvSanPham.Columns["LoaiSP"].HeaderText = "Loại";
             if (dgvSanPham.Columns["MauSac"] != null) dgvSanPham.Columns["MauSac"].HeaderText = "Màu";
             if (dgvSanPham.Columns["Size"] != null) dgvSanPham.Columns["Size"].HeaderText = "Size";
-            if (dgvSanPham.Columns["GiaNhap"] != null) dgvSanPham.Columns["GiaNhap"].HeaderText = "Giá Nhập";
-            if (dgvSanPham.Columns["GiaBan"] != null) dgvSanPham.Columns["GiaBan"].HeaderText = "Giá Bán";
+
+            if (dgvSanPham.Columns["GiaNhap"] != null)
+            {
+                dgvSanPham.Columns["GiaNhap"].HeaderText = "Giá Nhập";
+                dgvSanPham.Columns["GiaNhap"].DefaultCellStyle.Format = "N0";
+            }
+            if (dgvSanPham.Columns["GiaBan"] != null)
+            {
+                dgvSanPham.Columns["GiaBan"].HeaderText = "Giá Bán";
+                dgvSanPham.Columns["GiaBan"].DefaultCellStyle.Format = "N0";
+            }
+
             if (dgvSanPham.Columns["SoLuongTon"] != null) dgvSanPham.Columns["SoLuongTon"].HeaderText = "Số Lượng";
             if (dgvSanPham.Columns["GhiChu"] != null) dgvSanPham.Columns["GhiChu"].HeaderText = "Ghi Chú";
-            if (dgvSanPham.Columns["HinhAnh"] != null) dgvSanPham.Columns["HinhAnh"].Visible = false; // Ẩn cột đường dẫn ảnh
+            if (dgvSanPham.Columns["HinhAnh"] != null) dgvSanPham.Columns["HinhAnh"].Visible = false;
+        }
+
+        // Cảnh báo màu đỏ khi số lượng tồn kho <= 5
+        private void DgvSanPham_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (dgvSanPham.Columns[e.ColumnIndex].Name == "SoLuongTon" && e.Value != null)
+            {
+                if (int.TryParse(e.Value.ToString(), out int soLuong) && soLuong <= 5)
+                {
+                    dgvSanPham.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.LightPink;
+                    dgvSanPham.Rows[e.RowIndex].DefaultCellStyle.ForeColor = Color.Red;
+                }
+            }
         }
 
         private void DgvSanPham_CellClick(object? sender, DataGridViewCellEventArgs e)
@@ -251,9 +269,9 @@ namespace FORM_DKY
             if (e.RowIndex >= 0 && dgvSanPham.CurrentRow != null)
             {
                 DataGridViewRow row = dgvSanPham.CurrentRow;
-                txtMaSP.Text = row.Cells["MaSanPham"].Value?.ToString();
-                txtTenSP.Text = row.Cells["TenSanPham"].Value?.ToString();
-                cboLoaiSP.Text = row.Cells["LoaiSanPham"].Value?.ToString();
+                txtMaSP.Text = row.Cells["MaSP"].Value?.ToString();
+                txtTenSP.Text = row.Cells["TenSP"].Value?.ToString();
+                cboLoaiSP.Text = row.Cells["LoaiSP"].Value?.ToString();
                 cboMauSac.Text = row.Cells["MauSac"].Value?.ToString();
                 cboSize.Text = row.Cells["Size"].Value?.ToString();
 
@@ -336,15 +354,15 @@ namespace FORM_DKY
                 return;
             }
 
-            string query = @"INSERT INTO SanPham (MaSanPham, TenSanPham, LoaiSanPham, MauSac, Size, GiaNhap, GiaBan, SoLuongTon, GhiChu, HinhAnh)
-                            VALUES (@Ma, @Ten, @Loai, @Mau, @Size, @GiaNhap, @GiaBan, @SoLuong, @GhiChu, @HinhAnh)";
+            string query = @"INSERT INTO SanPham (MaSP, TenSP, LoaiSP, MauSac, Size, GiaNhap, GiaBan, SoLuongTon, GhiChu, HinhAnh)
+                            VALUES (@MaSP, @TenSP, @LoaiSP, @MauSac, @Size, @GiaNhap, @GiaBan, @SoLuong, @GhiChu, @HinhAnh)";
 
             SqlParameter[] parameters = new SqlParameter[]
             {
-                new SqlParameter("@Ma", txtMaSP.Text.Trim()),
-                new SqlParameter("@Ten", txtTenSP.Text.Trim()),
-                new SqlParameter("@Loai", (object?)cboLoaiSP.Text ?? DBNull.Value),
-                new SqlParameter("@Mau", (object?)cboMauSac.Text ?? DBNull.Value),
+                new SqlParameter("@MaSP", txtMaSP.Text.Trim()),
+                new SqlParameter("@TenSP", txtTenSP.Text.Trim()),
+                new SqlParameter("@LoaiSP", (object?)cboLoaiSP.Text ?? DBNull.Value),
+                new SqlParameter("@MauSac", (object?)cboMauSac.Text ?? DBNull.Value),
                 new SqlParameter("@Size", (object?)cboSize.Text ?? DBNull.Value),
                 new SqlParameter("@GiaNhap", nudGiaNhap.Value),
                 new SqlParameter("@GiaBan", nudGiaBan.Value),
@@ -370,17 +388,17 @@ namespace FORM_DKY
             }
 
             string query = @"UPDATE SanPham 
-                            SET TenSanPham = @Ten, LoaiSanPham = @Loai, MauSac = @Mau, Size = @Size, 
+                            SET TenSP = @TenSP, LoaiSP = @LoaiSP, MauSac = @MauSac, Size = @Size, 
                                 GiaNhap = @GiaNhap, GiaBan = @GiaBan, SoLuongTon = @SoLuong, 
                                 GhiChu = @GhiChu, HinhAnh = @HinhAnh 
-                            WHERE MaSanPham = @Ma";
+                            WHERE MaSP = @MaSP";
 
             SqlParameter[] parameters = new SqlParameter[]
             {
-                new SqlParameter("@Ma", txtMaSP.Text.Trim()),
-                new SqlParameter("@Ten", txtTenSP.Text.Trim()),
-                new SqlParameter("@Loai", (object?)cboLoaiSP.Text ?? DBNull.Value),
-                new SqlParameter("@Mau", (object?)cboMauSac.Text ?? DBNull.Value),
+                new SqlParameter("@MaSP", txtMaSP.Text.Trim()),
+                new SqlParameter("@TenSP", txtTenSP.Text.Trim()),
+                new SqlParameter("@LoaiSP", (object?)cboLoaiSP.Text ?? DBNull.Value),
+                new SqlParameter("@MauSac", (object?)cboMauSac.Text ?? DBNull.Value),
                 new SqlParameter("@Size", (object?)cboSize.Text ?? DBNull.Value),
                 new SqlParameter("@GiaNhap", nudGiaNhap.Value),
                 new SqlParameter("@GiaBan", nudGiaBan.Value),
@@ -407,8 +425,8 @@ namespace FORM_DKY
 
             if (MessageBox.Show($"Bạn có chắc chắn muốn xóa sản phẩm [{txtMaSP.Text}] không?", "Xác nhận xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                string query = "DELETE FROM SanPham WHERE MaSanPham = @Ma";
-                SqlParameter[] parameters = new SqlParameter[] { new SqlParameter("@Ma", txtMaSP.Text.Trim()) };
+                string query = "DELETE FROM SanPham WHERE MaSP = @MaSP";
+                SqlParameter[] parameters = new SqlParameter[] { new SqlParameter("@MaSP", txtMaSP.Text.Trim()) };
 
                 if (Database.ExecuteNonQuery(query, parameters) > 0)
                 {

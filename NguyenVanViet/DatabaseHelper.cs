@@ -8,7 +8,7 @@ namespace FORM_DKY
     public class DatabaseHelper
     {
         // Chuỗi kết nối SQL Server (dùng .\SQLEXPRESS chạy chuẩn trên mọi máy)
-        private static string connectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=QuanLyBanHangDB;Integrated Security=True;TrustServerCertificate=True";
+        private static string connectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=QuanLyCuaHangThoiTrang;Integrated Security=True;TrustServerCertificate=True";
 
         public static SqlConnection GetConnection()
         {

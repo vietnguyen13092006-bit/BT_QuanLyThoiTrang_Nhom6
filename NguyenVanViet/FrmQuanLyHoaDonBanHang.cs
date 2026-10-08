@@ -11,18 +11,21 @@ namespace FORM_DKY
         // Khai báo các Control
         private Label lblTitle;
         private GroupBox gbThongTinHD, gbThongTinSP, gbGioHang, gbDanhSachHD;
-        private TextBox txtMaHD, txtKhachHang, txtSDT, txtDonGia, txtTongTien;
+        private TextBox txtMaHD, txtKhachHang, txtSDT, txtDonGia, txtTongTien, txtNhanVien; // Đổi cboNhanVien thành txtNhanVien
         private DateTimePicker dtpNgayBan;
-        private ComboBox cboNhanVien, cboSanPham, cboMau, cboKichThuoc;
+        private ComboBox cboMaSP, cboSanPham, cboMau, cboKichThuoc;
         private NumericUpDown nudSoLuong;
         private Button btnThemSP, btnSua, btnXoa, btnLamMoi, btnThanhToan, btnXuatHoaDon, btnTaiDanhSachHD;
 
-        // DataGridView: 1 cái cho Giỏ hàng tạm, 1 cái cho Danh sách Hóa đơn đã lưu trong Database
+        // DataGridView
         private DataGridView dgvGioHang;
         private DataGridView dgvDanhSachHD;
 
         // Bảng tạm giỏ hàng
         private DataTable dtGioHang;
+
+        // Cờ chống lặp sự kiện giữa cboMaSP và cboSanPham
+        private bool isBindingSP = false;
 
         public FrmQuanLyHoaDonBanHang()
         {
@@ -31,29 +34,30 @@ namespace FORM_DKY
             InitGioHang();
             LoadDataToComboBoxes();
             TaoMaHoaDonMoi();
-            LoadDanhSachHoaDonDaLuu(); // Tải danh sách hóa đơn từ SQL khi mở Form
+            LoadDanhSachHoaDonDaLuu();
         }
 
         private void InitializeComponentCustom()
         {
             this.Text = "QUẢN LÝ HÓA ĐƠN BÁN HÀNG";
-            this.Size = new Size(1100, 780);
-            this.MinimumSize = new Size(1000, 700);
+            this.Size = new Size(1150, 820);
+            this.MinimumSize = new Size(1050, 720);
             this.StartPosition = FormStartPosition.CenterScreen;
 
-            // Layout chính co giãn tự động
-            TableLayoutPanel mainLayout = new TableLayoutPanel();
-            mainLayout.Dock = DockStyle.Fill;
-            mainLayout.Padding = new Padding(10);
-            mainLayout.RowCount = 6;
-            mainLayout.ColumnCount = 1;
+            TableLayoutPanel mainLayout = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(10),
+                RowCount = 6,
+                ColumnCount = 1
+            };
 
             mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));  // 0. Tiêu đề
             mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 95F));  // 1. Thông tin HD
             mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 105F)); // 2. Thông tin SP
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 45F));  // 3. Giỏ hàng tạm (co giãn)
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 45F));   // 3. Giỏ hàng tạm
             mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 85F));  // 4. Thanh toán & Nút bấm
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 55F));  // 5. Danh sách Hóa đơn đã lưu (co giãn)
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 55F));   // 5. Danh sách Hóa đơn đã lưu
 
             // 0. Tiêu đề
             lblTitle = new Label
@@ -83,7 +87,7 @@ namespace FORM_DKY
 
             txtMaHD = new TextBox { ReadOnly = true, Dock = DockStyle.Fill, Font = new Font("Arial", 9, FontStyle.Regular) };
             dtpNgayBan = new DateTimePicker { Format = DateTimePickerFormat.Short, Dock = DockStyle.Fill, Font = new Font("Arial", 9, FontStyle.Regular) };
-            cboNhanVien = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Fill, Font = new Font("Arial", 9, FontStyle.Regular) };
+            txtNhanVien = new TextBox { Dock = DockStyle.Fill, Font = new Font("Arial", 9, FontStyle.Regular) }; // Ô nhập tự do tên nhân viên
             txtKhachHang = new TextBox { Dock = DockStyle.Fill, Font = new Font("Arial", 9, FontStyle.Regular) };
             txtSDT = new TextBox { Dock = DockStyle.Fill, Font = new Font("Arial", 9, FontStyle.Regular) };
 
@@ -92,7 +96,7 @@ namespace FORM_DKY
             tlpHD.Controls.Add(new Label { Text = "Ngày bán:", Anchor = AnchorStyles.Left, AutoSize = true }, 2, 0);
             tlpHD.Controls.Add(dtpNgayBan, 3, 0);
             tlpHD.Controls.Add(new Label { Text = "Nhân viên bán:", Anchor = AnchorStyles.Left, AutoSize = true }, 4, 0);
-            tlpHD.Controls.Add(cboNhanVien, 5, 0);
+            tlpHD.Controls.Add(txtNhanVien, 5, 0);
 
             tlpHD.Controls.Add(new Label { Text = "Khách hàng:", Anchor = AnchorStyles.Left, AutoSize = true }, 0, 1);
             tlpHD.Controls.Add(txtKhachHang, 1, 1);
@@ -106,19 +110,22 @@ namespace FORM_DKY
             TableLayoutPanel tlpSP = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
-                ColumnCount = 8,
+                ColumnCount = 10,
                 RowCount = 2,
                 Padding = new Padding(5)
             };
-            tlpSP.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 80F));
-            tlpSP.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
-            tlpSP.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 60F));
+            tlpSP.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 65F));
             tlpSP.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
-            tlpSP.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 80F));
-            tlpSP.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
-            tlpSP.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 80F));
+            tlpSP.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 65F));
             tlpSP.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
+            tlpSP.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 50F));
+            tlpSP.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 15F));
+            tlpSP.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 70F));
+            tlpSP.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 15F));
+            tlpSP.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 70F));
+            tlpSP.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
 
+            cboMaSP = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Fill, Font = new Font("Arial", 9, FontStyle.Regular) };
             cboSanPham = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Fill, Font = new Font("Arial", 9, FontStyle.Regular) };
             cboMau = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Fill, Font = new Font("Arial", 9, FontStyle.Regular) };
             cboKichThuoc = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Fill, Font = new Font("Arial", 9, FontStyle.Regular) };
@@ -133,17 +140,21 @@ namespace FORM_DKY
                 Dock = DockStyle.Fill,
                 Height = 32
             };
-            btnThemSP.Click += BtnThemSP_Click;
-            cboSanPham.SelectedIndexChanged += CboSanPham_SelectedIndexChanged;
 
-            tlpSP.Controls.Add(new Label { Text = "Sản phẩm:", Anchor = AnchorStyles.Left, AutoSize = true }, 0, 0);
-            tlpSP.Controls.Add(cboSanPham, 1, 0);
-            tlpSP.Controls.Add(new Label { Text = "Màu:", Anchor = AnchorStyles.Left, AutoSize = true }, 2, 0);
-            tlpSP.Controls.Add(cboMau, 3, 0);
-            tlpSP.Controls.Add(new Label { Text = "Kích thước:", Anchor = AnchorStyles.Left, AutoSize = true }, 4, 0);
-            tlpSP.Controls.Add(cboKichThuoc, 5, 0);
-            tlpSP.Controls.Add(new Label { Text = "Số lượng:", Anchor = AnchorStyles.Left, AutoSize = true }, 6, 0);
-            tlpSP.Controls.Add(nudSoLuong, 7, 0);
+            cboMaSP.SelectedIndexChanged += CboMaSP_SelectedIndexChanged;
+            cboSanPham.SelectedIndexChanged += CboSanPham_SelectedIndexChanged;
+            btnThemSP.Click += BtnThemSP_Click;
+
+            tlpSP.Controls.Add(new Label { Text = "Mã SP:", Anchor = AnchorStyles.Left, AutoSize = true }, 0, 0);
+            tlpSP.Controls.Add(cboMaSP, 1, 0);
+            tlpSP.Controls.Add(new Label { Text = "Tên SP:", Anchor = AnchorStyles.Left, AutoSize = true }, 2, 0);
+            tlpSP.Controls.Add(cboSanPham, 3, 0);
+            tlpSP.Controls.Add(new Label { Text = "Màu:", Anchor = AnchorStyles.Left, AutoSize = true }, 4, 0);
+            tlpSP.Controls.Add(cboMau, 5, 0);
+            tlpSP.Controls.Add(new Label { Text = "Size:", Anchor = AnchorStyles.Left, AutoSize = true }, 6, 0);
+            tlpSP.Controls.Add(cboKichThuoc, 7, 0);
+            tlpSP.Controls.Add(new Label { Text = "Số lượng:", Anchor = AnchorStyles.Left, AutoSize = true }, 8, 0);
+            tlpSP.Controls.Add(nudSoLuong, 9, 0);
 
             tlpSP.Controls.Add(new Label { Text = "Đơn giá:", Anchor = AnchorStyles.Left, AutoSize = true }, 0, 1);
             tlpSP.Controls.Add(txtDonGia, 1, 1);
@@ -152,7 +163,7 @@ namespace FORM_DKY
 
             gbThongTinSP.Controls.Add(tlpSP);
 
-            // 3. GroupBox GIỎ HÀNG ĐANG CHỌN (TẠM)
+            // 3. GroupBox GIỎ HÀNG
             gbGioHang = new GroupBox { Text = "GIỎ HÀNG ĐANG TẠO", Font = new Font("Arial", 9, FontStyle.Bold), Dock = DockStyle.Fill };
             dgvGioHang = new DataGridView
             {
@@ -164,7 +175,7 @@ namespace FORM_DKY
             };
             gbGioHang.Controls.Add(dgvGioHang);
 
-            // 4. Layout Bottom (Thanh toán & Nút thao tác giỏ hàng)
+            // 4. Layout Bottom
             TableLayoutPanel tlpBottom = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
@@ -191,16 +202,16 @@ namespace FORM_DKY
                 ColumnCount = 2,
                 RowCount = 2
             };
-            tlpPay.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40F));
-            tlpPay.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60F));
+            tlpPay.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35F));
+            tlpPay.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65F));
 
             txtTongTien = new TextBox { ReadOnly = true, Text = "0", Font = new Font("Arial", 11, FontStyle.Bold), TextAlign = HorizontalAlignment.Right, Dock = DockStyle.Fill };
 
             FlowLayoutPanel flpPayBtns = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.RightToLeft };
-            btnThanhToan = new Button { Text = "THANH TOÁN", BackColor = Color.DodgerBlue, ForeColor = Color.White, Font = new Font("Arial", 9, FontStyle.Bold), Width = 115, Height = 38 };
+            btnThanhToan = new Button { Text = "THANH TOÁN HD DƯỚI", BackColor = Color.DodgerBlue, ForeColor = Color.White, Font = new Font("Arial", 9, FontStyle.Bold), Width = 165, Height = 38 };
             btnXuatHoaDon = new Button { Text = "XUẤT HÓA ĐƠN", BackColor = Color.Orange, ForeColor = Color.White, Font = new Font("Arial", 9, FontStyle.Bold), Width = 125, Height = 38 };
 
-            btnThanhToan.Click += BtnThanhToan_Click;
+            btnThanhToan.Click += BtnThanhToanHDDuoi_Click;
             btnXuatHoaDon.Click += BtnXuatHoaDon_Click;
 
             flpPayBtns.Controls.Add(btnThanhToan);
@@ -213,8 +224,8 @@ namespace FORM_DKY
             tlpBottom.Controls.Add(flpButtons, 0, 0);
             tlpBottom.Controls.Add(tlpPay, 1, 0);
 
-            // 5. GroupBox DANH SÁCH HÓA ĐƠN ĐÃ LƯU TRONG DATABASE (Bổ sung mới)
-            gbDanhSachHD = new GroupBox { Text = "DANH SÁCH HÓA ĐƠN ĐÃ LƯU TRONG DATABASE", Font = new Font("Arial", 9, FontStyle.Bold), Dock = DockStyle.Fill };
+            // 5. GroupBox DANH SÁCH HÓA ĐƠN ĐÃ LƯU
+            gbDanhSachHD = new GroupBox { Text = "DANH SÁCH HÓA ĐƠN TRONG DATABASE (BẤM ĐỂ THANH TOÁN / XEM CHI TIẾT)", Font = new Font("Arial", 9, FontStyle.Bold), Dock = DockStyle.Fill };
 
             TableLayoutPanel tlpDS = new TableLayoutPanel
             {
@@ -237,13 +248,12 @@ namespace FORM_DKY
                 SelectionMode = DataGridViewSelectionMode.FullRowSelect,
                 MultiSelect = false
             };
-            dgvDanhSachHD.CellDoubleClick += DgvDanhSachHD_CellDoubleClick; // Nhấp kép để xem chi tiết
+            dgvDanhSachHD.CellDoubleClick += DgvDanhSachHD_CellDoubleClick;
 
             tlpDS.Controls.Add(btnTaiDanhSachHD, 0, 0);
             tlpDS.Controls.Add(dgvDanhSachHD, 0, 1);
             gbDanhSachHD.Controls.Add(tlpDS);
 
-            // Thêm tất cả vào Layout chính
             mainLayout.Controls.Add(lblTitle, 0, 0);
             mainLayout.Controls.Add(gbThongTinHD, 0, 1);
             mainLayout.Controls.Add(gbThongTinSP, 0, 2);
@@ -269,13 +279,17 @@ namespace FORM_DKY
             dgvGioHang.DataSource = dtGioHang;
 
             dgvGioHang.Columns["MaHD"].HeaderText = "Mã Hóa Đơn";
+            dgvGioHang.Columns["MaSP"].HeaderText = "Mã SP";
             dgvGioHang.Columns["TenSP"].HeaderText = "Tên sản phẩm";
             dgvGioHang.Columns["Mau"].HeaderText = "Màu";
             dgvGioHang.Columns["KichThuoc"].HeaderText = "Kích thước";
             dgvGioHang.Columns["SoLuong"].HeaderText = "Số lượng";
             dgvGioHang.Columns["DonGia"].HeaderText = "Đơn giá";
             dgvGioHang.Columns["ThanhTien"].HeaderText = "Thành tiền";
-            dgvGioHang.Columns["MaSP"].Visible = false;
+
+            dgvGioHang.Columns["MaSP"].Visible = true;
+            dgvGioHang.Columns["DonGia"].DefaultCellStyle.Format = "N0";
+            dgvGioHang.Columns["ThanhTien"].DefaultCellStyle.Format = "N0";
         }
 
         private void TaoMaHoaDonMoi()
@@ -287,25 +301,69 @@ namespace FORM_DKY
         {
             try
             {
-                DataTable dtNV = DatabaseHelper.ExecuteQuery("SELECT MaNV, TenNV FROM NhanVien");
-                cboNhanVien.DataSource = dtNV;
-                cboNhanVien.DisplayMember = "TenNV";
-                cboNhanVien.ValueMember = "MaNV";
+                // Chỉ nạp danh mục sản phẩm lên ComboBox
+                DataTable dtSP = DatabaseHelper.ExecuteQuery("SELECT MaSP, TenSP, MauSac, Size, GiaBan FROM SanPham");
 
-                DataTable dtSP = DatabaseHelper.ExecuteQuery("SELECT MaSP, TenSP, Mau, KichThuoc, DonGia FROM SanPham");
+                isBindingSP = true;
+
+                cboMaSP.DataSource = dtSP.Copy();
+                cboMaSP.DisplayMember = "MaSP";
+                cboMaSP.ValueMember = "MaSP";
+
                 cboSanPham.DataSource = dtSP;
                 cboSanPham.DisplayMember = "TenSP";
                 cboSanPham.ValueMember = "MaSP";
+
+                isBindingSP = false;
+
+                if (cboSanPham.Items.Count > 0)
+                {
+                    CapNhatChiTietSPSelected((DataRowView)cboSanPham.SelectedItem);
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi lấy dữ liệu danh mục: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Lỗi lấy dữ liệu sản phẩm: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // =========================================================================
-        // HÀM TẢI DANH SÁCH HÓA ĐƠN ĐÃ LƯU TỪ SQL VÀO DGV DANH SÁCH
-        // =========================================================================
+        private void CboMaSP_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (isBindingSP || cboMaSP.SelectedValue == null) return;
+            isBindingSP = true;
+            cboSanPham.SelectedValue = cboMaSP.SelectedValue;
+            if (cboSanPham.SelectedItem is DataRowView drv)
+            {
+                CapNhatChiTietSPSelected(drv);
+            }
+            isBindingSP = false;
+        }
+
+        private void CboSanPham_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (isBindingSP || cboSanPham.SelectedValue == null) return;
+            isBindingSP = true;
+            cboMaSP.SelectedValue = cboSanPham.SelectedValue;
+            if (cboSanPham.SelectedItem is DataRowView drv)
+            {
+                CapNhatChiTietSPSelected(drv);
+            }
+            isBindingSP = false;
+        }
+
+        private void CapNhatChiTietSPSelected(DataRowView drv)
+        {
+            txtDonGia.Text = Convert.ToDecimal(drv["GiaBan"]).ToString("N0");
+
+            cboMau.Items.Clear();
+            cboMau.Items.Add(drv["MauSac"] != DBNull.Value ? drv["MauSac"].ToString() : "");
+            cboMau.SelectedIndex = 0;
+
+            cboKichThuoc.Items.Clear();
+            cboKichThuoc.Items.Add(drv["Size"] != DBNull.Value ? drv["Size"].ToString() : "");
+            cboKichThuoc.SelectedIndex = 0;
+        }
+
         private void LoadDanhSachHoaDonDaLuu()
         {
             try
@@ -315,7 +373,8 @@ namespace FORM_DKY
                                       nv.TenNV AS [Nhân Viên], 
                                       ISNULL(hd.TenKhachHang, N'Khách lẻ') AS [Khách Hàng], 
                                       ISNULL(hd.SDT, '') AS [SĐT], 
-                                      hd.TongTien AS [Tổng Tiền]
+                                      hd.TongTien AS [Tổng Tiền],
+                                      ISNULL(hd.TrangThai, N'Chưa thanh toán') AS [Trạng Thái]
                                FROM HoaDon hd
                                LEFT JOIN NhanVien nv ON hd.MaNV = nv.MaNV
                                ORDER BY hd.NgayBan DESC";
@@ -334,7 +393,6 @@ namespace FORM_DKY
             }
         }
 
-        // Nhấp kép vào dòng hóa đơn đã lưu để xem lại Popup Hóa đơn
         private void DgvDanhSachHD_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
@@ -347,8 +405,7 @@ namespace FORM_DKY
                 string sdt = row.Cells["SĐT"].Value.ToString();
                 string tongTien = Convert.ToDecimal(row.Cells["Tổng Tiền"].Value).ToString("N0");
 
-                // Lấy chi tiết các mặt hàng của Hóa đơn này từ SQL
-                string sqlChiTiet = @"SELECT sp.TenSP, sp.Mau, sp.KichThuoc, ct.SoLuong, ct.DonGia, (ct.SoLuong * ct.DonGia) AS ThanhTien
+                string sqlChiTiet = @"SELECT sp.MaSP, sp.TenSP, sp.MauSac AS Mau, sp.Size AS KichThuoc, ct.SoLuong, ct.DonGia, (ct.SoLuong * ct.DonGia) AS ThanhTien
                                       FROM ChiTietHoaDon ct
                                       JOIN SanPham sp ON ct.MaSP = sp.MaSP
                                       WHERE ct.MaHD = @MaHD";
@@ -356,26 +413,8 @@ namespace FORM_DKY
                 SqlParameter[] p = { new SqlParameter("@MaHD", maHD) };
                 DataTable dtCT = DatabaseHelper.ExecuteQuery(sqlChiTiet, p);
 
-                // Mở Form Popup hiển thị lại
                 FrmXuatHoaDonPopup frm = new FrmXuatHoaDonPopup(maHD, ngayBan, nhanVien, khachHang, sdt, tongTien, dtCT);
                 frm.ShowDialog();
-            }
-        }
-
-        private void CboSanPham_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (cboSanPham.SelectedItem != null)
-            {
-                DataRowView drv = (DataRowView)cboSanPham.SelectedItem;
-                txtDonGia.Text = Convert.ToDecimal(drv["DonGia"]).ToString("N0");
-
-                cboMau.Items.Clear();
-                cboMau.Items.Add(drv["Mau"].ToString());
-                cboMau.SelectedIndex = 0;
-
-                cboKichThuoc.Items.Clear();
-                cboKichThuoc.Items.Add(drv["KichThuoc"].ToString());
-                cboKichThuoc.SelectedIndex = 0;
             }
         }
 
@@ -389,7 +428,7 @@ namespace FORM_DKY
             string mau = cboMau.Text;
             string kichThuoc = cboKichThuoc.Text;
             int soLuong = (int)nudSoLuong.Value;
-            decimal donGia = Convert.ToDecimal(drv["DonGia"]);
+            decimal donGia = Convert.ToDecimal(drv["GiaBan"]);
 
             foreach (DataRow row in dtGioHang.Rows)
             {
@@ -441,25 +480,52 @@ namespace FORM_DKY
             dtGioHang.Rows.Clear();
             txtKhachHang.Clear();
             txtSDT.Clear();
+            txtNhanVien.Clear();
             nudSoLuong.Value = 1;
             TaoMaHoaDonMoi();
             TinhTongTien();
         }
 
-        // =========================================================================
-        // HÀM LƯU HÓA ĐƠN VÀO SQL DATABASE
-        // =========================================================================
-        private bool LuuHoaDonVaoDatabase()
+        // Hàm kiểm tra và tự động thêm Nhân viên nếu chưa có trong bảng NhanVien (để tránh lỗi khóa ngoại SQL)
+        private string XuLyVaLayMaNhanVien(SqlConnection conn, SqlTransaction transaction, string tenNV)
+        {
+            // Kiểm tra xem tên nhân viên đã tồn tại chưa
+            string checkQuery = "SELECT MaNV FROM NhanVien WHERE TenNV = @TenNV";
+            using (SqlCommand cmdCheck = new SqlCommand(checkQuery, conn, transaction))
+            {
+                cmdCheck.Parameters.AddWithValue("@TenNV", tenNV);
+                object result = cmdCheck.ExecuteScalar();
+                if (result != null)
+                {
+                    return result.ToString();
+                }
+            }
+
+            // Nếu chưa có, tự động sinh MaNV mới (VD: NV + ticks) và thêm vào bảng NhanVien
+            string newMaNV = "NV" + DateTime.Now.ToString("mmssff");
+            string insertNV = "INSERT INTO NhanVien (MaNV, TenNV) VALUES (@MaNV, @TenNV)";
+            using (SqlCommand cmdInsert = new SqlCommand(insertNV, conn, transaction))
+            {
+                cmdInsert.Parameters.AddWithValue("@MaNV", newMaNV);
+                cmdInsert.Parameters.AddWithValue("@TenNV", tenNV);
+                cmdInsert.ExecuteNonQuery();
+            }
+
+            return newMaNV;
+        }
+
+        private bool LuuHoaDonBanDau()
         {
             if (dtGioHang.Rows.Count == 0)
             {
-                MessageBox.Show("Vui lòng thêm ít nhất một sản phẩm!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng thêm ít nhất một sản phẩm vào giỏ!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
 
-            if (cboNhanVien.SelectedValue == null)
+            if (string.IsNullOrWhiteSpace(txtNhanVien.Text))
             {
-                MessageBox.Show("Vui lòng chọn nhân viên bán hàng!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Vui lòng nhập tên nhân viên bán hàng!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtNhanVien.Focus();
                 return false;
             }
 
@@ -470,21 +536,22 @@ namespace FORM_DKY
 
                 try
                 {
-                    // 1. Lưu Hóa Đơn vào bảng HoaDon
-                    string insertHD = @"INSERT INTO HoaDon (MaHD, NgayBan, MaNV, TenKhachHang, SDT, TongTien) 
-                                        VALUES (@MaHD, @NgayBan, @MaNV, @TenKhachHang, @SDT, @TongTien)";
+                    // Tự động kiểm tra/thêm nhân viên vừa gõ vào Database
+                    string maNV = XuLyVaLayMaNhanVien(conn, transaction, txtNhanVien.Text.Trim());
+
+                    string insertHD = @"INSERT INTO HoaDon (MaHD, NgayBan, MaNV, TenKhachHang, SDT, TongTien, TrangThai) 
+                                        VALUES (@MaHD, @NgayBan, @MaNV, @TenKhachHang, @SDT, @TongTien, N'Chưa thanh toán')";
 
                     SqlParameter[] pHD = {
                         new SqlParameter("@MaHD", txtMaHD.Text),
                         new SqlParameter("@NgayBan", dtpNgayBan.Value),
-                        new SqlParameter("@MaNV", cboNhanVien.SelectedValue.ToString()),
+                        new SqlParameter("@MaNV", maNV),
                         new SqlParameter("@TenKhachHang", string.IsNullOrWhiteSpace(txtKhachHang.Text) ? (object)DBNull.Value : txtKhachHang.Text),
                         new SqlParameter("@SDT", string.IsNullOrWhiteSpace(txtSDT.Text) ? (object)DBNull.Value : txtSDT.Text),
                         new SqlParameter("@TongTien", decimal.Parse(txtTongTien.Text.Replace(".", "").Replace(",", "")))
                     };
                     DatabaseHelper.ExecuteNonQuery(insertHD, pHD, transaction);
 
-                    // 2. Lưu Chi Tiết Hóa Đơn vào bảng ChiTietHoaDon
                     foreach (DataRow row in dtGioHang.Rows)
                     {
                         string insertCT = @"INSERT INTO ChiTietHoaDon (MaHD, MaSP, SoLuong, DonGia) 
@@ -511,43 +578,88 @@ namespace FORM_DKY
             }
         }
 
-        private void BtnThanhToan_Click(object sender, EventArgs e)
-        {
-            if (LuuHoaDonVaoDatabase())
-            {
-                MessageBox.Show("Thanh toán thành công! Hóa đơn đã được lưu vào SQL.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LoadDanhSachHoaDonDaLuu(); // Cập nhật lại danh sách hóa đơn bên dưới
-                BtnLamMoi_Click(null, null);
-            }
-        }
-
+        // NÚT XUẤT HÓA ĐƠN
         private void BtnXuatHoaDon_Click(object sender, EventArgs e)
         {
-            if (LuuHoaDonVaoDatabase())
+            if (LuuHoaDonBanDau())
             {
                 string maHD = txtMaHD.Text;
                 string ngayBan = dtpNgayBan.Value.ToString("dd/MM/yyyy");
-                string nhanVien = cboNhanVien.Text;
+                string nhanVien = txtNhanVien.Text;
                 string khachHang = txtKhachHang.Text;
                 string sdt = txtSDT.Text;
                 string tongTien = txtTongTien.Text;
 
-                // Load lại bảng danh sách bên dưới
                 LoadDanhSachHoaDonDaLuu();
 
-                // Bật Form Popup xem và in hóa đơn
-                FrmXuatHoaDonPopup frm = new FrmXuatHoaDonPopup(maHD, ngayBan, nhanVien, khachHang, sdt, tongTien, dtGioHang);
+                FrmXuatHoaDonPopup frm = new FrmXuatHoaDonPopup(maHD, ngayBan, nhanVien, khachHang, sdt, tongTien, dtGioHang.Copy());
                 frm.ShowDialog();
 
-                // Làm mới form chính
                 BtnLamMoi_Click(null, null);
+            }
+        }
+
+        // NÚT THANH TOÁN HÓA ĐƠN ĐƯỢC CHỌN Ở BẢNG 2
+        private void BtnThanhToanHDDuoi_Click(object sender, EventArgs e)
+        {
+            if (dgvDanhSachHD.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Vui lòng chọn 1 hóa đơn cần thanh toán từ danh sách bên dưới!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            DataGridViewRow row = dgvDanhSachHD.SelectedRows[0];
+            string maHD = row.Cells["Mã Hóa Đơn"].Value.ToString();
+            string trangThai = row.Cells["Trạng Thái"].Value.ToString();
+
+            if (trangThai == "Đã thanh toán")
+            {
+                MessageBox.Show("Hóa đơn này đã được thanh toán rồi!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            DialogResult dr = MessageBox.Show($"Xác nhận thanh toán cho hóa đơn [{maHD}]?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (dr == DialogResult.Yes)
+            {
+                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                {
+                    conn.Open();
+                    SqlTransaction transaction = conn.BeginTransaction();
+
+                    try
+                    {
+                        // 1. Đổi trạng thái Hóa đơn
+                        string updateHD = "UPDATE HoaDon SET TrangThai = N'Đã thanh toán' WHERE MaHD = @MaHD";
+                        SqlParameter[] p1 = { new SqlParameter("@MaHD", maHD) };
+                        DatabaseHelper.ExecuteNonQuery(updateHD, p1, transaction);
+
+                        // 2. Trừ tồn kho chính xác theo MaSP
+                        string updateKho = @"UPDATE SanPham 
+                                             SET SoLuongTon = SoLuongTon - ct.SoLuong 
+                                             FROM SanPham sp
+                                             INNER JOIN ChiTietHoaDon ct ON sp.MaSP = ct.MaSP
+                                             WHERE ct.MaHD = @MaHD";
+                        SqlParameter[] p2 = { new SqlParameter("@MaHD", maHD) };
+                        DatabaseHelper.ExecuteNonQuery(updateKho, p2, transaction);
+
+                        transaction.Commit();
+                        MessageBox.Show($"Thanh toán thành công hóa đơn [{maHD}]!\nĐã tự động trừ số lượng tồn kho theo Mã SP.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                        LoadDanhSachHoaDonDaLuu();
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        MessageBox.Show("Lỗi khi thanh toán: " + ex.Message, "Lỗi SQL", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
             }
         }
     }
 }
 
 // =========================================================================
-// POPUP XUẤT HÓA ĐƠN (XEM & IN)
+// POPUP XUẤT HÓA ĐƠN
 // =========================================================================
 public class FrmXuatHoaDonPopup : Form
 {
@@ -570,7 +682,7 @@ public class FrmXuatHoaDonPopup : Form
     private void TaoGiaoDienHoaDon()
     {
         this.Text = "HÓA ĐƠN BÁN HÀNG";
-        this.Size = new Size(680, 580);
+        this.Size = new Size(720, 580);
         this.StartPosition = FormStartPosition.CenterParent;
         this.FormBorderStyle = FormBorderStyle.FixedDialog;
         this.MaximizeBox = false;
@@ -630,6 +742,7 @@ public class FrmXuatHoaDonPopup : Form
         };
 
         DataTable dtPrint = new DataTable();
+        dtPrint.Columns.Add("Mã SP", typeof(string));
         dtPrint.Columns.Add("Tên sản phẩm", typeof(string));
         dtPrint.Columns.Add("Màu", typeof(string));
         dtPrint.Columns.Add("Kích thước", typeof(string));
@@ -637,17 +750,22 @@ public class FrmXuatHoaDonPopup : Form
         dtPrint.Columns.Add("Đơn giá", typeof(decimal));
         dtPrint.Columns.Add("Thành tiền", typeof(decimal));
 
-        foreach (DataRow row in dtChiTiet.Rows)
+        if (dtChiTiet != null)
         {
-            dtPrint.Rows.Add(
-                row["TenSP"],
-                row["Mau"],
-                row["KichThuoc"],
-                row["SoLuong"],
-                row["DonGia"],
-                row["ThanhTien"]
-            );
+            foreach (DataRow row in dtChiTiet.Rows)
+            {
+                string maSP = row.Table.Columns.Contains("MaSP") ? row["MaSP"].ToString() : "";
+                string tenSP = row.Table.Columns.Contains("TenSP") ? row["TenSP"].ToString() : "";
+                string mau = row.Table.Columns.Contains("Mau") ? row["Mau"].ToString() : (row.Table.Columns.Contains("MauSac") ? row["MauSac"].ToString() : "");
+                string size = row.Table.Columns.Contains("KichThuoc") ? row["KichThuoc"].ToString() : (row.Table.Columns.Contains("Size") ? row["Size"].ToString() : "");
+                int soLuong = row.Table.Columns.Contains("SoLuong") && row["SoLuong"] != DBNull.Value ? Convert.ToInt32(row["SoLuong"]) : 0;
+                decimal donGia = row.Table.Columns.Contains("DonGia") && row["DonGia"] != DBNull.Value ? Convert.ToDecimal(row["DonGia"]) : 0;
+                decimal thanhTien = row.Table.Columns.Contains("ThanhTien") && row["ThanhTien"] != DBNull.Value ? Convert.ToDecimal(row["ThanhTien"]) : (soLuong * donGia);
+
+                dtPrint.Rows.Add(maSP, tenSP, mau, size, soLuong, donGia, thanhTien);
+            }
         }
+
         dgvSanPham.DataSource = dtPrint;
 
         if (dgvSanPham.Columns["Đơn giá"] != null) dgvSanPham.Columns["Đơn giá"].DefaultCellStyle.Format = "N0";

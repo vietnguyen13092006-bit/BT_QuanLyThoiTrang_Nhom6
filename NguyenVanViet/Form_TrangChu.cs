@@ -185,10 +185,10 @@ namespace FORM_DKY
             {
                 MessageBox.Show("Bạn cần đăng nhập để xem quản lý hóa đơn", "Thông báo", MessageBoxButtons.OK); ;
             }
-            else
+            else                                                                               
             {
-                openChildForm(new FrmQuanLyHoaDonBanHang());
+                openChildForm(new FrmQuanLyHoaDonBanHang());                                                                                                
             }
         }
-    }
+    }              
 }
