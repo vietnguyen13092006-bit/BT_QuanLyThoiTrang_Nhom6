@@ -30,6 +30,7 @@
         {
             components = new System.ComponentModel.Container();
             panelsidebar = new Panel();
+            btnBaocao = new Button();
             btnDangNhap = new Button();
             btnHdon = new Button();
             btnQlyQAo = new Button();
@@ -43,6 +44,7 @@
             // panelsidebar
             // 
             panelsidebar.BackColor = Color.SlateGray;
+            panelsidebar.Controls.Add(btnBaocao);
             panelsidebar.Controls.Add(btnDangNhap);
             panelsidebar.Controls.Add(btnHdon);
             panelsidebar.Controls.Add(btnQlyQAo);
@@ -55,6 +57,20 @@
             panelsidebar.Name = "panelsidebar";
             panelsidebar.Size = new Size(50, 450);
             panelsidebar.TabIndex = 7;
+            // 
+            // btnBaocao
+            // 
+            btnBaocao.AutoSize = true;
+            btnBaocao.Dock = DockStyle.Top;
+            btnBaocao.FlatAppearance.BorderSize = 0;
+            btnBaocao.FlatStyle = FlatStyle.Flat;
+            btnBaocao.Font = new Font("Segoe UI", 9.75F);
+            btnBaocao.Location = new Point(0, 115);
+            btnBaocao.Name = "btnBaocao";
+            btnBaocao.Size = new Size(50, 23);
+            btnBaocao.TabIndex = 6;
+            btnBaocao.UseVisualStyleBackColor = true;
+            btnBaocao.Click += button1_Click;
             // 
             // btnDangNhap
             // 
@@ -154,6 +170,7 @@
             Text = "Form_TrangChu";
             Load += Form_TrangChu_Load;
             panelsidebar.ResumeLayout(false);
+            panelsidebar.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -166,5 +183,6 @@
         private System.Windows.Forms.Timer sidebarTimer;
         private Button btnQlyQAo;
         private Button btnHdon;
+        private Button btnBaocao;
     }
 }
