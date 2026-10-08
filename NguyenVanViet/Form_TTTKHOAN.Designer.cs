@@ -34,10 +34,10 @@
             lblSDT = new Label();
             btnAVT = new Button();
             picAVT = new PictureBox();
-            dataGridView1 = new DataGridView();
+            panel1 = new Panel();
             pictureBox1 = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)picAVT).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
             // 
@@ -46,7 +46,7 @@
             lblMail.AutoSize = true;
             lblMail.BackColor = Color.Transparent;
             lblMail.Font = new Font("Segoe UI", 50F);
-            lblMail.Location = new Point(530, 268);
+            lblMail.Location = new Point(487, 263);
             lblMail.Name = "lblMail";
             lblMail.Size = new Size(196, 89);
             lblMail.TabIndex = 0;
@@ -57,7 +57,7 @@
             lblName.AutoSize = true;
             lblName.BackColor = Color.Transparent;
             lblName.Font = new Font("Segoe UI", 50F);
-            lblName.Location = new Point(530, 36);
+            lblName.Location = new Point(487, 26);
             lblName.Name = "lblName";
             lblName.Size = new Size(139, 89);
             lblName.TabIndex = 1;
@@ -79,7 +79,7 @@
             lblSDT.AutoSize = true;
             lblSDT.BackColor = Color.Transparent;
             lblSDT.Font = new Font("Segoe UI", 50F);
-            lblSDT.Location = new Point(530, 156);
+            lblSDT.Location = new Point(487, 151);
             lblSDT.Name = "lblSDT";
             lblSDT.Size = new Size(153, 89);
             lblSDT.TabIndex = 3;
@@ -87,7 +87,7 @@
             // 
             // btnAVT
             // 
-            btnAVT.Location = new Point(205, 479);
+            btnAVT.Location = new Point(179, 483);
             btnAVT.Name = "btnAVT";
             btnAVT.Size = new Size(90, 39);
             btnAVT.TabIndex = 5;
@@ -97,31 +97,33 @@
             // 
             // picAVT
             // 
-            picAVT.Location = new Point(66, 21);
+            picAVT.Location = new Point(47, 36);
             picAVT.Name = "picAVT";
             picAVT.Size = new Size(362, 441);
             picAVT.SizeMode = PictureBoxSizeMode.StretchImage;
             picAVT.TabIndex = 4;
             picAVT.TabStop = false;
             // 
-            // dataGridView1
+            // panel1
             // 
-            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Location = new Point(16, 11);
-            dataGridView1.Name = "dataGridView1";
-            dataGridView1.Size = new Size(462, 525);
-            dataGridView1.TabIndex = 6;
+            panel1.BackColor = Color.Transparent;
+            panel1.Controls.Add(btnAVT);
+            panel1.Controls.Add(picAVT);
+            panel1.Location = new Point(12, 12);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(445, 537);
+            panel1.TabIndex = 8;
             // 
             // pictureBox1
             // 
             pictureBox1.BackColor = Color.Transparent;
-            pictureBox1.BackgroundImage = Properties.Resources.NenTT;
-            pictureBox1.BackgroundImageLayout = ImageLayout.Stretch;
             pictureBox1.Dock = DockStyle.Fill;
+            pictureBox1.Image = Properties.Resources.NenTT;
             pictureBox1.Location = new Point(0, 0);
             pictureBox1.Name = "pictureBox1";
             pictureBox1.Size = new Size(968, 618);
-            pictureBox1.TabIndex = 7;
+            pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+            pictureBox1.TabIndex = 9;
             pictureBox1.TabStop = false;
             // 
             // Form_TTTKHOAN
@@ -129,19 +131,17 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(968, 618);
-            Controls.Add(btnAVT);
-            Controls.Add(picAVT);
+            Controls.Add(panel1);
             Controls.Add(lblSDT);
-            Controls.Add(btnDangXuat);
             Controls.Add(lblName);
             Controls.Add(lblMail);
-            Controls.Add(dataGridView1);
+            Controls.Add(btnDangXuat);
             Controls.Add(pictureBox1);
             Name = "Form_TTTKHOAN";
             Text = "Form_TTTKHOAN";
             Load += Form_TTTKHOAN_Load;
             ((System.ComponentModel.ISupportInitialize)picAVT).EndInit();
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -155,7 +155,7 @@
         private Label lblSDT;
         private Button btnAVT;
         private PictureBox picAVT;
-        private DataGridView dataGridView1;
+        private Panel panel1;
         private PictureBox pictureBox1;
     }
 }

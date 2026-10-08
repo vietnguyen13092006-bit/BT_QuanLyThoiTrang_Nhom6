@@ -9,7 +9,8 @@ using System.Windows.Forms;
 
 namespace FORM_DKY
 {
-    public partial class Form_TTTKHOAN : Form
+    public partial class
+        Form_TTTKHOAN : Form
     {
         public Form_TTTKHOAN()
         {
@@ -20,13 +21,7 @@ namespace FORM_DKY
         {
             pictureBox1.Image = ImageHelper.GetImage("NenTT.jpg");
             lblName.Text = "Tên: " + FormDangNhap.Ten;
-            lblMail.Parent = pictureBox1;
-            lblName.Parent = pictureBox1;
-            lblSDT.Parent = pictureBox1;
 
-            lblMail.BackColor = Color.Transparent;
-            lblName.BackColor = Color.Transparent;
-            lblSDT.BackColor = Color.Transparent;
 
             //string connectionString = @"Data Source=localhost\SQLEXPRESS01;Initial Catalog=TAIKHOAN;Integrated Security=True;TrustServerCertificate=True";
             string connectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=TAIKHOAN;Integrated Security=True;TrustServerCertificate=True";
@@ -104,7 +99,7 @@ namespace FORM_DKY
             }
         }
 
-            private void CapNhatAvatarVaoDatabase(string username, string AvatarPath)
+        private void CapNhatAvatarVaoDatabase(string username, string AvatarPath)
         {
             string query = "UPDATE Users SET AvatarPath = @AvatarPath WHERE Username = @Username";
             string connectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=TAIKHOAN;Integrated Security=True;TrustServerCertificate=True";
