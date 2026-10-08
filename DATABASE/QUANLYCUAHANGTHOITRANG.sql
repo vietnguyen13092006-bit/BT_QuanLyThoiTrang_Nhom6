@@ -88,26 +88,9 @@ GO
 -- THÊM DỮ LIỆU MẪU ĐỂ CHẠY THỬ
 -- =========================================================
 
--- 1. Thêm Nhân viên
-INSERT INTO NhanVien (MaNV, TenNV, SDT) VALUES 
-('NV01', N'Nguyễn Văn A', '0987654321'),
-('NV02', N'Trần Thị B', '0912345678');
-
--- 2. Thêm Sản phẩm
-INSERT INTO SanPham (MaSP, TenSP, LoaiSP, MauSac, Size, GiaNhap, GiaBan, SoLuongTon, HinhAnh) VALUES 
-('SP01', N'Áo sơ mi nam', N'Áo sơ mi', N'Trắng', 'L', 150000, 250000, 50, 'somitrung.jpg'),
-('SP02', N'Quần Jeans Basic', N'Quần jean', N'Đen', '30', 250000, 400000, 30, 'quanjean.jpg');
-
--- 3. Tạo Phiếu nhập hàng
-INSERT INTO PhieuNhap (MaPN, NgayNhap, MaNV) VALUES ('PN01', GETDATE(), 'NV01');
-INSERT INTO ChiTietPhieuNhap (MaPN, MaSP, SoLuong, GiaNhap) VALUES ('PN01', 'SP01', 20, 150000);
-
--- 4. Tạo Hóa đơn bán hàng
-INSERT INTO HoaDon (MaHD, NgayBan, MaNV, TenKhachHang, SDT, TongTien) VALUES 
-('HD01', GETDATE(), 'NV01', N'Anh Hoàng', '0909123456', 250000);
-INSERT INTO ChiTietHoaDon (MaHD, MaSP, SoLuong, DonGia) VALUES ('HD01', 'SP01', 1, 250000);
-
 GO
 use QuanLyCuaHangThoiTrang
+go
+ALTER TABLE HoaDon ADD TienThue DECIMAL(18, 2) DEFAULT 0;
 go
 select* from HoaDon
