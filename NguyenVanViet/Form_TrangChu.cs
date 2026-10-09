@@ -19,10 +19,10 @@ namespace FORM_DKY
         {
             InitializeComponent();
 
-            TaiDanhSachSP();
-            sidebarTimer.Interval = 10;
-            sidebarTimer.Tick += sidebarTimer_Tick;
+            this.DoubleBuffered = true;
+            this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
 
+            TaiDanhSachSP();
             ApplyFlatButton(btnMenu);
             ApplyFlatButton(btn_TrangChu);
             ApplyFlatButton(btnDangNhap);
@@ -106,49 +106,32 @@ namespace FORM_DKY
         }
         private void btnMenu_Click(object sender, EventArgs e)
         {
-            sidebarTimer.Start();
-        }
-
-
-        // Khi di chuột RA KHỎI vùng Sidebar -> Cho Timer chạy để THU GỌN MENU IN
-        private void sidebarTimer_Tick(object sender, EventArgs e)
-        {
             if (isSidebarExpanded)
             {
-                // Thu gọn
-                panelsidebar.Width -= 15;
-                if (panelsidebar.Width <= panelsidebar.MinimumSize.Width)
-                {
-                    isSidebarExpanded = false;
-                    sidebarTimer.Stop();
-                    btn_TrangChu.Text = "🏠";
-                    btnDangNhap.Text = "👤";
-                    btnQlyQAo.Text = "🛍️";
-                    btnHdon.Text = "🧾";
-                    btnBaocao.Text = "📈";
-                    btnPhieuNhap.Text = "📋";
-                    //btn_TrangChu.Text = "";
-                    //btnDangNhap.Text = "";
-                }
+                // Thu gọn ngay lập tức về kích thước nhỏ
+                panelsidebar.Width = panelsidebar.MinimumSize.Width;
+                isSidebarExpanded = false;
+                btn_TrangChu.Text = "🏠";
+                btnDangNhap.Text = "👤";
+                btnQlyQAo.Text = "🛍️";
+                btnHdon.Text = "🧾";
+                btnBaocao.Text = "📈";
+                btnPhieuNhap.Text = "📋";
             }
             else
             {
-                // Xòe ra
-                panelsidebar.Width += 15;
-                if (panelsidebar.Width >= panelsidebar.MaximumSize.Width)
-                {
-                    isSidebarExpanded = true;
-                    sidebarTimer.Stop();
-                    btn_TrangChu.Text = "Trang chủ";
-                    btnQlyQAo.Text = "Qly quần áo";
-                    btnHdon.Text = "Qly hóa đơn";
-                    btnBaocao.Text = "Báo cáo thống kê";
-                    btnPhieuNhap.Text = "Phiếu nhập";
-                    CapNhatGiaoDienNutTaiKhoan();
-                }
+                // Mở rộng ngay lập tức
+                panelsidebar.Width = panelsidebar.MaximumSize.Width;
+                isSidebarExpanded = true;
+                btn_TrangChu.Text = "Trang chủ";
+                btnQlyQAo.Text = "Qly quần áo";
+                btnHdon.Text = "Qly hóa đơn";
+                btnBaocao.Text = "Báo cáo thống kê";
+                btnPhieuNhap.Text = "Phiếu nhập";
+                CapNhatGiaoDienNutTaiKhoan();
             }
-
         }
+        // Bạn có thể xóa hẳn hoặc để trống sự kiện sidebarTimer_Tick đi vì không dùng nữa.
 
         private void btnQlyQAo_Click(object sender, EventArgs e)
         {
@@ -177,11 +160,6 @@ namespace FORM_DKY
             TaiDanhSachSP();
         }
 
-
-        private void panelchildform_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
 
         private void btnHdon_Click(object sender, EventArgs e)
         {
@@ -217,11 +195,6 @@ namespace FORM_DKY
             {
                 openChildForm(new FrmPhieuNhap());
             }
-        }
-
-        private void txtThue_TextChanged(object sender, EventArgs e)
-        {
-
         }
     }
 }

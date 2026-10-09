@@ -53,7 +53,6 @@
             label1.Size = new Size(63, 37);
             label1.TabIndex = 0;
             label1.Text = "Tên:";
-            label1.Click += label1_Click;
             // 
             // btnSend
             // 
@@ -164,6 +163,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            AutoScroll = true;
             BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
             ClientSize = new Size(800, 450);
             Controls.Add(panel1);

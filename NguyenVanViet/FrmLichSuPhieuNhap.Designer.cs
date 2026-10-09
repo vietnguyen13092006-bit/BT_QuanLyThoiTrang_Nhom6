@@ -1,6 +1,6 @@
 ﻿namespace FORM_DKY
 {
-    partial class FrmSanPham
+    partial class FrmLichSuPhieuNhap
     {
         /// <summary>
         /// Required designer variable.
@@ -28,19 +28,36 @@
         /// </summary>
         private void InitializeComponent()
         {
+            dgvLichSu = new DataGridView();
+            ((System.ComponentModel.ISupportInitialize)dgvLichSu).BeginInit();
             SuspendLayout();
             // 
-            // FrmSanPham
+            // dgvLichSu
+            // 
+            dgvLichSu.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvLichSu.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+            dgvLichSu.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgvLichSu.Dock = DockStyle.Fill;
+            dgvLichSu.Location = new Point(0, 0);
+            dgvLichSu.Name = "dgvLichSu";
+            dgvLichSu.Size = new Size(800, 450);
+            dgvLichSu.TabIndex = 0;
+            // 
+            // FrmLichSuPhieuNhap
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoScroll = true;
-            ClientSize = new Size(1100, 700);
-            Name = "FrmSanPham";
-            Text = "FrmSanPham";
+            ClientSize = new Size(800, 450);
+            Controls.Add(dgvLichSu);
+            Name = "FrmLichSuPhieuNhap";
+            Text = "FrmLichSuPhieuNhap";
+            ((System.ComponentModel.ISupportInitialize)dgvLichSu).EndInit();
             ResumeLayout(false);
         }
 
         #endregion
+
+        private DataGridView dgvLichSu;
     }
 }

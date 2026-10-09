@@ -45,10 +45,10 @@
             // 
             lblMail.AutoSize = true;
             lblMail.BackColor = Color.Transparent;
-            lblMail.Font = new Font("Segoe UI", 50F);
+            lblMail.Font = new Font("Segoe UI", 35F);
             lblMail.Location = new Point(487, 263);
             lblMail.Name = "lblMail";
-            lblMail.Size = new Size(196, 89);
+            lblMail.Size = new Size(137, 62);
             lblMail.TabIndex = 0;
             lblMail.Text = "Email";
             // 
@@ -56,10 +56,10 @@
             // 
             lblName.AutoSize = true;
             lblName.BackColor = Color.Transparent;
-            lblName.Font = new Font("Segoe UI", 50F);
+            lblName.Font = new Font("Segoe UI", 35F);
             lblName.Location = new Point(487, 26);
             lblName.Name = "lblName";
-            lblName.Size = new Size(139, 89);
+            lblName.Size = new Size(99, 62);
             lblName.TabIndex = 1;
             lblName.Text = "Tên";
             // 
@@ -78,10 +78,10 @@
             // 
             lblSDT.AutoSize = true;
             lblSDT.BackColor = Color.Transparent;
-            lblSDT.Font = new Font("Segoe UI", 50F);
+            lblSDT.Font = new Font("Segoe UI", 35F);
             lblSDT.Location = new Point(487, 151);
             lblSDT.Name = "lblSDT";
-            lblSDT.Size = new Size(153, 89);
+            lblSDT.Size = new Size(108, 62);
             lblSDT.TabIndex = 3;
             lblSDT.Text = "SDT";
             // 
@@ -130,6 +130,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            AutoScroll = true;
             ClientSize = new Size(968, 618);
             Controls.Add(panel1);
             Controls.Add(lblSDT);

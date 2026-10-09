@@ -24,7 +24,7 @@ namespace FORM_DKY
             txtPN.Text = "PN" + DateTime.Now.ToString("yyyyMMddHHmmss");
             dateTimePicker1.Value = DateTime.Now;
 
-            // Kiểm tra và tạo cột cho DataGridView nếu chưa có
+            // Kiểm tra và tạo cột cho DataGridView lập phiếu (dgvPN) nếu chưa có
             if (dgvPN.Columns.Count == 0)
             {
                 dgvPN.Columns.Add("MaSP", "Mã SP");
@@ -34,7 +34,7 @@ namespace FORM_DKY
                 dgvPN.Columns.Add("ThanhTien", "Thành tiền");
             }
 
-            // === ĐOẠN CODE NÀY ĐỂ ĐỊNH DẠNG DẤU PHẨY CHO BẢNG 1 (dgvPN) ===
+            // Định dạng hiển thị dấu phẩy
             if (dgvPN.Columns["GiaNhap"] != null)
             {
                 dgvPN.Columns["GiaNhap"].DefaultCellStyle.Format = "N0";
@@ -43,64 +43,26 @@ namespace FORM_DKY
             {
                 dgvPN.Columns["ThanhTien"].DefaultCellStyle.Format = "N0";
             }
-            // ==============================================================
 
-            // Đổ dữ liệu sản phẩm vào ComboBox
+            // Chỉ tải danh sách sản phẩm vào ComboBox, loại bỏ dgvLoad nặng nề
             LoadDanhSachSanPham();
-            LoadChiTietPhieuNhap();
+            comboBox1.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            comboBox1.AutoCompleteSource = AutoCompleteSource.ListItems;
 
             if (string.IsNullOrEmpty(txtThue.Text))
             {
                 txtThue.Text = "10";
             }
         }
-        private void LoadChiTietPhieuNhap()
-        {
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                try
-                {
-                    conn.Open();
-                    string query = @"SELECT ct.MaPN AS [Mã Phiếu Nhập], 
-                                    ct.MaSP AS [Mã SP], 
-                                    sp.TenSP AS [Tên Sản Phẩm], 
-                                    ct.SoLuong AS [Số Lượng], 
-                                    ct.GiaNhap AS [Giá Nhập], 
-                                    (ct.SoLuong * ct.GiaNhap * (1 + ISNULL(pn.Thue, 0) / 100.0)) AS [Thành Tiền] 
-                             FROM ChiTietPhieuNhap ct 
-                             JOIN SanPham sp ON ct.MaSP = sp.MaSP
-                             JOIN PhieuNhap pn ON ct.MaPN = pn.MaPN";
 
-                    SqlDataAdapter da = new SqlDataAdapter(query, conn);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-
-                    dgvLoad.DataSource = dt;
-
-                    // Định dạng hiển thị tiền tệ
-                    if (dgvLoad.Columns["Giá Nhập"] != null)
-                    {
-                        dgvLoad.Columns["Giá Nhập"].DefaultCellStyle.Format = "N0";
-                    }
-                    if (dgvLoad.Columns["Thành Tiền"] != null)
-                    {
-                        dgvLoad.Columns["Thành Tiền"].DefaultCellStyle.Format = "N0";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Lỗi tải chi tiết phiếu nhập lên dgvLoad: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (comboBox1.SelectedIndex != -1 && comboBox1.SelectedItem is DataRowView row)
             {
-                // Nếu có ô textbox hiển thị Mã SP, code sẽ tự điền vào đây:
                 txtMaSP.Text = row["MaSP"].ToString();
             }
         }
+
         private void LoadDanhSachSanPham()
         {
             using (SqlConnection conn = new SqlConnection(connectionString))
@@ -150,12 +112,9 @@ namespace FORM_DKY
                 return;
             }
 
-            // Lấy phần trăm thuế từ txtThue (mặc định 0 nếu trống)
             decimal phanTramThue = 0;
             decimal.TryParse(txtThue.Text.Trim(), out phanTramThue);
 
-            // --- BẮT ĐẦU ĐOẠN CODE TÍNH TOÁN VÀ THÊM VÀO DGVPN ---
-            // Tính thành tiền có bao gồm thuế cho từng dòng sản phẩm
             decimal tienHang = soLuong * giaNhap;
             decimal thanhTien = tienHang + (tienHang * (phanTramThue / 100));
 
@@ -169,7 +128,6 @@ namespace FORM_DKY
                     decimal tienHangMoi = slMoi * giaNhap;
 
                     row.Cells["SoLuong"].Value = slMoi;
-                    // Cập nhật lại thành tiền có gộp thuế khi cộng dồn sản phẩm
                     row.Cells["ThanhTien"].Value = tienHangMoi + (tienHangMoi * (phanTramThue / 100));
                     daTonTai = true;
                     break;
@@ -178,10 +136,8 @@ namespace FORM_DKY
 
             if (!daTonTai)
             {
-                // Lúc add vào row:
                 dgvPN.Rows.Add(maSP, tenSP, soLuong, giaNhap, thanhTien);
             }
-            // ----------------------------------------------------
 
             TinhTongTien();
 
@@ -196,7 +152,6 @@ namespace FORM_DKY
             decimal tongTienHang = 0;
             foreach (DataGridViewRow row in dgvPN.Rows)
             {
-                // Lấy tiền hàng gốc (Số lượng * Giá nhập) để tính thuế chuẩn xác tổng phiếu
                 if (row.Cells["SoLuong"].Value != null && row.Cells["GiaNhap"].Value != null)
                 {
                     int sl = Convert.ToInt32(row.Cells["SoLuong"].Value);
@@ -209,32 +164,26 @@ namespace FORM_DKY
             decimal.TryParse(txtThue.Text, out phanTramThue);
 
             decimal tienThue = tongTienHang * (phanTramThue / 100);
-            decimal tongThanhToan = tongTienHang + tienThue;
-
-            // Hiển thị lên giao diện tương ứng (label7 là tiền hàng, lblThue là tiền thuế, v.v.)
-            label7.Text = tongTienHang.ToString("N0") + " VNĐ";
-            lblThue.Text = tienThue.ToString("N0") + " VNĐ";
         }
 
         private void txtThue_TextChanged(object sender, EventArgs e)
         {
             TinhTongTien();
         }
-        // Khi rời khỏi ô (Sự kiện Leave):
+
         private void txtGiaNhap_Leave(object sender, EventArgs e)
         {
             if (decimal.TryParse(txtGiaNhap.Text.Replace(",", ""), out decimal number))
             {
-                txtGiaNhap.Text = number.ToString("N0"); // Tự động thêm dấu phẩy
+                txtGiaNhap.Text = number.ToString("N0");
             }
         }
 
-        // Khi click vào lại để sửa (Sự kiện Enter):
         private void txtGiaNhap_Enter(object sender, EventArgs e)
         {
-            // Bỏ dấu phẩy đi để người dùng sửa số cho dễ
             txtGiaNhap.Text = txtGiaNhap.Text.Replace(",", "");
         }
+
         private void btnLuuPhieu_Click(object sender, EventArgs e)
         {
             string maNV = txtMaNV.Text.Trim();
@@ -274,7 +223,6 @@ namespace FORM_DKY
 
                 try
                 {
-                    // Kiểm tra xem mã nhân viên gõ vào có thực sự tồn tại trong bảng NhanVien không để tránh lỗi khóa ngoại
                     string checkNVQuery = "SELECT COUNT(1) FROM NhanVien WHERE MaNV = @MaNV";
                     using (SqlCommand cmdCheck = new SqlCommand(checkNVQuery, conn, transaction))
                     {
@@ -286,7 +234,6 @@ namespace FORM_DKY
                         }
                     }
 
-                    // Thêm vào bảng PhieuNhap
                     string queryPN = "INSERT INTO PhieuNhap (MaPN, NgayNhap, MaNV, TongTienNhap, Thue) VALUES (@MaPN, @NgayNhap, @MaNV, @TongTienNhap, @Thue)";
                     using (SqlCommand cmd = new SqlCommand(queryPN, conn, transaction))
                     {
@@ -294,11 +241,10 @@ namespace FORM_DKY
                         cmd.Parameters.AddWithValue("@NgayNhap", ngayNhap);
                         cmd.Parameters.AddWithValue("@MaNV", maNV);
                         cmd.Parameters.AddWithValue("@TongTienNhap", tongTienThanhToan);
-                        cmd.Parameters.AddWithValue("@Thue", phanTramThue); // Lưu phần trăm thuế vào CSDL
+                        cmd.Parameters.AddWithValue("@Thue", phanTramThue);
                         cmd.ExecuteNonQuery();
                     }
 
-                    // Thêm chi tiết phiếu nhập và cập nhật tồn kho
                     foreach (DataGridViewRow row in dgvPN.Rows)
                     {
                         if (row.Cells["MaSP"].Value == null) continue;
@@ -317,12 +263,11 @@ namespace FORM_DKY
                             cmdCT.ExecuteNonQuery();
                         }
 
-                        // Vừa cộng dồn số lượng tồn, vừa cập nhật giá nhập mới nhất cho sản phẩm đó
                         string queryUpdateKho = "UPDATE SanPham SET SoLuongTon = SoLuongTon + @SoLuong, GiaNhap = @GiaNhap WHERE MaSP = @MaSP";
                         using (SqlCommand cmdKho = new SqlCommand(queryUpdateKho, conn, transaction))
                         {
                             cmdKho.Parameters.AddWithValue("@SoLuong", soLuong);
-                            cmdKho.Parameters.AddWithValue("@GiaNhap", giaNhap); // Cập nhật giá nhập mới nhất
+                            cmdKho.Parameters.AddWithValue("@GiaNhap", giaNhap);
                             cmdKho.Parameters.AddWithValue("@MaSP", maSP);
                             cmdKho.ExecuteNonQuery();
                         }
@@ -345,15 +290,13 @@ namespace FORM_DKY
 
         private void btnThemNhanhSP_Click(object sender, EventArgs e)
         {
-            // Hiển thị hộp thoại nhỏ để nhập tên sản phẩm
             string tenSP = Microsoft.VisualBasic.Interaction.InputBox("Nhập tên sản phẩm mới:", "Thêm nhanh sản phẩm", "", -1, -1);
 
             if (string.IsNullOrWhiteSpace(tenSP))
             {
-                return; // Người dùng bấm Hủy hoặc không nhập gì thì bỏ qua
+                return;
             }
 
-            // Tự động sinh mã sản phẩm dựa theo thời gian để không bị trùng và đỡ mất công gõ
             string maSP = "SP" + DateTime.Now.ToString("yyMMddHHmmss");
 
             using (SqlConnection conn = new SqlConnection(connectionString))
@@ -361,7 +304,6 @@ namespace FORM_DKY
                 try
                 {
                     conn.Open();
-                    // Thêm nhanh vào bảng SanPham với số lượng tồn ban đầu là 0
                     string query = "INSERT INTO SanPham (MaSP, TenSP, SoLuongTon) VALUES (@MaSP, @TenSP, 0)";
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
@@ -371,11 +313,7 @@ namespace FORM_DKY
                     }
 
                     MessageBox.Show("Thêm sản phẩm thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                    // Load lại danh sách sản phẩm trong ComboBox
                     LoadDanhSachSanPham();
-
-                    // Tự động chọn sản phẩm vừa thêm vào ComboBox để nhập kho
                     comboBox1.SelectedValue = maSP;
                     txtSoluong.Focus();
                 }
@@ -384,6 +322,13 @@ namespace FORM_DKY
                     MessageBox.Show("Lỗi khi thêm sản phẩm: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
+
+        // Sự kiện nút mở popup xem lịch sử chi tiết nhập hàng
+        private void btnXemLichSu_Click(object sender, EventArgs e)
+        {
+            FrmLichSuPhieuNhap popup = new FrmLichSuPhieuNhap();
+            popup.ShowDialog();
         }
     }
 }

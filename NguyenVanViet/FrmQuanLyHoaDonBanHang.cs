@@ -314,6 +314,10 @@ namespace FORM_DKY
                 cboSanPham.DisplayMember = "TenSP";
                 cboSanPham.ValueMember = "MaSP";
 
+                cboSanPham.DropDownStyle = ComboBoxStyle.DropDown; // Cho phép gõ chữ trực tiếp vào ô
+                cboSanPham.AutoCompleteMode = AutoCompleteMode.SuggestAppend; // Tự động gợi ý danh sách khi gõ
+                cboSanPham.AutoCompleteSource = AutoCompleteSource.ListItems;
+
                 isBindingSP = false;
 
                 if (cboSanPham.Items.Count > 0)

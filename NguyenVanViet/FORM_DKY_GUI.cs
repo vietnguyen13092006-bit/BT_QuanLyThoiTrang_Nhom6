@@ -14,16 +14,6 @@ namespace FORM_DKY
             InitializeComponent();
         }
 
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label4_Click(object sender, EventArgs e)
-        {
-
-        }
-        
         private void Form_DKY_Resize(object sender, EventArgs e)
         {
             // Giữ Panel luôn ở chính giữa khi phóng to / thu nhỏ Form

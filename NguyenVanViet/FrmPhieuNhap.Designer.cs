@@ -31,9 +31,9 @@
             txtPN = new TextBox();
             label1 = new Label();
             panelTong = new Panel();
-            btnThemNhanhSP = new Button();
             label4 = new Label();
-            dgvLoad = new DataGridView();
+            btnXemLichSu = new Button();
+            btnThemNhanhSP = new Button();
             label8 = new Label();
             txtMaNV = new TextBox();
             dgvPN = new DataGridView();
@@ -52,7 +52,6 @@
             label3 = new Label();
             label2 = new Label();
             panelTong.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvLoad).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dgvPN).BeginInit();
             SuspendLayout();
             // 
@@ -60,7 +59,7 @@
             // 
             txtPN.Anchor = AnchorStyles.Top;
             txtPN.Enabled = false;
-            txtPN.Location = new Point(141, 11);
+            txtPN.Location = new Point(117, 167);
             txtPN.Name = "txtPN";
             txtPN.ReadOnly = true;
             txtPN.Size = new Size(193, 23);
@@ -70,7 +69,7 @@
             // 
             label1.Anchor = AnchorStyles.Top;
             label1.AutoSize = true;
-            label1.Location = new Point(92, 11);
+            label1.Location = new Point(68, 167);
             label1.Name = "label1";
             label1.Size = new Size(43, 15);
             label1.TabIndex = 1;
@@ -78,10 +77,11 @@
             // 
             // panelTong
             // 
+            panelTong.AutoScroll = true;
             panelTong.AutoSize = true;
-            panelTong.Controls.Add(btnThemNhanhSP);
             panelTong.Controls.Add(label4);
-            panelTong.Controls.Add(dgvLoad);
+            panelTong.Controls.Add(btnXemLichSu);
+            panelTong.Controls.Add(btnThemNhanhSP);
             panelTong.Controls.Add(label8);
             panelTong.Controls.Add(txtMaNV);
             panelTong.Controls.Add(dgvPN);
@@ -104,13 +104,35 @@
             panelTong.Dock = DockStyle.Fill;
             panelTong.Location = new Point(0, 0);
             panelTong.Name = "panelTong";
-            panelTong.Size = new Size(1139, 802);
+            panelTong.Size = new Size(1021, 639);
             panelTong.TabIndex = 2;
+            // 
+            // label4
+            // 
+            label4.Anchor = AnchorStyles.Top;
+            label4.AutoSize = true;
+            label4.Font = new Font("Segoe UI", 50F);
+            label4.Location = new Point(321, 9);
+            label4.Name = "label4";
+            label4.Size = new Size(370, 89);
+            label4.TabIndex = 25;
+            label4.Text = "Phiếu nhập";
+            // 
+            // btnXemLichSu
+            // 
+            btnXemLichSu.Anchor = AnchorStyles.Top;
+            btnXemLichSu.Location = new Point(786, 578);
+            btnXemLichSu.Name = "btnXemLichSu";
+            btnXemLichSu.Size = new Size(146, 46);
+            btnXemLichSu.TabIndex = 24;
+            btnXemLichSu.Text = "Xem phiếu nhập đã tạo";
+            btnXemLichSu.UseVisualStyleBackColor = true;
+            btnXemLichSu.Click += btnXemLichSu_Click;
             // 
             // btnThemNhanhSP
             // 
             btnThemNhanhSP.Anchor = AnchorStyles.Top;
-            btnThemNhanhSP.Location = new Point(881, 142);
+            btnThemNhanhSP.Location = new Point(832, 298);
             btnThemNhanhSP.Name = "btnThemNhanhSP";
             btnThemNhanhSP.Size = new Size(100, 39);
             btnThemNhanhSP.TabIndex = 23;
@@ -118,30 +140,11 @@
             btnThemNhanhSP.UseVisualStyleBackColor = true;
             btnThemNhanhSP.Click += btnThemNhanhSP_Click;
             // 
-            // label4
-            // 
-            label4.Anchor = AnchorStyles.Top;
-            label4.AutoSize = true;
-            label4.Location = new Point(101, 532);
-            label4.Name = "label4";
-            label4.Size = new Size(132, 15);
-            label4.TabIndex = 22;
-            label4.Text = "Các phiếu nhập hiện có";
-            // 
-            // dgvLoad
-            // 
-            dgvLoad.Anchor = AnchorStyles.Top;
-            dgvLoad.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvLoad.Location = new Point(101, 560);
-            dgvLoad.Name = "dgvLoad";
-            dgvLoad.Size = new Size(880, 201);
-            dgvLoad.TabIndex = 21;
-            // 
             // label8
             // 
             label8.Anchor = AnchorStyles.Top;
             label8.AutoSize = true;
-            label8.Location = new Point(554, 154);
+            label8.Location = new Point(530, 310);
             label8.Name = "label8";
             label8.Size = new Size(79, 15);
             label8.TabIndex = 20;
@@ -150,7 +153,7 @@
             // txtMaNV
             // 
             txtMaNV.Anchor = AnchorStyles.Top;
-            txtMaNV.Location = new Point(642, 151);
+            txtMaNV.Location = new Point(618, 307);
             txtMaNV.Name = "txtMaNV";
             txtMaNV.Size = new Size(193, 23);
             txtMaNV.TabIndex = 19;
@@ -158,18 +161,20 @@
             // dgvPN
             // 
             dgvPN.Anchor = AnchorStyles.Top;
+            dgvPN.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvPN.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
             dgvPN.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvPN.Location = new Point(101, 208);
+            dgvPN.Location = new Point(77, 343);
             dgvPN.Name = "dgvPN";
-            dgvPN.Size = new Size(880, 308);
+            dgvPN.Size = new Size(855, 229);
             dgvPN.TabIndex = 18;
             // 
             // btnLuuPhieu
             // 
-            btnLuuPhieu.Anchor = AnchorStyles.Bottom;
-            btnLuuPhieu.Location = new Point(706, 767);
+            btnLuuPhieu.Anchor = AnchorStyles.Top;
+            btnLuuPhieu.Location = new Point(627, 578);
             btnLuuPhieu.Name = "btnLuuPhieu";
-            btnLuuPhieu.Size = new Size(119, 23);
+            btnLuuPhieu.Size = new Size(119, 46);
             btnLuuPhieu.TabIndex = 17;
             btnLuuPhieu.Text = "Lưu hóa đơn";
             btnLuuPhieu.UseVisualStyleBackColor = true;
@@ -177,10 +182,10 @@
             // 
             // btnThemSp
             // 
-            btnThemSp.Anchor = AnchorStyles.Bottom;
-            btnThemSp.Location = new Point(211, 767);
+            btnThemSp.Anchor = AnchorStyles.Top;
+            btnThemSp.Location = new Point(82, 578);
             btnThemSp.Name = "btnThemSp";
-            btnThemSp.Size = new Size(75, 23);
+            btnThemSp.Size = new Size(97, 46);
             btnThemSp.TabIndex = 16;
             btnThemSp.Text = "Thêm SP";
             btnThemSp.UseVisualStyleBackColor = true;
@@ -190,7 +195,7 @@
             // 
             label7.Anchor = AnchorStyles.Top;
             label7.AutoSize = true;
-            label7.Location = new Point(368, 18);
+            label7.Location = new Point(344, 174);
             label7.Name = "label7";
             label7.Size = new Size(84, 15);
             label7.TabIndex = 15;
@@ -200,7 +205,7 @@
             // 
             comboBox1.Anchor = AnchorStyles.Top;
             comboBox1.FormattingEnabled = true;
-            comboBox1.Location = new Point(458, 15);
+            comboBox1.Location = new Point(434, 171);
             comboBox1.Name = "comboBox1";
             comboBox1.Size = new Size(145, 23);
             comboBox1.TabIndex = 14;
@@ -210,7 +215,7 @@
             // 
             label6.Anchor = AnchorStyles.Top;
             label6.AutoSize = true;
-            label6.Location = new Point(675, 76);
+            label6.Location = new Point(651, 232);
             label6.Name = "label6";
             label6.Size = new Size(65, 15);
             label6.TabIndex = 13;
@@ -219,15 +224,15 @@
             // dateTimePicker1
             // 
             dateTimePicker1.Anchor = AnchorStyles.Top;
-            dateTimePicker1.Location = new Point(756, 72);
+            dateTimePicker1.Location = new Point(722, 228);
             dateTimePicker1.Name = "dateTimePicker1";
-            dateTimePicker1.Size = new Size(200, 23);
+            dateTimePicker1.Size = new Size(210, 23);
             dateTimePicker1.TabIndex = 12;
             // 
             // txtThue
             // 
             txtThue.Anchor = AnchorStyles.Top;
-            txtThue.Location = new Point(303, 151);
+            txtThue.Location = new Point(279, 307);
             txtThue.Name = "txtThue";
             txtThue.Size = new Size(179, 23);
             txtThue.TabIndex = 11;
@@ -237,16 +242,16 @@
             // 
             lblThue.Anchor = AnchorStyles.Top;
             lblThue.AutoSize = true;
-            lblThue.Location = new Point(243, 154);
+            lblThue.Location = new Point(219, 310);
             lblThue.Name = "lblThue";
-            lblThue.Size = new Size(43, 15);
+            lblThue.Size = new Size(44, 15);
             lblThue.TabIndex = 10;
             lblThue.Text = "%Thuế";
             // 
             // txtSoluong
             // 
             txtSoluong.Anchor = AnchorStyles.Top;
-            txtSoluong.Location = new Point(427, 72);
+            txtSoluong.Location = new Point(403, 228);
             txtSoluong.Name = "txtSoluong";
             txtSoluong.Size = new Size(179, 23);
             txtSoluong.TabIndex = 8;
@@ -254,7 +259,7 @@
             // txtGiaNhap
             // 
             txtGiaNhap.Anchor = AnchorStyles.Top;
-            txtGiaNhap.Location = new Point(155, 72);
+            txtGiaNhap.Location = new Point(131, 228);
             txtGiaNhap.Name = "txtGiaNhap";
             txtGiaNhap.Size = new Size(179, 23);
             txtGiaNhap.TabIndex = 7;
@@ -264,7 +269,7 @@
             // txtMaSP
             // 
             txtMaSP.Anchor = AnchorStyles.Top;
-            txtMaSP.Location = new Point(721, 12);
+            txtMaSP.Location = new Point(697, 168);
             txtMaSP.Name = "txtMaSP";
             txtMaSP.Size = new Size(235, 23);
             txtMaSP.TabIndex = 6;
@@ -273,7 +278,7 @@
             // 
             label5.Anchor = AnchorStyles.Top;
             label5.AutoSize = true;
-            label5.Location = new Point(675, 14);
+            label5.Location = new Point(651, 170);
             label5.Name = "label5";
             label5.Size = new Size(40, 15);
             label5.TabIndex = 5;
@@ -283,7 +288,7 @@
             // 
             label3.Anchor = AnchorStyles.Top;
             label3.AutoSize = true;
-            label3.Location = new Point(95, 75);
+            label3.Location = new Point(71, 231);
             label3.Name = "label3";
             label3.Size = new Size(54, 15);
             label3.TabIndex = 3;
@@ -293,7 +298,7 @@
             // 
             label2.Anchor = AnchorStyles.Top;
             label2.AutoSize = true;
-            label2.Location = new Point(367, 75);
+            label2.Location = new Point(343, 231);
             label2.Name = "label2";
             label2.Size = new Size(54, 15);
             label2.TabIndex = 2;
@@ -303,14 +308,13 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1139, 802);
+            ClientSize = new Size(1021, 639);
             Controls.Add(panelTong);
             Name = "FrmPhieuNhap";
             Text = "FrmPhieuNhap";
             Load += FrmPhieuNhap_Load;
             panelTong.ResumeLayout(false);
             panelTong.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvLoad).EndInit();
             ((System.ComponentModel.ISupportInitialize)dgvPN).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -338,8 +342,8 @@
         private DataGridView dgvPN;
         private Label label8;
         private TextBox txtMaNV;
-        private Label label4;
-        private DataGridView dgvLoad;
         private Button btnThemNhanhSP;
+        private Button btnXemLichSu;
+        private Label label4;
     }
 }
