@@ -102,3 +102,5 @@ go
 SELECT* FROM PhieuNhap
 go
 ALTER TABLE PhieuNhap ADD Thue DECIMAL(18, 2) DEFAULT 0;
+
+select* from PhieuNhap
