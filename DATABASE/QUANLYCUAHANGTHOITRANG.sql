@@ -94,3 +94,11 @@ go
 ALTER TABLE HoaDon ADD TienThue DECIMAL(18, 2) DEFAULT 0;
 go
 select* from HoaDon
+go
+INSERT INTO NhanVien (MaNV, TenNV, SDT, ChucVu) 
+VALUES 
+('NV01', N'Nguyễn Văn Việt', '0987654321', N'Quản lý')
+go
+SELECT* FROM PhieuNhap
+go
+ALTER TABLE PhieuNhap ADD Thue DECIMAL(18, 2) DEFAULT 0;
