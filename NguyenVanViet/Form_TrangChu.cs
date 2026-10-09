@@ -126,6 +126,7 @@ namespace FORM_DKY
                     btnQlyQAo.Text = "🛍️";
                     btnHdon.Text = "🧾";
                     btnBaocao.Text = "📈";
+                    btnPhieuNhap.Text = "📋";
                     //btn_TrangChu.Text = "";
                     //btnDangNhap.Text = "";
                 }
@@ -142,6 +143,7 @@ namespace FORM_DKY
                     btnQlyQAo.Text = "Qly quần áo";
                     btnHdon.Text = "Qly hóa đơn";
                     btnBaocao.Text = "Báo cáo thống kê";
+                    btnPhieuNhap.Text = "Phiếu nhập";
                     CapNhatGiaoDienNutTaiKhoan();
                 }
             }
@@ -203,6 +205,23 @@ namespace FORM_DKY
             {
                 openChildForm(new frmBaoCaoThongKe());
             }
+        }
+
+        private void btnPhieuNhap_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(FormDangNhap.Ten))
+            {
+                MessageBox.Show("Bạn cần đăng nhập để xem quản lý hóa đơn", "Thông báo", MessageBoxButtons.OK); ;
+            }
+            else
+            {
+                openChildForm(new FrmPhieuNhap());
+            }
+        }
+
+        private void txtThue_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -25,6 +25,7 @@ namespace FORM_DKY
         private Label lblValDoanhThu = null!;
         private Label lblValGiaVon = null!;
         private Label lblValLoiNhuan = null!;
+        private Label lblTienThue = null!;
 
         private DataGridView dgvBaoCao = null!;
         private DataGridView dgvChiTiet = null!;
@@ -89,10 +90,12 @@ namespace FORM_DKY
                     denNgay = dtpDenNgay.Value.Date.AddDays(1).AddSeconds(-1);
                 }
 
+                // Đồng bộ tên cột [Tổng Tiền Thuế] khớp với phía dưới
                 string query = @"SELECT 
                                     h.MaHD AS [Số Hóa Đơn],
                                     h.NgayBan AS [Ngày Lập],
                                     h.TongTien AS [Doanh Thu],
+                                    ISNULL(h.TienThue, 0) AS [Tổng Tiền Thuế],
                                     ISNULL(SUM(ct.SoLuong * ISNULL(pn.GiaNhapGoc, ct.DonGia * 0.6)), 0) AS [Giá Vốn],
                                     (h.TongTien - ISNULL(SUM(ct.SoLuong * ISNULL(pn.GiaNhapGoc, ct.DonGia * 0.6)), 0)) AS [Lợi Nhuận],
                                     n.TenNV AS [Nhân Viên Lập]
@@ -106,7 +109,7 @@ namespace FORM_DKY
                                     ORDER BY MaPN DESC
                                 ) pn
                                 WHERE h.NgayBan BETWEEN @TuNgay AND @DenNgay
-                                GROUP BY h.MaHD, h.NgayBan, h.TongTien, n.TenNV";
+                                GROUP BY h.MaHD, h.NgayBan, h.TongTien, h.TienThue, n.TenNV";
 
                 SqlParameter[] parameters = new SqlParameter[]
                 {
@@ -114,14 +117,13 @@ namespace FORM_DKY
                     new SqlParameter("@DenNgay", denNgay)
                 };
 
-                // Sử dụng DatabaseHelper.ExecuteQuery đúng chuẩn
                 DataTable dt = DatabaseHelper.ExecuteQuery(query, parameters);
-
                 dgvBaoCao.DataSource = dt;
 
                 if (dgvBaoCao.Columns["Doanh Thu"] != null) dgvBaoCao.Columns["Doanh Thu"].DefaultCellStyle.Format = "N0";
                 if (dgvBaoCao.Columns["Giá Vốn"] != null) dgvBaoCao.Columns["Giá Vốn"].DefaultCellStyle.Format = "N0";
                 if (dgvBaoCao.Columns["Lợi Nhuận"] != null) dgvBaoCao.Columns["Lợi Nhuận"].DefaultCellStyle.Format = "N0";
+                if (dgvBaoCao.Columns["Tổng Tiền Thuế"] != null) dgvBaoCao.Columns["Tổng Tiền Thuế"].DefaultCellStyle.Format = "N0";
 
                 txtSoLuongHD.Text = dt.Rows.Count.ToString();
 
@@ -136,17 +138,19 @@ namespace FORM_DKY
                 }
                 cboMaHoaDon.SelectedIndex = 0;
 
-                decimal tongDoanhThu = 0, tongGiaVon = 0, tongLoiNhuan = 0;
+                decimal tongDoanhThu = 0, tongGiaVon = 0, tongLoiNhuan = 0, tongThueVAT = 0;
                 foreach (DataRow row in dt.Rows)
                 {
                     tongDoanhThu += Convert.ToDecimal(row["Doanh Thu"]);
                     tongGiaVon += Convert.ToDecimal(row["Giá Vốn"]);
                     tongLoiNhuan += Convert.ToDecimal(row["Lợi Nhuận"]);
+                    tongThueVAT += Convert.ToDecimal(row["Tổng Tiền Thuế"]);
                 }
 
                 lblValDoanhThu.Text = tongDoanhThu.ToString("N0") + " VNĐ";
                 lblValGiaVon.Text = tongGiaVon.ToString("N0") + " VNĐ";
                 lblValLoiNhuan.Text = tongLoiNhuan.ToString("N0") + " VNĐ";
+                lblTienThue.Text = tongThueVAT.ToString("N0") + " VNĐ";
 
                 dgvChiTiet.DataSource = null;
                 CapNhatChieuCaoGridView();
@@ -183,6 +187,7 @@ namespace FORM_DKY
         {
             try
             {
+                // Sửa lại câu lệnh SQL lấy chi tiết hóa đơn chuẩn và an toàn
                 string query = @"SELECT 
                                     ct.MaHD AS [Mã HD],
                                     ct.MaSP AS [Mã Sản Phẩm],
@@ -191,6 +196,7 @@ namespace FORM_DKY
                                     ct.DonGia AS [Đơn Giá Bán],
                                     (ct.SoLuong * ct.DonGia) AS [Thành Tiền]
                                 FROM ChiTietHoaDon ct
+                                INNER JOIN HoaDon h ON ct.MaHD = h.MaHD
                                 LEFT JOIN SanPham sp ON ct.MaSP = sp.MaSP
                                 WHERE ct.MaHD = @MaHD";
 
@@ -199,9 +205,7 @@ namespace FORM_DKY
                     new SqlParameter("@MaHD", maHD)
                 };
 
-                // Sử dụng DatabaseHelper.ExecuteQuery lấy chi tiết hóa đơn
                 DataTable dtChiTiet = DatabaseHelper.ExecuteQuery(query, parameters);
-
                 dgvChiTiet.DataSource = dtChiTiet;
 
                 if (dgvChiTiet.Columns["Đơn Giá Bán"] != null) dgvChiTiet.Columns["Đơn Giá Bán"].DefaultCellStyle.Format = "N0";
@@ -242,7 +246,7 @@ namespace FORM_DKY
             using SaveFileDialog sfd = new SaveFileDialog
             {
                 Filter = "Excel Files (*.xls)|*.xls",
-                FileName = "BaoCaoDoanhThu_" + DateTime.Now.ToString("ddMMyyyy") + ".xls"
+                FileName = "BaoCaoDoanhThu_" + DateTime.Now.ToString("dd-MM-yyyy") + ".xls"
             };
 
             if (sfd.ShowDialog() == DialogResult.OK)
@@ -251,12 +255,12 @@ namespace FORM_DKY
                 {
                     using (StreamWriter sw = new StreamWriter(sfd.FileName, false, System.Text.Encoding.Unicode))
                     {
-                        sw.WriteLine("Số Hóa Đơn\tNgày Lập\tDoanh Thu\tGiá Vốn\tLợi Nhuận\tNhân Viên Lập");
+                        sw.WriteLine("Số Hóa Đơn\tNgày Lập\tDoanh Thu\tTổng Tiền Thuế\tGiá Vốn\tLợi Nhuận\tNhân Viên Lập");
                         foreach (DataGridViewRow row in dgvBaoCao.Rows)
                         {
                             if (!row.IsNewRow)
                             {
-                                sw.WriteLine($"{row.Cells["Số Hóa Đơn"].Value}\t{row.Cells["Ngày Lập"].Value}\t{row.Cells["Doanh Thu"].Value}\t{row.Cells["Giá Vốn"].Value}\t{row.Cells["Lợi Nhuận"].Value}\t{row.Cells["Nhân Viên Lập"].Value}");
+                                sw.WriteLine($"{row.Cells["Số Hóa Đơn"].Value}\t{row.Cells["Ngày Lập"].Value}\t{row.Cells["Doanh Thu"].Value}\t{row.Cells["Tổng Tiền Thuế"].Value}\t{row.Cells["Giá Vốn"].Value}\t{row.Cells["Lợi Nhuận"].Value}\t{row.Cells["Nhân Viên Lập"].Value}");
                             }
                         }
                     }
@@ -277,10 +281,12 @@ namespace FORM_DKY
         private void InitializeComponentCustom()
         {
             this.WindowState = FormWindowState.Maximized;
-            this.MinimumSize = new Size(1100, 700);
+            this.MinimumSize = new Size(1200, 700);
             this.Text = "BÁO CÁO THỐNG KÊ DOANH THU & LỢI NHUẬN";
 
             pnlTop = new Panel { Dock = DockStyle.Top, Height = 60, BackColor = Color.FromArgb(240, 244, 248) };
+
+            // Tăng chiều cao của pnlCards để chứa đẹp 4 thẻ card thông kê ngang nhau
             pnlCards = new Panel { Dock = DockStyle.Top, Height = 85, BackColor = Color.White };
 
             pnlMainContainer = new Panel { Dock = DockStyle.Fill, AutoScroll = true };
@@ -298,7 +304,7 @@ namespace FORM_DKY
 
             grpChiTiet = new GroupBox
             {
-                Text = "📄 CHI TIẾT SẢN PHẨM TRONG HÓA ĐƠN ",
+                Text = "📄 CHI TIẾT SẢN PHẨM TRONG HÓA ĐƠN",
                 Dock = DockStyle.Top,
                 Height = 220,
                 Font = new Font("Segoe UI", 9, FontStyle.Bold)
@@ -341,9 +347,11 @@ namespace FORM_DKY
 
             pnlTop.Controls.AddRange(new Control[] { rdoHomNay, rdoThangNay, rdoNamNay, rdoTuChon, lblTu, dtpTuNgay, lblDen, dtpDenNgay, btnTraCuu, lblSL, txtSoLuongHD });
 
-            lblValDoanhThu = CreateCard(pnlCards, "💵 TỔNG DOANH THU", Color.SeaGreen, 30);
-            lblValGiaVon = CreateCard(pnlCards, "💸 TỔNG GIÁ VỐN", Color.IndianRed, 350);
-            lblValLoiNhuan = CreateCard(pnlCards, "💰 TỔNG LỢI NHUẬN", Color.DarkBlue, 670);
+            // SẮP XẾP LẠI TỌA ĐỘ 4 THẺ CARD NGANG NHAU (Cách đều khoảng 310 pixel)
+            lblValDoanhThu = CreateCard(pnlCards, "💵 TỔNG DOANH THU", Color.SeaGreen, 20);
+            lblValGiaVon = CreateCard(pnlCards, "💸 TỔNG GIÁ VỐN", Color.IndianRed, 330);
+            lblTienThue = CreateCard(pnlCards, "🧾 TỔNG THUẾ VAT", Color.DarkOrange, 640);
+            lblValLoiNhuan = CreateCard(pnlCards, "💰 TỔNG LỢI NHUẬN", Color.DarkBlue, 950);
 
             Label lblChonHD = new Label { Text = "🔍 Tìm HD:", Location = new Point(20, 18), AutoSize = true };
 
@@ -372,7 +380,7 @@ namespace FORM_DKY
 
         private static Label CreateCard(Panel parent, string title, Color color, int x)
         {
-            Panel p = new Panel { Location = new Point(x, 8), Size = new Size(280, 68), BorderStyle = BorderStyle.FixedSingle, BackColor = Color.AliceBlue };
+            Panel p = new Panel { Location = new Point(x, 8), Size = new Size(300, 68), BorderStyle = BorderStyle.FixedSingle, BackColor = Color.AliceBlue };
             Label lblTitle = new Label { Text = title, Location = new Point(10, 6), AutoSize = true, Font = new Font("Segoe UI", 9, FontStyle.Bold), ForeColor = color };
             Label lblVal = new Label { Text = "0 VNĐ", Location = new Point(10, 30), AutoSize = true, Font = new Font("Segoe UI", 12, FontStyle.Bold) };
             p.Controls.Add(lblTitle);

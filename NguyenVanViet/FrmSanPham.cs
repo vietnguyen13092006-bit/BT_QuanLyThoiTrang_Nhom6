@@ -39,9 +39,7 @@ namespace FORM_DKY
 
         private PictureBox picHinhAnh = null!;
         private Button btnChonAnh = null!;
-        private Button btnThem = null!;
         private Button btnSua = null!;
-        private Button btnXoa = null!;
         private Button btnLamMoi = null!;
 
         private void TaoGiaoDienResponsive()
@@ -163,19 +161,15 @@ namespace FORM_DKY
             tlpInput.Controls.Add(new Label { Text = "Ghi Chú:", Anchor = AnchorStyles.Left }, 2, 3);
             tlpInput.Controls.Add(txtGhiChu, 3, 3);
 
-            // Dòng 4
+            // Dòng 4 (Chỉ giữ lại nút Cập Nhật và Làm Mới)
             flpButtons = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoSize = true, FlowDirection = FlowDirection.LeftToRight };
-            btnThem = new Button { Text = "Thêm Mới", Width = 90, Height = 32, BackColor = Color.LightGreen };
-            btnSua = new Button { Text = "Cập Nhật", Width = 90, Height = 32, BackColor = Color.LightSkyBlue };
-            btnXoa = new Button { Text = "Xóa SP", Width = 90, Height = 32, BackColor = Color.MistyRose };
-            btnLamMoi = new Button { Text = "Làm Mới", Width = 90, Height = 32 };
+            btnSua = new Button { Text = "Cập Nhật", Width = 110, Height = 32, BackColor = Color.LightSkyBlue };
+            btnLamMoi = new Button { Text = "Làm Mới", Width = 110, Height = 32 };
 
-            btnThem.Click += BtnThem_Click;
             btnSua.Click += BtnSua_Click;
-            btnXoa.Click += BtnXoa_Click;
             btnLamMoi.Click += (s, e) => { TaiDanhSachSanPham(); XoaTrangForm(); };
 
-            flpButtons.Controls.AddRange(new Control[] { btnThem, btnSua, btnXoa, btnLamMoi });
+            flpButtons.Controls.AddRange(new Control[] { btnSua, btnLamMoi });
 
             TableLayoutPanel tlpTimKiem = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2 };
             tlpTimKiem.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 80F));
@@ -205,7 +199,7 @@ namespace FORM_DKY
                 BackgroundColor = Color.White
             };
             dgvSanPham.CellClick += DgvSanPham_CellClick;
-            dgvSanPham.CellFormatting += DgvSanPham_CellFormatting; // Thêm cảnh báo sắp hết hàng
+            dgvSanPham.CellFormatting += DgvSanPham_CellFormatting;
 
             tlpMain.Controls.Add(dgvSanPham, 0, 2);
             this.Controls.Add(tlpMain);
@@ -251,7 +245,6 @@ namespace FORM_DKY
             if (dgvSanPham.Columns["HinhAnh"] != null) dgvSanPham.Columns["HinhAnh"].Visible = false;
         }
 
-        // Cảnh báo màu đỏ khi số lượng tồn kho <= 5
         private void DgvSanPham_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
         {
             if (dgvSanPham.Columns[e.ColumnIndex].Name == "SoLuongTon" && e.Value != null)
@@ -331,7 +324,7 @@ namespace FORM_DKY
 
         #endregion
 
-        #region 3. THAO TÁC CRUD (THÊM, SỬA, XÓA, ẢNH, TÌM KIẾM)
+        #region 3. THAO TÁC CẬP NHẬT, ẢNH, TÌM KIẾM
 
         private void BtnChonAnh_Click(object? sender, EventArgs e)
         {
@@ -343,39 +336,6 @@ namespace FORM_DKY
                     duongDanAnh = ofd.FileName;
                     HienThiAnh(duongDanAnh);
                 }
-            }
-        }
-
-        private void BtnThem_Click(object? sender, EventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(txtMaSP.Text) || string.IsNullOrWhiteSpace(txtTenSP.Text))
-            {
-                MessageBox.Show("Vui lòng nhập Mã và Tên sản phẩm!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            string query = @"INSERT INTO SanPham (MaSP, TenSP, LoaiSP, MauSac, Size, GiaNhap, GiaBan, SoLuongTon, GhiChu, HinhAnh)
-                            VALUES (@MaSP, @TenSP, @LoaiSP, @MauSac, @Size, @GiaNhap, @GiaBan, @SoLuong, @GhiChu, @HinhAnh)";
-
-            SqlParameter[] parameters = new SqlParameter[]
-            {
-                new SqlParameter("@MaSP", txtMaSP.Text.Trim()),
-                new SqlParameter("@TenSP", txtTenSP.Text.Trim()),
-                new SqlParameter("@LoaiSP", (object?)cboLoaiSP.Text ?? DBNull.Value),
-                new SqlParameter("@MauSac", (object?)cboMauSac.Text ?? DBNull.Value),
-                new SqlParameter("@Size", (object?)cboSize.Text ?? DBNull.Value),
-                new SqlParameter("@GiaNhap", nudGiaNhap.Value),
-                new SqlParameter("@GiaBan", nudGiaBan.Value),
-                new SqlParameter("@SoLuong", (int)nudSoLuong.Value),
-                new SqlParameter("@GhiChu", (object?)txtGhiChu.Text ?? DBNull.Value),
-                new SqlParameter("@HinhAnh", (object?)duongDanAnh ?? DBNull.Value)
-            };
-
-            if (Database.ExecuteNonQuery(query, parameters) > 0)
-            {
-                MessageBox.Show("Thêm sản phẩm thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                TaiDanhSachSanPham();
-                XoaTrangForm();
             }
         }
 
@@ -412,28 +372,6 @@ namespace FORM_DKY
                 MessageBox.Show("Cập nhật thông tin thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 TaiDanhSachSanPham();
                 XoaTrangForm();
-            }
-        }
-
-        private void BtnXoa_Click(object? sender, EventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(txtMaSP.Text))
-            {
-                MessageBox.Show("Vui lòng chọn sản phẩm cần xóa!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            if (MessageBox.Show($"Bạn có chắc chắn muốn xóa sản phẩm [{txtMaSP.Text}] không?", "Xác nhận xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-            {
-                string query = "DELETE FROM SanPham WHERE MaSP = @MaSP";
-                SqlParameter[] parameters = new SqlParameter[] { new SqlParameter("@MaSP", txtMaSP.Text.Trim()) };
-
-                if (Database.ExecuteNonQuery(query, parameters) > 0)
-                {
-                    MessageBox.Show("Xóa sản phẩm thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    TaiDanhSachSanPham();
-                    XoaTrangForm();
-                }
             }
         }
 

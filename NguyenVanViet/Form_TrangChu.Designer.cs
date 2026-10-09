@@ -30,6 +30,7 @@
         {
             components = new System.ComponentModel.Container();
             panelsidebar = new Panel();
+            btnPhieuNhap = new Button();
             btnBaocao = new Button();
             btnDangNhap = new Button();
             btnHdon = new Button();
@@ -44,6 +45,7 @@
             // panelsidebar
             // 
             panelsidebar.BackColor = Color.SlateGray;
+            panelsidebar.Controls.Add(btnPhieuNhap);
             panelsidebar.Controls.Add(btnBaocao);
             panelsidebar.Controls.Add(btnDangNhap);
             panelsidebar.Controls.Add(btnHdon);
@@ -57,6 +59,20 @@
             panelsidebar.Name = "panelsidebar";
             panelsidebar.Size = new Size(50, 450);
             panelsidebar.TabIndex = 7;
+            // 
+            // btnPhieuNhap
+            // 
+            btnPhieuNhap.AutoSize = true;
+            btnPhieuNhap.Dock = DockStyle.Top;
+            btnPhieuNhap.FlatAppearance.BorderSize = 0;
+            btnPhieuNhap.FlatStyle = FlatStyle.Flat;
+            btnPhieuNhap.Font = new Font("Segoe UI", 9.75F);
+            btnPhieuNhap.Location = new Point(0, 138);
+            btnPhieuNhap.Name = "btnPhieuNhap";
+            btnPhieuNhap.Size = new Size(50, 23);
+            btnPhieuNhap.TabIndex = 7;
+            btnPhieuNhap.UseVisualStyleBackColor = true;
+            btnPhieuNhap.Click += btnPhieuNhap_Click;
             // 
             // btnBaocao
             // 
@@ -184,5 +200,6 @@
         private Button btnQlyQAo;
         private Button btnHdon;
         private Button btnBaocao;
+        private Button btnPhieuNhap;
     }
 }
