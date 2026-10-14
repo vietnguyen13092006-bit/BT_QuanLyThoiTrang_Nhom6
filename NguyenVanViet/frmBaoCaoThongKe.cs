@@ -296,17 +296,22 @@ namespace FORM_DKY
                         {
                             if (!row.IsNewRow)
                             {
+                                // Dùng decimal để bảo toàn tuyệt đối
+                                decimal doanhThu = Convert.ToDecimal(row.Cells["Doanh Thu"].Value ?? 0);
+                                decimal tienThue = Convert.ToDecimal(row.Cells["Tổng Tiền Thuế"].Value ?? 0);
+                                decimal giaVon = Convert.ToDecimal(row.Cells["Giá Vốn"].Value ?? 0);
+                                decimal loiNhuan = Convert.ToDecimal(row.Cells["Lợi Nhuận"].Value ?? 0);
                                 sw.WriteLine($"{row.Cells["Số Hóa Đơn"].Value}\t" +
                                              $"{row.Cells["Ngày Lập"].Value}\t" +
-                                             $"{row.Cells["Doanh Thu"].Value}\t" +
-                                             $"{row.Cells["Tổng Tiền Thuế"].Value}\t" +
-                                             $"{row.Cells["Giá Vốn"].Value}\t" +
-                                             $"{row.Cells["Lợi Nhuận"].Value}\t" +
+                                             $"{doanhThu}\t" +
+                                             $"{tienThue}\t" +
+                                             $"{giaVon}\t" +
+                                             $"{loiNhuan}\t" +
                                              $"{row.Cells["Nhân Viên Lập"].Value}");
                             }
                         }
 
-                        // Thêm phần tổng kết thông số các thẻ card thống kê lên file Excel cho chuyên nghiệp
+                        // Thêm phần tổng kết thông số các thẻ card thống kê lên file Excel
                         sw.WriteLine("");
                         sw.WriteLine("TỔNG KẾT CHỈ SỐ KINH DOANH:");
                         sw.WriteLine($"- Tổng Doanh Thu:\t{lblValDoanhThu.Text}");
