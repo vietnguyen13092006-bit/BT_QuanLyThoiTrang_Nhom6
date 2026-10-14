@@ -36,14 +36,13 @@ namespace FORM_DKY
         private Panel pnlTop = null!;
         private Panel pnlCards = null!;
         private Panel pnlBottom = null!;
+        private GroupBox grpBaoCao = null!;
         private GroupBox grpChiTiet = null!;
         private Panel pnlMainContainer = null!;
 
         public frmBaoCaoThongKe()
         {
             InitializeComponentCustom();
-            // Khử gọi InitializeComponent() sinh từ Designer để tránh lỗi xung đột code tay
-            // InitializeComponent(); 
         }
 
         private void FrmBaoCaoThongKe_Load(object? sender, EventArgs e)
@@ -110,10 +109,11 @@ namespace FORM_DKY
                                     SELECT TOP 1 GiaNhap AS GiaNhapGoc 
                                     FROM ChiTietPhieuNhap 
                                     WHERE MaSP = ct.MaSP 
-                                    ORDER BY MaPN DESC
+                                    ORDER BY NgayBan DESC, MaPN DESC
                                 ) pn
                                 WHERE h.NgayBan BETWEEN @TuNgay AND @DenNgay
-                                GROUP BY h.MaHD, h.NgayBan, h.TongTien, h.TienThue, n.TenNV";
+                                GROUP BY h.MaHD, h.NgayBan, h.TongTien, h.TienThue, n.TenNV
+                                ORDER BY h.NgayBan DESC, h.MaHD DESC";
 
                 SqlParameter[] parameters = new SqlParameter[]
                 {
@@ -132,15 +132,18 @@ namespace FORM_DKY
                 txtSoLuongHD.Text = dt.Rows.Count.ToString();
 
                 cboMaHoaDon.Items.Clear();
-                cboMaHoaDon.Items.Add("-- Chọn để định vị --");
                 foreach (DataRow row in dt.Rows)
                 {
                     if (row["Số Hóa Đơn"] != DBNull.Value)
                     {
-                        cboMaHoaDon.Items.Add(row["Số Hóa Đơn"].ToString() ?? "");
+                        string maHD = row["Số Hóa Đơn"].ToString() ?? "";
+                        if (!cboMaHoaDon.Items.Contains(maHD))
+                        {
+                            cboMaHoaDon.Items.Add(maHD);
+                        }
                     }
                 }
-                cboMaHoaDon.SelectedIndex = 0;
+                cboMaHoaDon.SelectedIndex = -1;
 
                 decimal tongDoanhThu = 0, tongGiaVon = 0, tongLoiNhuan = 0, tongThueVATRa = 0;
                 foreach (DataRow row in dt.Rows)
@@ -152,7 +155,6 @@ namespace FORM_DKY
                 }
 
                 // 2. Truy vấn Tổng Thuế Đầu Vào từ bảng PhieuNhap trong khoảng thời gian chọn
-                // 2. Truy vấn Tổng Thuế Đầu Vào trực tiếp bằng SqlConnection
                 string connectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=QuanLyCuaHangThoiTrang;Integrated Security=True;TrustServerCertificate=True";
 
                 decimal tongThueDauVao = 0;
@@ -160,8 +162,8 @@ namespace FORM_DKY
                 {
                     conn.Open();
                     string queryThueNhap = @"SELECT ISNULL(SUM(TongTienNhap -(TongTienNhap / (1.0 + Thue / 100.0))), 0) 
-                             FROM PhieuNhap 
-                             WHERE NgayNhap BETWEEN @TuNgay AND @DenNgay";
+                                     FROM PhieuNhap 
+                                     WHERE NgayNhap BETWEEN @TuNgay AND @DenNgay";
                     using (SqlCommand cmd = new SqlCommand(queryThueNhap, conn))
                     {
                         cmd.Parameters.AddWithValue("@TuNgay", tuNgay);
@@ -177,11 +179,11 @@ namespace FORM_DKY
                 // Gán giá trị lên 5 thẻ Card
                 lblValDoanhThu.Text = tongDoanhThu.ToString("N0") + " VNĐ";
                 lblValGiaVon.Text = tongGiaVon.ToString("N0") + " VNĐ";
-                lblThueDauVao.Text = tongThueDauVao.ToString("N0") + " VNĐ"; // Hiển thị thuế đầu vào
-                lblTienThue.Text = tongThueVATRa.ToString("N0") + " VNĐ";      // Hiển thị thuế đầu ra
+                lblThueDauVao.Text = tongThueDauVao.ToString("N0") + " VNĐ";
+                lblTienThue.Text = tongThueVATRa.ToString("N0") + " VNĐ";
                 lblValLoiNhuan.Text = tongLoiNhuan.ToString("N0") + " VNĐ";
 
-                // Tự động load chi tiết của hóa đơn đầu tiên nếu có dữ liệu để bảng dưới không bị trống
+                // Tự động load chi tiết của hóa đơn đầu tiên nếu có dữ liệu
                 if (dt.Rows.Count > 0)
                 {
                     dgvBaoCao.Rows[0].Selected = true;
@@ -195,26 +197,11 @@ namespace FORM_DKY
                 {
                     dgvChiTiet.DataSource = null;
                 }
-
-                CapNhatChieuCaoGridView();
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Lỗi tra cứu: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private void CapNhatChieuCaoGridView()
-        {
-            int rowCount = dgvBaoCao.Rows.Count;
-            int rowHeight = dgvBaoCao.RowTemplate.Height;
-            int headerHeight = dgvBaoCao.ColumnHeadersHeight;
-
-            int calculatedHeight = headerHeight + (rowCount * rowHeight) + 10;
-            if (calculatedHeight < 110) calculatedHeight = 110;
-            if (calculatedHeight > 320) calculatedHeight = 320;
-
-            dgvBaoCao.Height = calculatedHeight;
         }
 
         private void DgvBaoCao_CellClick(object? sender, DataGridViewCellEventArgs e)
@@ -261,9 +248,8 @@ namespace FORM_DKY
 
         private void CboMaHoaDon_SelectedIndexChanged(object? sender, EventArgs e)
         {
-            if (cboMaHoaDon.SelectedIndex <= 0) return;
-            string? selectedHD = cboMaHoaDon.SelectedItem?.ToString();
-            if (string.IsNullOrEmpty(selectedHD)) return;
+            if (string.IsNullOrEmpty(cboMaHoaDon.Text)) return;
+            string selectedHD = cboMaHoaDon.Text.Trim();
 
             foreach (DataGridViewRow row in dgvBaoCao.Rows)
             {
@@ -281,14 +267,14 @@ namespace FORM_DKY
         {
             if (dgvBaoCao.Rows.Count == 0)
             {
-                MessageBox.Show("Không có dữ liệu để xuất!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Không có dữ liệu để xuất báo cáo!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             using SaveFileDialog sfd = new SaveFileDialog
             {
                 Filter = "Excel Files (*.xls)|*.xls",
-                FileName = "BaoCaoDoanhThu_" + DateTime.Now.ToString("dd-MM-yyyy") + ".xls"
+                FileName = "BaoCaoDoanhThuVaLoiNhuan_" + DateTime.Now.ToString("dd-MM-yyyy") + ".xls"
             };
 
             if (sfd.ShowDialog() == DialogResult.OK)
@@ -297,20 +283,43 @@ namespace FORM_DKY
                 {
                     using (StreamWriter sw = new StreamWriter(sfd.FileName, false, System.Text.Encoding.Unicode))
                     {
-                        sw.WriteLine("Số Hóa Đơn\tNgày Lập\tDoanh Thu\tTổng Tiền Thuế\tGiá Vốn\tLợi Nhuận\tNhân Viên Lập");
+                        // Tiêu đề báo cáo tổng quan
+                        sw.WriteLine("BÁO CÁO DOANH THU, THUẾ & LỢI NHUẬN CỬA HÀNG");
+                        sw.WriteLine($"Thời gian xuất báo cáo: {DateTime.Now:dd/MM/yyyy HH:mm:ss}");
+                        sw.WriteLine("");
+
+                        // Header bảng danh sách hóa đơn
+                        sw.WriteLine("DANH SÁCH HÓA ĐƠN TRONG KỲ");
+                        sw.WriteLine("Số Hóa Đơn\tNgày Lập\tDoanh Thu (VNĐ)\tTổng Tiền Thuế (VNĐ)\tGiá Vốn (VNĐ)\tLợi Nhuận (VNĐ)\tNhân Viên Lập");
+
                         foreach (DataGridViewRow row in dgvBaoCao.Rows)
                         {
                             if (!row.IsNewRow)
                             {
-                                sw.WriteLine($"{row.Cells["Số Hóa Đơn"].Value}\t{row.Cells["Ngày Lập"].Value}\t{row.Cells["Doanh Thu"].Value}\t{row.Cells["Tổng Tiền Thuế"].Value}\t{row.Cells["Giá Vốn"].Value}\t{row.Cells["Lợi Nhuận"].Value}\t{row.Cells["Nhân Viên Lập"].Value}");
+                                sw.WriteLine($"{row.Cells["Số Hóa Đơn"].Value}\t" +
+                                             $"{row.Cells["Ngày Lập"].Value}\t" +
+                                             $"{row.Cells["Doanh Thu"].Value}\t" +
+                                             $"{row.Cells["Tổng Tiền Thuế"].Value}\t" +
+                                             $"{row.Cells["Giá Vốn"].Value}\t" +
+                                             $"{row.Cells["Lợi Nhuận"].Value}\t" +
+                                             $"{row.Cells["Nhân Viên Lập"].Value}");
                             }
                         }
+
+                        // Thêm phần tổng kết thông số các thẻ card thống kê lên file Excel cho chuyên nghiệp
+                        sw.WriteLine("");
+                        sw.WriteLine("TỔNG KẾT CHỈ SỐ KINH DOANH:");
+                        sw.WriteLine($"- Tổng Doanh Thu:\t{lblValDoanhThu.Text}");
+                        sw.WriteLine($"- Tổng Giá Vốn:\t{lblValGiaVon.Text}");
+                        sw.WriteLine($"- Tổng Thuế Đầu Vào:\t{lblThueDauVao.Text}");
+                        sw.WriteLine($"- Tổng Thuế Đầu Ra (VAT):\t{lblTienThue.Text}");
+                        sw.WriteLine($"- Tổng Lợi Nhuận:\t{lblValLoiNhuan.Text}");
                     }
-                    MessageBox.Show("Xuất Excel thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("Xuất báo cáo Excel thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Lỗi xuất file: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Lỗi xuất file Excel: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -327,28 +336,38 @@ namespace FORM_DKY
             this.Text = "BÁO CÁO THỐNG KÊ DOANH THU & LỢI NHUẬN";
 
             pnlTop = new Panel { Dock = DockStyle.Top, Height = 60, BackColor = Color.FromArgb(240, 244, 248) };
-
-            // Tăng chiều cao thẻ chứa 5 card cân đối
             pnlCards = new Panel { Dock = DockStyle.Top, Height = 85, BackColor = Color.White };
+            pnlBottom = new Panel { Dock = DockStyle.Top, Height = 55, BackColor = Color.FromArgb(240, 244, 248) };
 
             pnlMainContainer = new Panel { Dock = DockStyle.Fill, AutoScroll = true };
+
+            // GroupBox cố định cho bảng Danh sách hóa đơn (Bảng trên)
+            grpBaoCao = new GroupBox
+            {
+                Text = "📋 DANH SÁCH HÓA ĐƠN TRONG KỲ",
+                Dock = DockStyle.Top,
+                Height = 260,
+                Font = new Font("Segoe UI", 9, FontStyle.Bold)
+            };
 
             dgvBaoCao = new DataGridView
             {
                 Dock = DockStyle.Fill,
-                Height = 400,
                 AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
                 ReadOnly = true,
                 SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                AllowUserToAddRows = false
+                AllowUserToAddRows = false,
+                Font = new Font("Segoe UI", 9, FontStyle.Regular)
             };
             dgvBaoCao.CellClick += DgvBaoCao_CellClick;
+            grpBaoCao.Controls.Add(dgvBaoCao);
 
+            // GroupBox cố định cho bảng Chi tiết sản phẩm (Bảng dưới)
             grpChiTiet = new GroupBox
             {
-                Text = "📄 CHI TIẾT SẢN PHẨM TRONG HÓA ĐƠN",
+                Text = "📄 CHI TIẾT SẢN PHẨM TRONG HÓA ĐƠN ĐƯỢC CHỌN",
                 Dock = DockStyle.Top,
-                Height = 300,
+                Height = 280,
                 Font = new Font("Segoe UI", 9, FontStyle.Bold)
             };
 
@@ -356,7 +375,6 @@ namespace FORM_DKY
             {
                 Dock = DockStyle.Fill,
                 AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                Height = 400,
                 ReadOnly = true,
                 SelectionMode = DataGridViewSelectionMode.FullRowSelect,
                 Font = new Font("Segoe UI", 9, FontStyle.Regular),
@@ -364,8 +382,7 @@ namespace FORM_DKY
             };
             grpChiTiet.Controls.Add(dgvChiTiet);
 
-            pnlBottom = new Panel { Dock = DockStyle.Top, Height = 55, BackColor = Color.FromArgb(240, 244, 248) };
-
+            // Các Control trên thanh lọc (pnlTop)
             rdoHomNay = new RadioButton { Text = "Hôm nay", Location = new Point(15, 18), AutoSize = true };
             rdoThangNay = new RadioButton { Text = "Tháng này", Location = new Point(100, 18), AutoSize = true };
             rdoNamNay = new RadioButton { Text = "Năm nay", Location = new Point(190, 18), AutoSize = true };
@@ -390,16 +407,24 @@ namespace FORM_DKY
 
             pnlTop.Controls.AddRange(new Control[] { rdoHomNay, rdoThangNay, rdoNamNay, rdoTuChon, lblTu, dtpTuNgay, lblDen, dtpDenNgay, btnTraCuu, lblSL, txtSoLuongHD });
 
-            // SẮP XẾP 5 THẺ CARD TRẢI ĐỀU NGANG MÀN HÌNH (Mỗi thẻ rộng ~245px, khoảng cách đều)
+            // 5 Thẻ Card Thống Kê
             lblValDoanhThu = CreateCard(pnlCards, "💵 TỔNG DOANH THU", Color.SeaGreen, 15, 200);
             lblValGiaVon = CreateCard(pnlCards, "💸 TỔNG GIÁ VỐN", Color.IndianRed, 275, 200);
-            lblThueDauVao = CreateCard(pnlCards, "📥 THUẾ ĐẦU VÀO", Color.Teal, 535, 200);       // Thẻ Thuế Đầu Vào
-            lblTienThue = CreateCard(pnlCards, "🧾 THUẾ ĐẦU RA", Color.DarkOrange, 795, 200);      // Thẻ Thuế Đầu Ra (VAT)
+            lblThueDauVao = CreateCard(pnlCards, "📥 THUẾ ĐẦU VÀO", Color.Teal, 535, 200);
+            lblTienThue = CreateCard(pnlCards, "🧾 THUẾ ĐẦU RA", Color.DarkOrange, 795, 200);
             lblValLoiNhuan = CreateCard(pnlCards, "💰 TỔNG LỢI NHUẬN", Color.DarkBlue, 1055, 200);
 
+            // Các nút chức năng dưới đáy (pnlBottom)
             Label lblChonHD = new Label { Text = "🔍 Tìm HD:", Location = new Point(20, 18), AutoSize = true };
 
-            cboMaHoaDon = new ComboBox { Location = new Point(85, 15), Width = 150, DropDownStyle = ComboBoxStyle.DropDownList };
+            cboMaHoaDon = new ComboBox
+            {
+                Location = new Point(85, 15),
+                Width = 150,
+                DropDownStyle = ComboBoxStyle.DropDown,
+                AutoCompleteMode = AutoCompleteMode.SuggestAppend,
+                AutoCompleteSource = AutoCompleteSource.ListItems
+            };
             cboMaHoaDon.SelectedIndexChanged += CboMaHoaDon_SelectedIndexChanged;
 
             btnExcel = new Button { Text = "🟢 XUẤT Excel", Location = new Point(275, 10), Size = new Size(110, 35), BackColor = Color.ForestGreen, ForeColor = Color.White, FlatStyle = FlatStyle.Flat };
@@ -411,11 +436,12 @@ namespace FORM_DKY
             pnlBottom.Controls.Clear();
             pnlBottom.Controls.AddRange(new Control[] { lblChonHD, cboMaHoaDon, btnExcel, btnThoat });
 
-            pnlMainContainer.Controls.Add(pnlBottom);
+            // Thêm thứ tự các Control vào container chính (thứ tự ngược vì Dock = Top)
             pnlMainContainer.Controls.Add(grpChiTiet);
-            pnlMainContainer.Controls.Add(dgvBaoCao);
+            pnlMainContainer.Controls.Add(grpBaoCao);
 
             this.Controls.Add(pnlMainContainer);
+            this.Controls.Add(pnlBottom);
             this.Controls.Add(pnlCards);
             this.Controls.Add(pnlTop);
 

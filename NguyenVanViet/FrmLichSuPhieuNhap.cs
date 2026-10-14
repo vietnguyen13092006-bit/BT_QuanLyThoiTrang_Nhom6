@@ -76,12 +76,8 @@ namespace FORM_DKY
                 selectedMaPN = row.Cells["Mã Phiếu Nhập"].Value.ToString() ?? "";
                 selectedMaSP = row.Cells["Mã SP"].Value.ToString() ?? "";
 
+                // Gán đúng số lượng đang hiển thị trên lưới vào biến oldSoLuong
                 int.TryParse(row.Cells["Số Lượng"].Value?.ToString(), out oldSoLuong);
-                decimal.TryParse(row.Cells["Giá Nhập"].Value?.ToString(), out decimal oldGiaNhap);
-
-                // Nếu bạn có các ô textbox trên Designer để người dùng nhập giá trị mới, hãy gán vào đây:
-                // txtSoLuongMoi.Text = oldSoLuong.ToString();
-                // txtGiaNhapMoi.Text = oldGiaNhap.ToString("0");
             }
         }
 
@@ -103,10 +99,7 @@ namespace FORM_DKY
                 return;
             }
 
-            // Lấy số lượng và giá cũ từ lúc click
-            int soLuongCu = oldSoLuong;
-
-            // Lấy giá trị mới trực tiếp từ các cột tương ứng trên lưới (hoặc bạn có thể cho phép người dùng gõ sửa)
+            // Lấy số lượng mới trên lưới
             if (!int.TryParse(row.Cells["Số Lượng"].Value?.ToString(), out int soLuongMoi) || soLuongMoi <= 0)
             {
                 MessageBox.Show("Số lượng mới trên lưới không hợp lệ!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -126,6 +119,20 @@ namespace FORM_DKY
 
                 try
                 {
+                    // Lấy số lượng cũ thực sự đang nằm trong CSDL trước khi update
+                    int soLuongCuDb = 0;
+                    string queryGetOld = "SELECT SoLuong FROM ChiTietPhieuNhap WHERE MaPN = @MaPN AND MaSP = @MaSP";
+                    using (SqlCommand cmdGet = new SqlCommand(queryGetOld, conn, transaction))
+                    {
+                        cmdGet.Parameters.AddWithValue("@MaPN", maPN);
+                        cmdGet.Parameters.AddWithValue("@MaSP", maSP);
+                        object result = cmdGet.ExecuteScalar();
+                        if (result != null)
+                        {
+                            soLuongCuDb = Convert.ToInt32(result);
+                        }
+                    }
+
                     // 1. Cập nhật lại ChiTietPhieuNhap
                     string queryUpdateCT = "UPDATE ChiTietPhieuNhap SET SoLuong = @SoLuong, GiaNhap = @GiaNhap WHERE MaPN = @MaPN AND MaSP = @MaSP";
                     using (SqlCommand cmd = new SqlCommand(queryUpdateCT, conn, transaction))
@@ -137,8 +144,8 @@ namespace FORM_DKY
                         cmd.ExecuteNonQuery();
                     }
 
-                    // 2. Tính chênh lệch số lượng để bù trừ vào tồn kho (SoLuongTon) của bảng SanPham
-                    int chenhLech = soLuongMoi - soLuongCu;
+                    // 2. Tính chênh lệch dựa trên số lượng gốc trong CSDL (Mới - Cũ_DB)
+                    int chenhLech = soLuongMoi - soLuongCuDb;
                     if (chenhLech != 0)
                     {
                         string queryUpdateKho = "UPDATE SanPham SET SoLuongTon = SoLuongTon + @ChenhLech WHERE MaSP = @MaSP";
@@ -151,9 +158,13 @@ namespace FORM_DKY
                     }
 
                     transaction.Commit();
+
+                    // Cập nhật lại biến oldSoLuong thành số lượng mới để nếu bấm sửa tiếp lần nữa vẫn chuẩn
+                    oldSoLuong = soLuongMoi;
+
                     MessageBox.Show("Cập nhật phiếu nhập và đồng bộ kho thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                    // Tải lại dữ liệu để lưới cập nhật mới
+                    // Tải lại dữ liệu
                     TaiDuLieuLichSu();
                 }
                 catch (Exception ex)

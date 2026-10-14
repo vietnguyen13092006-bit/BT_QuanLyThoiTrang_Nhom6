@@ -11,11 +11,11 @@ namespace FORM_DKY
         // Khai báo các Control
         private Label lblTitle;
         private GroupBox gbThongTinHD, gbThongTinSP, gbGioHang, gbDanhSachHD;
-        private TextBox txtMaHD, txtKhachHang, txtSDT, txtDonGia, txtTongTien, txtNhanVien; // Đổi cboNhanVien thành txtNhanVien
+        private TextBox txtMaHD, txtKhachHang, txtSDT, txtDonGia, txtTongTien, txtNhanVien;
         private DateTimePicker dtpNgayBan;
         private ComboBox cboMaSP, cboSanPham, cboMau, cboKichThuoc;
         private NumericUpDown nudSoLuong;
-        private Button btnThemSP, btnSua, btnXoa, btnLamMoi, btnThanhToan, btnXuatHoaDon, btnTaiDanhSachHD;
+        private Button btnThemSP, btnSua, btnXoa, btnLamMoi, btnThanhToan, btnXuatHoaDon, btnTaiDanhSachHD, btnSuaHDDB, btnXoaHDDB;
 
         // DataGridView
         private DataGridView dgvGioHang;
@@ -87,7 +87,7 @@ namespace FORM_DKY
 
             txtMaHD = new TextBox { ReadOnly = true, Dock = DockStyle.Fill, Font = new Font("Arial", 9, FontStyle.Regular) };
             dtpNgayBan = new DateTimePicker { Format = DateTimePickerFormat.Short, Dock = DockStyle.Fill, Font = new Font("Arial", 9, FontStyle.Regular) };
-            txtNhanVien = new TextBox { Dock = DockStyle.Fill, Font = new Font("Arial", 9, FontStyle.Regular) }; // Ô nhập tự do tên nhân viên
+            txtNhanVien = new TextBox { Dock = DockStyle.Fill, Font = new Font("Arial", 9, FontStyle.Regular) };
             txtKhachHang = new TextBox { Dock = DockStyle.Fill, Font = new Font("Arial", 9, FontStyle.Regular) };
             txtSDT = new TextBox { Dock = DockStyle.Fill, Font = new Font("Arial", 9, FontStyle.Regular) };
 
@@ -173,6 +173,7 @@ namespace FORM_DKY
                 SelectionMode = DataGridViewSelectionMode.FullRowSelect,
                 MultiSelect = false
             };
+            dgvGioHang.CellClick += DgvGioHang_CellClick;
             gbGioHang.Controls.Add(dgvGioHang);
 
             // 4. Layout Bottom
@@ -225,7 +226,7 @@ namespace FORM_DKY
             tlpBottom.Controls.Add(tlpPay, 1, 0);
 
             // 5. GroupBox DANH SÁCH HÓA ĐƠN ĐÃ LƯU
-            gbDanhSachHD = new GroupBox { Text = "DANH SÁCH HÓA ĐƠN TRONG DATABASE (BẤM ĐỂ THANH TOÁN / XEM CHI TIẾT)", Font = new Font("Arial", 9, FontStyle.Bold), Dock = DockStyle.Fill };
+            gbDanhSachHD = new GroupBox { Text = "DANH SÁCH HÓA ĐƠN TRONG DATABASE", Font = new Font("Arial", 9, FontStyle.Bold), Dock = DockStyle.Fill };
 
             TableLayoutPanel tlpDS = new TableLayoutPanel
             {
@@ -236,8 +237,16 @@ namespace FORM_DKY
             tlpDS.RowStyles.Add(new RowStyle(SizeType.Absolute, 35F));
             tlpDS.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
 
-            btnTaiDanhSachHD = new Button { Text = "🔄 Tải lại danh sách Hóa đơn", Width = 180, Height = 28, Anchor = AnchorStyles.Left };
+            FlowLayoutPanel flpHDButtons = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.LeftToRight };
+            btnTaiDanhSachHD = new Button { Text = "🔄 Tải lại", Width = 95, Height = 28 };
+            btnSuaHDDB = new Button { Text = "✏️ Sửa Hóa Đơn", Width = 115, Height = 28, BackColor = Color.LightYellow };
+            btnXoaHDDB = new Button { Text = "❌ Xóa Hóa Đơn", Width = 115, Height = 28, BackColor = Color.LightPink };
+
             btnTaiDanhSachHD.Click += (s, e) => LoadDanhSachHoaDonDaLuu();
+            btnSuaHDDB.Click += BtnSuaHDDB_Click;
+            btnXoaHDDB.Click += BtnXoaHDDB_Click;
+
+            flpHDButtons.Controls.AddRange(new Control[] { btnTaiDanhSachHD, btnSuaHDDB, btnXoaHDDB });
 
             dgvDanhSachHD = new DataGridView
             {
@@ -250,7 +259,7 @@ namespace FORM_DKY
             };
             dgvDanhSachHD.CellDoubleClick += DgvDanhSachHD_CellDoubleClick;
 
-            tlpDS.Controls.Add(btnTaiDanhSachHD, 0, 0);
+            tlpDS.Controls.Add(flpHDButtons, 0, 0);
             tlpDS.Controls.Add(dgvDanhSachHD, 0, 1);
             gbDanhSachHD.Controls.Add(tlpDS);
 
@@ -301,7 +310,6 @@ namespace FORM_DKY
         {
             try
             {
-                // Chỉ nạp danh mục sản phẩm lên ComboBox
                 DataTable dtSP = DatabaseHelper.ExecuteQuery("SELECT MaSP, TenSP, MauSac, Size, GiaBan FROM SanPham");
 
                 isBindingSP = true;
@@ -314,8 +322,8 @@ namespace FORM_DKY
                 cboSanPham.DisplayMember = "TenSP";
                 cboSanPham.ValueMember = "MaSP";
 
-                cboSanPham.DropDownStyle = ComboBoxStyle.DropDown; // Cho phép gõ chữ trực tiếp vào ô
-                cboSanPham.AutoCompleteMode = AutoCompleteMode.SuggestAppend; // Tự động gợi ý danh sách khi gõ
+                cboSanPham.DropDownStyle = ComboBoxStyle.DropDown;
+                cboSanPham.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
                 cboSanPham.AutoCompleteSource = AutoCompleteSource.ListItems;
 
                 isBindingSP = false;
@@ -459,14 +467,54 @@ namespace FORM_DKY
             txtTongTien.Text = tongTien.ToString("N0");
         }
 
+        private void DgvGioHang_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                DataGridViewRow row = dgvGioHang.Rows[e.RowIndex];
+
+                if (row.Cells["MaSP"].Value != null)
+                {
+                    string maSP = row.Cells["MaSP"].Value.ToString() ?? "";
+                    cboMaSP.SelectedValue = maSP;
+
+                    if (row.Cells["Mau"].Value != null)
+                        cboMau.Text = row.Cells["Mau"].Value.ToString();
+
+                    if (row.Cells["KichThuoc"].Value != null)
+                        cboKichThuoc.Text = row.Cells["KichThuoc"].Value.ToString();
+
+                    if (row.Cells["SoLuong"].Value != null && int.TryParse(row.Cells["SoLuong"].Value.ToString(), out int soLuong))
+                    {
+                        if (soLuong >= nudSoLuong.Minimum && soLuong <= nudSoLuong.Maximum)
+                        {
+                            nudSoLuong.Value = soLuong;
+                        }
+                    }
+                }
+            }
+        }
+
         private void BtnSua_Click(object sender, EventArgs e)
         {
             if (dgvGioHang.SelectedRows.Count > 0)
             {
                 DataGridViewRow row = dgvGioHang.SelectedRows[0];
-                row.Cells["SoLuong"].Value = (int)nudSoLuong.Value;
-                row.Cells["ThanhTien"].Value = (int)nudSoLuong.Value * Convert.ToDecimal(row.Cells["DonGia"].Value);
+
+                int soLuongMoi = (int)nudSoLuong.Value;
+                decimal donGia = Convert.ToDecimal(row.Cells["DonGia"].Value);
+
+                row.Cells["SoLuong"].Value = soLuongMoi;
+                row.Cells["ThanhTien"].Value = soLuongMoi * donGia;
+                row.Cells["Mau"].Value = cboMau.Text;
+                row.Cells["KichThuoc"].Value = cboKichThuoc.Text;
+
                 TinhTongTien();
+                MessageBox.Show("Đã cập nhật sản phẩm trong giỏ hàng!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show("Vui lòng chọn sản phẩm cần sửa trong giỏ hàng!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -490,10 +538,152 @@ namespace FORM_DKY
             TinhTongTien();
         }
 
-        // Hàm kiểm tra và tự động thêm Nhân viên nếu chưa có trong bảng NhanVien (để tránh lỗi khóa ngoại SQL)
+        // ==========================================
+        // ❌ CHỨC NĂNG XÓA HÓA ĐƠN TRONG DATABASE
+        // ==========================================
+        private void BtnXoaHDDB_Click(object sender, EventArgs e)
+        {
+            if (dgvDanhSachHD.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Vui lòng chọn hóa đơn cần xóa từ danh sách bên dưới!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            DataGridViewRow row = dgvDanhSachHD.SelectedRows[0];
+            string maHD = row.Cells["Mã Hóa Đơn"].Value?.ToString() ?? "";
+            string trangThai = row.Cells["Trạng Thái"].Value?.ToString() ?? "";
+
+            DialogResult dr = MessageBox.Show($"Bạn có chắc chắn muốn xóa hóa đơn [{maHD}] không?", "Xác nhận xóa", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (dr == DialogResult.Yes)
+            {
+                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                {
+                    conn.Open();
+                    SqlTransaction transaction = conn.BeginTransaction();
+
+                    try
+                    {
+                        // Nếu hóa đơn đã thanh toán, hoàn trả lại tồn kho
+                        if (trangThai == "Đã thanh toán")
+                        {
+                            string returnStockSql = @"UPDATE SanPham 
+                                                     SET SoLuongTon = SoLuongTon + ct.SoLuong 
+                                                     FROM SanPham sp
+                                                     INNER JOIN ChiTietHoaDon ct ON sp.MaSP = ct.MaSP
+                                                     WHERE ct.MaHD = @MaHD";
+                            using (SqlCommand cmdStock = new SqlCommand(returnStockSql, conn, transaction))
+                            {
+                                cmdStock.Parameters.AddWithValue("@MaHD", maHD);
+                                cmdStock.ExecuteNonQuery();
+                            }
+                        }
+
+                        // Xóa chi tiết hóa đơn
+                        string delCT = "DELETE FROM ChiTietHoaDon WHERE MaHD = @MaHD";
+                        using (SqlCommand cmdCT = new SqlCommand(delCT, conn, transaction))
+                        {
+                            cmdCT.Parameters.AddWithValue("@MaHD", maHD);
+                            cmdCT.ExecuteNonQuery();
+                        }
+
+                        // Xóa hóa đơn chính
+                        string delHD = "DELETE FROM HoaDon WHERE MaHD = @MaHD";
+                        using (SqlCommand cmdHD = new SqlCommand(delHD, conn, transaction))
+                        {
+                            cmdHD.Parameters.AddWithValue("@MaHD", maHD);
+                            cmdHD.ExecuteNonQuery();
+                        }
+
+                        transaction.Commit();
+                        MessageBox.Show($"Đã xóa thành công hóa đơn [{maHD}]!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        LoadDanhSachHoaDonDaLuu();
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        MessageBox.Show("Lỗi khi xóa hóa đơn: " + ex.Message, "Lỗi SQL", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        // ==========================================
+        // ✏️ CHỨC NĂNG SỬA HÓA ĐƠN ĐÃ LƯU
+        // ==========================================
+        private void BtnSuaHDDB_Click(object sender, EventArgs e)
+        {
+            if (dgvDanhSachHD.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Vui lòng chọn hóa đơn cần sửa từ danh sách bên dưới!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            DataGridViewRow row = dgvDanhSachHD.SelectedRows[0];
+            string maHD = row.Cells["Mã Hóa Đơn"].Value?.ToString() ?? "";
+            string trangThai = row.Cells["Trạng Thái"].Value?.ToString() ?? "";
+
+            if (trangThai == "Đã thanh toán")
+            {
+                MessageBox.Show("Hóa đơn này đã thanh toán, không thể sửa trực tiếp. Vui lòng xóa và lập hóa đơn mới nếu cần thiết!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            DialogResult dr = MessageBox.Show($"Đưa hóa đơn [{maHD}] lên giỏ hàng để chỉnh sửa?\n(Hóa đơn cũ sẽ được thay thế khi bạn bấm Xuất/Lưu lại)", "Xác nhận sửa", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (dr == DialogResult.Yes)
+            {
+                txtMaHD.Text = maHD;
+                txtKhachHang.Text = row.Cells["Khách Hàng"].Value?.ToString() == "Khách lẻ" ? "" : row.Cells["Khách Hàng"].Value?.ToString();
+                txtSDT.Text = row.Cells["SĐT"].Value?.ToString();
+                txtNhanVien.Text = row.Cells["Nhân Viên"].Value?.ToString();
+                if (DateTime.TryParse(row.Cells["Ngày Bán"].Value?.ToString(), out DateTime ngayBan))
+                {
+                    dtpNgayBan.Value = ngayBan;
+                }
+
+                string sqlChiTiet = @"SELECT ct.MaHD, ct.MaSP, sp.TenSP, sp.MauSac AS Mau, sp.Size AS KichThuoc, ct.SoLuong, ct.DonGia, (ct.SoLuong * ct.DonGia) AS ThanhTien
+                                      FROM ChiTietHoaDon ct
+                                      JOIN SanPham sp ON ct.MaSP = sp.MaSP
+                                      WHERE ct.MaHD = @MaHD";
+
+                SqlParameter[] p = { new SqlParameter("@MaHD", maHD) };
+                DataTable dtCT = DatabaseHelper.ExecuteQuery(sqlChiTiet, p);
+
+                dtGioHang.Rows.Clear();
+                foreach (DataRow r in dtCT.Rows)
+                {
+                    dtGioHang.ImportRow(r);
+                }
+
+                TinhTongTien();
+
+                // Xóa hóa đơn cũ trong CSDL để tránh trùng mã khi lưu bản mới
+                using (SqlConnection conn = DatabaseHelper.GetConnection())
+                {
+                    conn.Open();
+                    SqlTransaction transaction = conn.BeginTransaction();
+                    try
+                    {
+                        string delCT = "DELETE FROM ChiTietHoaDon WHERE MaHD = @MaHD";
+                        DatabaseHelper.ExecuteNonQuery(delCT, new SqlParameter[] { new SqlParameter("@MaHD", maHD) }, transaction);
+
+                        string delHD = "DELETE FROM HoaDon WHERE MaHD = @MaHD";
+                        DatabaseHelper.ExecuteNonQuery(delHD, new SqlParameter[] { new SqlParameter("@MaHD", maHD) }, transaction);
+
+                        transaction.Commit();
+                        LoadDanhSachHoaDonDaLuu();
+                    }
+                    catch
+                    {
+                        transaction.Rollback();
+                    }
+                }
+
+                MessageBox.Show($"Đã tải hóa đơn [{maHD}] lên giỏ hàng. Bạn hãy thay đổi sản phẩm/số lượng theo ý muốn rồi bấm [XUẤT HÓA ĐƠN] để lưu lại nhé!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
         private string XuLyVaLayMaNhanVien(SqlConnection conn, SqlTransaction transaction, string tenNV)
         {
-            // Kiểm tra xem tên nhân viên đã tồn tại chưa
             string checkQuery = "SELECT MaNV FROM NhanVien WHERE TenNV = @TenNV";
             using (SqlCommand cmdCheck = new SqlCommand(checkQuery, conn, transaction))
             {
@@ -505,7 +695,6 @@ namespace FORM_DKY
                 }
             }
 
-            // Nếu chưa có, tự động sinh MaNV mới (VD: NV + ticks) và thêm vào bảng NhanVien
             string newMaNV = "NV" + DateTime.Now.ToString("mmssff");
             string insertNV = "INSERT INTO NhanVien (MaNV, TenNV) VALUES (@MaNV, @TenNV)";
             using (SqlCommand cmdInsert = new SqlCommand(insertNV, conn, transaction))
@@ -540,7 +729,6 @@ namespace FORM_DKY
 
                 try
                 {
-                    // 🛑 1. KIỂM TRA TỒN KHO TRƯỚC KHI CHO PHÉP XUẤT HÓA ĐƠN
                     foreach (DataRow cartRow in dtGioHang.Rows)
                     {
                         string maSP = cartRow["MaSP"].ToString() ?? "";
@@ -558,26 +746,23 @@ namespace FORM_DKY
                                     transaction.Rollback();
                                     MessageBox.Show($"Sản phẩm [{maSP}] không đủ hàng trong kho!\n- Tồn kho hiện tại: {soLuongTon}\n- Số lượng giỏ hàng: {soLuongMua}",
                                                     "Lỗi vượt quá tồn kho", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                    return false; // ❌ Dừng ngay, không cho tạo hóa đơn và không trừ kho âm
+                                    return false;
                                 }
                             }
                         }
                     }
 
-                    // 2. Tự động kiểm tra/thêm nhân viên vừa gõ vào Database
                     string maNV = XuLyVaLayMaNhanVien(conn, transaction, txtNhanVien.Text.Trim());
 
-                    // 3. TÍNH TOÁN TIỀN HÀNG VÀ THUẾ VAT (10%)
                     decimal tongTienHang = 0;
                     foreach (DataRow row in dtGioHang.Rows)
                     {
                         tongTienHang += Convert.ToDecimal(row["ThanhTien"]);
                     }
 
-                    decimal tienThue = tongTienHang * 0.10m; // VAT 10%
-                    decimal tongThanhToan = tongTienHang + tienThue; // Tổng tiền đã gồm thuế
+                    decimal tienThue = tongTienHang * 0.10m;
+                    decimal tongThanhToan = tongTienHang + tienThue;
 
-                    // 4. LƯU HÓA ĐƠN (Có lưu thêm TienThue và TongTien đã bao gồm thuế)
                     string insertHD = @"INSERT INTO HoaDon (MaHD, NgayBan, MaNV, TenKhachHang, SDT, TienThue, TongTien, TrangThai) 
                                         VALUES (@MaHD, @NgayBan, @MaNV, @TenKhachHang, @SDT, @TienThue, @TongTien, N'Chưa thanh toán')";
 
@@ -592,7 +777,6 @@ namespace FORM_DKY
                     };
                     DatabaseHelper.ExecuteNonQuery(insertHD, pHD, transaction);
 
-                    // 5. LƯU CHI TIẾT HÓA ĐƠN
                     foreach (DataRow row in dtGioHang.Rows)
                     {
                         string insertCT = @"INSERT INTO ChiTietHoaDon (MaHD, MaSP, SoLuong, DonGia) 
@@ -619,7 +803,6 @@ namespace FORM_DKY
             }
         }
 
-        // NÚT XUẤT HÓA ĐƠN
         private void BtnXuatHoaDon_Click(object sender, EventArgs e)
         {
             if (LuuHoaDonBanDau())
@@ -640,8 +823,6 @@ namespace FORM_DKY
             }
         }
 
-        // NÚT THANH TOÁN HÓA ĐƠN ĐƯỢC CHỌN Ở BẢNG 2
-        // NÚT THANH TOÁN HÓA ĐƠN ĐƯỢC CHỌN Ở BẢNG 2
         private void BtnThanhToanHDDuoi_Click(object sender, EventArgs e)
         {
             if (dgvDanhSachHD.SelectedRows.Count == 0)
@@ -670,12 +851,10 @@ namespace FORM_DKY
 
                     try
                     {
-                        // 1. Đổi trạng thái Hóa đơn sang Đã thanh toán
                         string updateHD = "UPDATE HoaDon SET TrangThai = N'Đã thanh toán' WHERE MaHD = @MaHD";
                         SqlParameter[] p1 = { new SqlParameter("@MaHD", maHD) };
                         DatabaseHelper.ExecuteNonQuery(updateHD, p1, transaction);
 
-                        // 2. Trừ tồn kho chính xác theo MaSP (Đảm bảo không bao giờ bị âm kho)
                         string updateKho = @"UPDATE SanPham 
                                              SET SoLuongTon = CASE 
                                                  WHEN SoLuongTon >= ct.SoLuong THEN SoLuongTon - ct.SoLuong 
@@ -727,7 +906,7 @@ public class FrmXuatHoaDonPopup : Form
     private void TaoGiaoDienHoaDon()
     {
         this.Text = "HÓA ĐƠN BÁN HÀNG";
-        this.Size = new Size(720, 620); // Tăng chiều cao một chút để chứa các dòng tiền
+        this.Size = new Size(720, 620);
         this.StartPosition = FormStartPosition.CenterParent;
         this.FormBorderStyle = FormBorderStyle.FixedDialog;
         this.MaximizeBox = false;
@@ -737,15 +916,15 @@ public class FrmXuatHoaDonPopup : Form
         {
             Dock = DockStyle.Fill,
             Padding = new Padding(15),
-            RowCount = 6, // Tăng thêm 1 dòng để chứa thông tin thuế
+            RowCount = 6,
             ColumnCount = 1
         };
         mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 45F));
         mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 90F));
         mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-        mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F)); // Dòng tiền hàng
-        mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F)); // Dòng thuế VAT
-        mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 45F)); // Nút bấm & Tổng tiền lớn
+        mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
+        mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
+        mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 45F));
 
         Label lblHeader = new Label
         {
@@ -819,7 +998,6 @@ public class FrmXuatHoaDonPopup : Form
         if (dgvSanPham.Columns["Đơn giá"] != null) dgvSanPham.Columns["Đơn giá"].DefaultCellStyle.Format = "N0";
         if (dgvSanPham.Columns["Thành tiền"] != null) dgvSanPham.Columns["Thành tiền"].DefaultCellStyle.Format = "N0";
 
-        // Tính toán tiền thuế và tổng tiền chuẩn xác
         decimal tienThue = tongTienHang * 0.10m;
         decimal tongThanhToan = tongTienHang + tienThue;
 
@@ -870,7 +1048,6 @@ public class FrmXuatHoaDonPopup : Form
         mainLayout.Controls.Add(lblTienHang, 0, 3);
         mainLayout.Controls.Add(lblThueVAT, 0, 4);
 
-        // Tạo panel chứa gộp cả Tổng tiền và Nút bấm ở dòng cuối
         TableLayoutPanel tlpBottomPrint = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2 };
         tlpBottomPrint.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
         tlpBottomPrint.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
