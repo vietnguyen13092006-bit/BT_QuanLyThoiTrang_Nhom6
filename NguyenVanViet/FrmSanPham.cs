@@ -51,10 +51,11 @@ namespace FORM_DKY
             tlpMain = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
-                RowCount = 3,
+                RowCount = 4,
                 ColumnCount = 1,
                 Padding = new Padding(10)
             };
+            tlpMain.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             tlpMain.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             tlpMain.RowStyles.Add(new RowStyle(SizeType.AutoSize));
             tlpMain.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
@@ -86,13 +87,18 @@ namespace FORM_DKY
                 Dock = DockStyle.Top,
                 AutoSize = true,
                 ColumnCount = 5,
-                RowCount = 5
+                RowCount = 4
             };
-            tlpInput.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100F));
-            tlpInput.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40F));
-            tlpInput.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100F));
-            tlpInput.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40F));
-            tlpInput.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tlpInput.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 95F));
+            tlpInput.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 42F));
+            tlpInput.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 85F));
+            tlpInput.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 42F));
+            tlpInput.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 16F));
+
+            for (int i = 0; i < 4; i++)
+            {
+                tlpInput.RowStyles.Add(new RowStyle(SizeType.Absolute, 38F));
+            }
 
             txtMaSP = new TextBox { Dock = DockStyle.Fill };
             txtTenSP = new TextBox { Dock = DockStyle.Fill };
@@ -117,10 +123,10 @@ namespace FORM_DKY
                 BorderStyle = BorderStyle.FixedSingle,
                 SizeMode = PictureBoxSizeMode.Zoom,
                 Dock = DockStyle.Fill,
-                Height = 120
+                Height = 110
             };
 
-            btnChonAnh = new Button { Text = "Chọn Ảnh...", Dock = DockStyle.Bottom, Height = 30 };
+            btnChonAnh = new Button { Text = "Chọn Ảnh...", Dock = DockStyle.Bottom, Height = 28 };
             btnChonAnh.Click += BtnChonAnh_Click;
 
             Panel pnlAnh = new Panel { Dock = DockStyle.Fill };
@@ -149,11 +155,14 @@ namespace FORM_DKY
 
             // Dòng 3
             TableLayoutPanel tlpMauSize = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 3, Margin = new Padding(0) };
-            tlpMauSize.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45F));
-            tlpMauSize.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 45F));
-            tlpMauSize.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55F));
+            tlpMauSize.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 48F));
+            tlpMauSize.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 35F));
+            tlpMauSize.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 48F));
+
+            cboMauSac.Margin = new Padding(0, 0, 2, 0);
+            cboSize.Margin = new Padding(2, 0, 0, 0);
+
             tlpMauSize.Controls.Add(cboMauSac, 0, 0);
-            tlpMauSize.Controls.Add(new Label { Text = "Size:", Anchor = AnchorStyles.None, TextAlign = ContentAlignment.MiddleCenter }, 1, 0);
             tlpMauSize.Controls.Add(cboSize, 2, 0);
 
             tlpInput.Controls.Add(new Label { Text = "Màu / Size:", Anchor = AnchorStyles.Left }, 0, 3);
@@ -161,33 +170,40 @@ namespace FORM_DKY
             tlpInput.Controls.Add(new Label { Text = "Ghi Chú:", Anchor = AnchorStyles.Left }, 2, 3);
             tlpInput.Controls.Add(txtGhiChu, 3, 3);
 
-            // Dòng 4 (Chỉ giữ lại nút Cập Nhật và Làm Mới)
-            flpButtons = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoSize = true, FlowDirection = FlowDirection.LeftToRight };
-            btnSua = new Button { Text = "Cập Nhật", Width = 110, Height = 32, BackColor = Color.LightSkyBlue };
-            btnLamMoi = new Button { Text = "Làm Mới", Width = 110, Height = 32 };
-
-            btnSua.Click += BtnSua_Click;
-            btnLamMoi.Click += (s, e) => { TaiDanhSachSanPham(); XoaTrangForm(); };
-
-            flpButtons.Controls.AddRange(new Control[] { btnSua, btnLamMoi });
-
-            TableLayoutPanel tlpTimKiem = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2 };
-            tlpTimKiem.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 80F));
-            tlpTimKiem.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            txtTimKiem = new TextBox { Dock = DockStyle.Fill };
-            txtTimKiem.TextChanged += TxtTimKiem_TextChanged;
-            tlpTimKiem.Controls.Add(new Label { Text = "Tìm kiếm:", Anchor = AnchorStyles.Left }, 0, 0);
-            tlpTimKiem.Controls.Add(txtTimKiem, 1, 0);
-
-            tlpInput.Controls.Add(flpButtons, 0, 4);
-            tlpInput.SetColumnSpan(flpButtons, 2);
-            tlpInput.Controls.Add(tlpTimKiem, 2, 4);
-            tlpInput.SetColumnSpan(tlpTimKiem, 3);
-
             gbThongTin.Controls.Add(tlpInput);
             tlpMain.Controls.Add(gbThongTin, 0, 1);
 
-            // DataGridView Hàng hóa
+            // Panel chứa nút và ô tìm kiếm
+            FlowLayoutPanel flpBottomControl = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Top,
+                AutoSize = true,
+                FlowDirection = FlowDirection.LeftToRight,
+                Padding = new Padding(0, 5, 0, 5)
+            };
+
+            flpButtons = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.LeftToRight, Margin = new Padding(0, 0, 20, 0) };
+            btnSua = new Button { Text = "Cập Nhật", Width = 100, Height = 32, BackColor = Color.LightSkyBlue };
+            btnLamMoi = new Button { Text = "Làm Mới", Width = 100, Height = 32 };
+
+            btnSua.Click += BtnSua_Click;
+            btnLamMoi.Click += (s, e) => { TaiDanhSachSanPham(); XoaTrangForm(); };
+            flpButtons.Controls.AddRange(new Control[] { btnSua, btnLamMoi });
+
+            FlowLayoutPanel flpSearch = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.LeftToRight };
+            Label lblTim = new Label { Text = "Tìm kiếm:", AutoSize = true, Margin = new Padding(0, 8, 5, 0) };
+            txtTimKiem = new TextBox { Width = 250, Height = 25 };
+            txtTimKiem.TextChanged += TxtTimKiem_TextChanged;
+            flpSearch.Controls.AddRange(new Control[] { lblTim, txtTimKiem });
+
+            flpBottomControl.Controls.Add(flpButtons);
+            flpBottomControl.Controls.Add(flpSearch);
+
+            Panel pnlWrapper = new Panel { Dock = DockStyle.Top, AutoSize = true };
+            pnlWrapper.Controls.Add(flpBottomControl);
+            tlpMain.Controls.Add(pnlWrapper, 0, 2);
+
+            // DataGridView
             dgvSanPham = new DataGridView
             {
                 Dock = DockStyle.Fill,
@@ -201,7 +217,7 @@ namespace FORM_DKY
             dgvSanPham.CellClick += DgvSanPham_CellClick;
             dgvSanPham.CellFormatting += DgvSanPham_CellFormatting;
 
-            tlpMain.Controls.Add(dgvSanPham, 0, 2);
+            tlpMain.Controls.Add(dgvSanPham, 0, 3);
             this.Controls.Add(tlpMain);
         }
 
@@ -222,6 +238,9 @@ namespace FORM_DKY
 
             DataTable dt = Database.GetData(query, parameters);
             dgvSanPham.DataSource = dt;
+
+            dgvSanPham.CellClick -= DgvSanPham_CellClick;
+            dgvSanPham.CellClick += DgvSanPham_CellClick;
 
             if (dgvSanPham.Columns["MaSP"] != null) dgvSanPham.Columns["MaSP"].HeaderText = "Mã SP";
             if (dgvSanPham.Columns["TenSP"] != null) dgvSanPham.Columns["TenSP"].HeaderText = "Tên Sản Phẩm";
@@ -259,27 +278,47 @@ namespace FORM_DKY
 
         private void DgvSanPham_CellClick(object? sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0 && dgvSanPham.CurrentRow != null)
+            if (e.RowIndex >= 0 && dgvSanPham.Rows[e.RowIndex].DataBoundItem is DataRowView drv)
             {
-                DataGridViewRow row = dgvSanPham.CurrentRow;
-                txtMaSP.Text = row.Cells["MaSP"].Value?.ToString();
-                txtTenSP.Text = row.Cells["TenSP"].Value?.ToString();
-                cboLoaiSP.Text = row.Cells["LoaiSP"].Value?.ToString();
-                cboMauSac.Text = row.Cells["MauSac"].Value?.ToString();
-                cboSize.Text = row.Cells["Size"].Value?.ToString();
+                txtMaSP.Text = drv["MaSP"]?.ToString() ?? "";
+                txtTenSP.Text = drv["TenSP"]?.ToString() ?? "";
 
-                decimal.TryParse(row.Cells["GiaNhap"].Value?.ToString(), out decimal giaNhap);
+                string loai = drv["LoaiSP"]?.ToString() ?? "";
+                if (!string.IsNullOrEmpty(loai))
+                {
+                    if (!cboLoaiSP.Items.Contains(loai)) cboLoaiSP.Items.Add(loai);
+                    cboLoaiSP.Text = loai;
+                }
+                else { cboLoaiSP.SelectedIndex = -1; }
+
+                string mau = drv["MauSac"]?.ToString() ?? "";
+                if (!string.IsNullOrEmpty(mau))
+                {
+                    if (!cboMauSac.Items.Contains(mau)) cboMauSac.Items.Add(mau);
+                    cboMauSac.Text = mau;
+                }
+                else { cboMauSac.SelectedIndex = -1; }
+
+                string size = drv["Size"]?.ToString() ?? "";
+                if (!string.IsNullOrEmpty(size))
+                {
+                    if (!cboSize.Items.Contains(size)) cboSize.Items.Add(size);
+                    cboSize.Text = size;
+                }
+                else { cboSize.SelectedIndex = -1; }
+
+                decimal.TryParse(drv["GiaNhap"]?.ToString(), out decimal giaNhap);
                 nudGiaNhap.Value = giaNhap;
 
-                decimal.TryParse(row.Cells["GiaBan"].Value?.ToString(), out decimal giaBan);
+                decimal.TryParse(drv["GiaBan"]?.ToString(), out decimal giaBan);
                 nudGiaBan.Value = giaBan;
 
-                int.TryParse(row.Cells["SoLuongTon"].Value?.ToString(), out int soLuong);
+                int.TryParse(drv["SoLuongTon"]?.ToString(), out int soLuong);
                 nudSoLuong.Value = soLuong;
 
-                txtGhiChu.Text = row.Cells["GhiChu"].Value?.ToString();
-                duongDanAnh = row.Cells["HinhAnh"].Value?.ToString() ?? "";
+                txtGhiChu.Text = drv["GhiChu"]?.ToString() ?? "";
 
+                duongDanAnh = drv["HinhAnh"]?.ToString() ?? "";
                 HienThiAnh(duongDanAnh);
             }
         }

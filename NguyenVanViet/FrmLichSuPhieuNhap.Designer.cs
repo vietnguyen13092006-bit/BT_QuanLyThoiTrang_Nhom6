@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             dgvLichSu = new DataGridView();
+            btnSua = new Button();
             ((System.ComponentModel.ISupportInitialize)dgvLichSu).BeginInit();
             SuspendLayout();
             // 
@@ -40,15 +41,27 @@
             dgvLichSu.Dock = DockStyle.Fill;
             dgvLichSu.Location = new Point(0, 0);
             dgvLichSu.Name = "dgvLichSu";
-            dgvLichSu.Size = new Size(800, 450);
+            dgvLichSu.Size = new Size(850, 501);
             dgvLichSu.TabIndex = 0;
+            // 
+            // btnSua
+            // 
+            btnSua.Dock = DockStyle.Bottom;
+            btnSua.Location = new Point(0, 458);
+            btnSua.Name = "btnSua";
+            btnSua.Size = new Size(850, 43);
+            btnSua.TabIndex = 2;
+            btnSua.Text = "Sửa phiếu";
+            btnSua.UseVisualStyleBackColor = true;
+            btnSua.Click += BtnSua_Click;
             // 
             // FrmLichSuPhieuNhap
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoScroll = true;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(850, 501);
+            Controls.Add(btnSua);
             Controls.Add(dgvLichSu);
             Name = "FrmLichSuPhieuNhap";
             Text = "FrmLichSuPhieuNhap";
@@ -59,5 +72,6 @@
         #endregion
 
         private DataGridView dgvLichSu;
+        private Button btnSua;
     }
 }

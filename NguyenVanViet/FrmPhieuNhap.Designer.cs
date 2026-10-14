@@ -31,6 +31,10 @@
             txtPN = new TextBox();
             label1 = new Label();
             panelTong = new Panel();
+            txtMau = new TextBox();
+            labelMau = new Label();
+            txtSize = new TextBox();
+            label9 = new Label();
             label4 = new Label();
             btnXemLichSu = new Button();
             btnThemNhanhSP = new Button();
@@ -51,6 +55,8 @@
             label5 = new Label();
             label3 = new Label();
             label2 = new Label();
+            btnXoa = new Button();
+            btnSua = new Button();
             panelTong.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvPN).BeginInit();
             SuspendLayout();
@@ -59,7 +65,7 @@
             // 
             txtPN.Anchor = AnchorStyles.Top;
             txtPN.Enabled = false;
-            txtPN.Location = new Point(117, 167);
+            txtPN.Location = new Point(121, 138);
             txtPN.Name = "txtPN";
             txtPN.ReadOnly = true;
             txtPN.Size = new Size(193, 23);
@@ -69,7 +75,7 @@
             // 
             label1.Anchor = AnchorStyles.Top;
             label1.AutoSize = true;
-            label1.Location = new Point(68, 167);
+            label1.Location = new Point(72, 138);
             label1.Name = "label1";
             label1.Size = new Size(43, 15);
             label1.TabIndex = 1;
@@ -79,6 +85,12 @@
             // 
             panelTong.AutoScroll = true;
             panelTong.AutoSize = true;
+            panelTong.Controls.Add(btnSua);
+            panelTong.Controls.Add(btnXoa);
+            panelTong.Controls.Add(txtMau);
+            panelTong.Controls.Add(labelMau);
+            panelTong.Controls.Add(txtSize);
+            panelTong.Controls.Add(label9);
             panelTong.Controls.Add(label4);
             panelTong.Controls.Add(btnXemLichSu);
             panelTong.Controls.Add(btnThemNhanhSP);
@@ -106,6 +118,42 @@
             panelTong.Name = "panelTong";
             panelTong.Size = new Size(1021, 639);
             panelTong.TabIndex = 2;
+            // 
+            // txtMau
+            // 
+            txtMau.Anchor = AnchorStyles.Top;
+            txtMau.Location = new Point(385, 259);
+            txtMau.Name = "txtMau";
+            txtMau.Size = new Size(201, 23);
+            txtMau.TabIndex = 29;
+            // 
+            // labelMau
+            // 
+            labelMau.Anchor = AnchorStyles.Top;
+            labelMau.AutoSize = true;
+            labelMau.Location = new Point(348, 262);
+            labelMau.Name = "labelMau";
+            labelMau.Size = new Size(31, 15);
+            labelMau.TabIndex = 28;
+            labelMau.Text = "Màu";
+            // 
+            // txtSize
+            // 
+            txtSize.Anchor = AnchorStyles.Top;
+            txtSize.Location = new Point(121, 256);
+            txtSize.Name = "txtSize";
+            txtSize.Size = new Size(193, 23);
+            txtSize.TabIndex = 27;
+            // 
+            // label9
+            // 
+            label9.Anchor = AnchorStyles.Top;
+            label9.AutoSize = true;
+            label9.Location = new Point(77, 259);
+            label9.Name = "label9";
+            label9.Size = new Size(27, 15);
+            label9.TabIndex = 26;
+            label9.Text = "Size";
             // 
             // label4
             // 
@@ -195,17 +243,17 @@
             // 
             label7.Anchor = AnchorStyles.Top;
             label7.AutoSize = true;
-            label7.Location = new Point(344, 174);
+            label7.Location = new Point(348, 145);
             label7.Name = "label7";
-            label7.Size = new Size(84, 15);
+            label7.Size = new Size(81, 15);
             label7.TabIndex = 15;
-            label7.Text = "Loại sản phẩm";
+            label7.Text = "Tên sản phẩm";
             // 
             // comboBox1
             // 
             comboBox1.Anchor = AnchorStyles.Top;
             comboBox1.FormattingEnabled = true;
-            comboBox1.Location = new Point(434, 171);
+            comboBox1.Location = new Point(438, 142);
             comboBox1.Name = "comboBox1";
             comboBox1.Size = new Size(145, 23);
             comboBox1.TabIndex = 14;
@@ -215,7 +263,7 @@
             // 
             label6.Anchor = AnchorStyles.Top;
             label6.AutoSize = true;
-            label6.Location = new Point(651, 232);
+            label6.Location = new Point(655, 203);
             label6.Name = "label6";
             label6.Size = new Size(65, 15);
             label6.TabIndex = 13;
@@ -224,7 +272,7 @@
             // dateTimePicker1
             // 
             dateTimePicker1.Anchor = AnchorStyles.Top;
-            dateTimePicker1.Location = new Point(722, 228);
+            dateTimePicker1.Location = new Point(726, 199);
             dateTimePicker1.Name = "dateTimePicker1";
             dateTimePicker1.Size = new Size(210, 23);
             dateTimePicker1.TabIndex = 12;
@@ -232,9 +280,9 @@
             // txtThue
             // 
             txtThue.Anchor = AnchorStyles.Top;
-            txtThue.Location = new Point(279, 307);
+            txtThue.Location = new Point(701, 262);
             txtThue.Name = "txtThue";
-            txtThue.Size = new Size(179, 23);
+            txtThue.Size = new Size(235, 23);
             txtThue.TabIndex = 11;
             txtThue.TextChanged += txtThue_TextChanged;
             // 
@@ -242,7 +290,7 @@
             // 
             lblThue.Anchor = AnchorStyles.Top;
             lblThue.AutoSize = true;
-            lblThue.Location = new Point(219, 310);
+            lblThue.Location = new Point(655, 267);
             lblThue.Name = "lblThue";
             lblThue.Size = new Size(44, 15);
             lblThue.TabIndex = 10;
@@ -251,7 +299,7 @@
             // txtSoluong
             // 
             txtSoluong.Anchor = AnchorStyles.Top;
-            txtSoluong.Location = new Point(403, 228);
+            txtSoluong.Location = new Point(407, 199);
             txtSoluong.Name = "txtSoluong";
             txtSoluong.Size = new Size(179, 23);
             txtSoluong.TabIndex = 8;
@@ -259,7 +307,7 @@
             // txtGiaNhap
             // 
             txtGiaNhap.Anchor = AnchorStyles.Top;
-            txtGiaNhap.Location = new Point(131, 228);
+            txtGiaNhap.Location = new Point(135, 199);
             txtGiaNhap.Name = "txtGiaNhap";
             txtGiaNhap.Size = new Size(179, 23);
             txtGiaNhap.TabIndex = 7;
@@ -269,7 +317,7 @@
             // txtMaSP
             // 
             txtMaSP.Anchor = AnchorStyles.Top;
-            txtMaSP.Location = new Point(697, 168);
+            txtMaSP.Location = new Point(701, 139);
             txtMaSP.Name = "txtMaSP";
             txtMaSP.Size = new Size(235, 23);
             txtMaSP.TabIndex = 6;
@@ -278,7 +326,7 @@
             // 
             label5.Anchor = AnchorStyles.Top;
             label5.AutoSize = true;
-            label5.Location = new Point(651, 170);
+            label5.Location = new Point(655, 141);
             label5.Name = "label5";
             label5.Size = new Size(40, 15);
             label5.TabIndex = 5;
@@ -288,7 +336,7 @@
             // 
             label3.Anchor = AnchorStyles.Top;
             label3.AutoSize = true;
-            label3.Location = new Point(71, 231);
+            label3.Location = new Point(72, 199);
             label3.Name = "label3";
             label3.Size = new Size(54, 15);
             label3.TabIndex = 3;
@@ -298,11 +346,33 @@
             // 
             label2.Anchor = AnchorStyles.Top;
             label2.AutoSize = true;
-            label2.Location = new Point(343, 231);
+            label2.Location = new Point(347, 202);
             label2.Name = "label2";
             label2.Size = new Size(54, 15);
             label2.TabIndex = 2;
             label2.Text = "Số lượng";
+            // 
+            // btnXoa
+            // 
+            btnXoa.Anchor = AnchorStyles.Top;
+            btnXoa.Location = new Point(438, 581);
+            btnXoa.Name = "btnXoa";
+            btnXoa.Size = new Size(97, 46);
+            btnXoa.TabIndex = 30;
+            btnXoa.Text = "Xóa SP";
+            btnXoa.UseVisualStyleBackColor = true;
+            btnXoa.Click += btnXoa_Click;
+            // 
+            // btnSua
+            // 
+            btnSua.Anchor = AnchorStyles.Top;
+            btnSua.Location = new Point(258, 578);
+            btnSua.Name = "btnSua";
+            btnSua.Size = new Size(97, 46);
+            btnSua.TabIndex = 31;
+            btnSua.Text = "Sửa SP";
+            btnSua.UseVisualStyleBackColor = true;
+            btnSua.Click += btnSua_Click;
             // 
             // FrmPhieuNhap
             // 
@@ -345,5 +415,11 @@
         private Button btnThemNhanhSP;
         private Button btnXemLichSu;
         private Label label4;
+        private TextBox txtMau;
+        private Label labelMau;
+        private TextBox txtSize;
+        private Label label9;
+        private Button btnSua;
+        private Button btnXoa;
     }
 }

@@ -181,7 +181,21 @@ namespace FORM_DKY
                 lblTienThue.Text = tongThueVATRa.ToString("N0") + " VNĐ";      // Hiển thị thuế đầu ra
                 lblValLoiNhuan.Text = tongLoiNhuan.ToString("N0") + " VNĐ";
 
-                dgvChiTiet.DataSource = null;
+                // Tự động load chi tiết của hóa đơn đầu tiên nếu có dữ liệu để bảng dưới không bị trống
+                if (dt.Rows.Count > 0)
+                {
+                    dgvBaoCao.Rows[0].Selected = true;
+                    string maHDDauTien = dt.Rows[0]["Số Hóa Đơn"]?.ToString() ?? "";
+                    if (!string.IsNullOrEmpty(maHDDauTien))
+                    {
+                        HienThiChiTietHoaDon(maHDDauTien);
+                    }
+                }
+                else
+                {
+                    dgvChiTiet.DataSource = null;
+                }
+
                 CapNhatChieuCaoGridView();
             }
             catch (Exception ex)
