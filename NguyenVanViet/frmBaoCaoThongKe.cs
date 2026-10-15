@@ -318,7 +318,7 @@ namespace FORM_DKY
                         sw.WriteLine($"- Tổng Giá Vốn:\t{lblValGiaVon.Text}");
                         sw.WriteLine($"- Tổng Thuế Đầu Vào:\t{lblThueDauVao.Text}");
                         sw.WriteLine($"- Tổng Thuế Đầu Ra (VAT):\t{lblTienThue.Text}");
-                        sw.WriteLine($"- Tổng Lợi Nhuận:\t{lblValLoiNhuan.Text}");
+                        sw.WriteLine($"- Tổng Lợi Nhuận Trước Thuế:\t{lblValLoiNhuan.Text}");
                     }
                     MessageBox.Show("Xuất báo cáo Excel thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
@@ -417,7 +417,7 @@ namespace FORM_DKY
             lblValGiaVon = CreateCard(pnlCards, "💸 TỔNG GIÁ VỐN", Color.IndianRed, 275, 200);
             lblThueDauVao = CreateCard(pnlCards, "📥 THUẾ ĐẦU VÀO", Color.Teal, 535, 200);
             lblTienThue = CreateCard(pnlCards, "🧾 THUẾ ĐẦU RA", Color.DarkOrange, 795, 200);
-            lblValLoiNhuan = CreateCard(pnlCards, "💰 TỔNG LỢI NHUẬN", Color.DarkBlue, 1055, 200);
+            lblValLoiNhuan = CreateCard(pnlCards, "💰 TỔNG LỢI NHUẬN TRƯỚC THUẾ", Color.DarkBlue, 1055, 200);
 
             // Các nút chức năng dưới đáy (pnlBottom)
             Label lblChonHD = new Label { Text = "🔍 Tìm HD:", Location = new Point(20, 18), AutoSize = true };

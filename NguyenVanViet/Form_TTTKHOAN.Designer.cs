@@ -43,12 +43,13 @@
             // 
             // lblMail
             // 
+            lblMail.AllowDrop = true;
             lblMail.AutoSize = true;
             lblMail.BackColor = Color.Transparent;
-            lblMail.Font = new Font("Segoe UI", 35F);
+            lblMail.Font = new Font("Segoe UI", 25F);
             lblMail.Location = new Point(487, 263);
             lblMail.Name = "lblMail";
-            lblMail.Size = new Size(137, 62);
+            lblMail.Size = new Size(99, 46);
             lblMail.TabIndex = 0;
             lblMail.Text = "Email";
             // 
@@ -56,10 +57,10 @@
             // 
             lblName.AutoSize = true;
             lblName.BackColor = Color.Transparent;
-            lblName.Font = new Font("Segoe UI", 35F);
+            lblName.Font = new Font("Segoe UI", 25F);
             lblName.Location = new Point(487, 26);
             lblName.Name = "lblName";
-            lblName.Size = new Size(99, 62);
+            lblName.Size = new Size(72, 46);
             lblName.TabIndex = 1;
             lblName.Text = "Tên";
             // 
@@ -78,10 +79,10 @@
             // 
             lblSDT.AutoSize = true;
             lblSDT.BackColor = Color.Transparent;
-            lblSDT.Font = new Font("Segoe UI", 35F);
+            lblSDT.Font = new Font("Segoe UI", 25F);
             lblSDT.Location = new Point(487, 151);
             lblSDT.Name = "lblSDT";
-            lblSDT.Size = new Size(108, 62);
+            lblSDT.Size = new Size(78, 46);
             lblSDT.TabIndex = 3;
             lblSDT.Text = "SDT";
             // 

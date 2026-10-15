@@ -41,16 +41,18 @@
             // 
             // txtPW
             // 
-            txtPW.Location = new Point(490, 243);
+            txtPW.Font = new Font("Segoe UI", 15F);
+            txtPW.Location = new Point(490, 232);
             txtPW.Name = "txtPW";
-            txtPW.Size = new Size(275, 23);
+            txtPW.Size = new Size(275, 34);
             txtPW.TabIndex = 15;
             // 
             // txtName
             // 
-            txtName.Location = new Point(401, 141);
+            txtName.Font = new Font("Segoe UI", 15F);
+            txtName.Location = new Point(401, 130);
             txtName.Name = "txtName";
-            txtName.Size = new Size(364, 23);
+            txtName.Size = new Size(364, 34);
             txtName.TabIndex = 14;
             // 
             // label3

@@ -484,5 +484,10 @@ namespace FORM_DKY
             FrmLichSuPhieuNhap popup = new FrmLichSuPhieuNhap();
             popup.ShowDialog();
         }
+
+        private void panelTong_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
     }
 }

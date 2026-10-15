@@ -100,21 +100,24 @@ namespace FORM_DKY
                 tlpInput.RowStyles.Add(new RowStyle(SizeType.Absolute, 38F));
             }
 
-            txtMaSP = new TextBox { Dock = DockStyle.Fill };
-            txtTenSP = new TextBox { Dock = DockStyle.Fill };
+            // Các trường khóa lại không cho sửa trực tiếp (gắn liền với phiếu nhập)
+            txtMaSP = new TextBox { Dock = DockStyle.Fill, ReadOnly = true, BackColor = Color.WhiteSmoke };
+            txtTenSP = new TextBox { Dock = DockStyle.Fill, ReadOnly = true, BackColor = Color.WhiteSmoke };
 
             cboLoaiSP = new ComboBox { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDown };
             cboLoaiSP.Items.AddRange(new object[] { "Áo thun", "Áo sơ mi", "Quần jean", "Quần short", "Áo khoác", "Váy/Đầm" });
 
-            cboMauSac = new ComboBox { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDown };
+            cboMauSac = new ComboBox { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDown, Enabled = false };
             cboMauSac.Items.AddRange(new object[] { "Đen", "Trắng", "Xanh", "Đỏ", "Vàng", "Xám", "Nâu" });
 
-            cboSize = new ComboBox { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDown };
+            cboSize = new ComboBox { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDown, Enabled = false };
             cboSize.Items.AddRange(new object[] { "S", "M", "L", "XL", "XXL", "28", "29", "30", "31", "32" });
 
-            nudGiaNhap = new NumericUpDown { Dock = DockStyle.Fill, Maximum = 1000000000, Increment = 10000, ThousandsSeparator = true };
+            nudGiaNhap = new NumericUpDown { Dock = DockStyle.Fill, Maximum = 1000000000, Increment = 10000, ThousandsSeparator = true, Enabled = false };
+
+            // Các trường cho phép chỉnh sửa
             nudGiaBan = new NumericUpDown { Dock = DockStyle.Fill, Maximum = 1000000000, Increment = 10000, ThousandsSeparator = true };
-            nudSoLuong = new NumericUpDown { Dock = DockStyle.Fill, Maximum = 100000, Value = 1 };
+            nudSoLuong = new NumericUpDown { Dock = DockStyle.Fill, Maximum = 100000, Value = 1, Enabled = false };
 
             txtGhiChu = new TextBox { Dock = DockStyle.Fill };
 
@@ -358,7 +361,6 @@ namespace FORM_DKY
             txtGhiChu.Clear();
             duongDanAnh = "";
             picHinhAnh.Image = null;
-            txtMaSP.Focus();
         }
 
         #endregion
@@ -386,29 +388,26 @@ namespace FORM_DKY
                 return;
             }
 
+            // Chỉ cho phép cập nhật các thuộc tính linh hoạt: Loại SP, Giá Bán, Ghi Chú, Hình Ảnh
             string query = @"UPDATE SanPham 
-                            SET TenSP = @TenSP, LoaiSP = @LoaiSP, MauSac = @MauSac, Size = @Size, 
-                                GiaNhap = @GiaNhap, GiaBan = @GiaBan, SoLuongTon = @SoLuong, 
-                                GhiChu = @GhiChu, HinhAnh = @HinhAnh 
+                            SET LoaiSP = @LoaiSP, 
+                                GiaBan = @GiaBan, 
+                                GhiChu = @GhiChu, 
+                                HinhAnh = @HinhAnh 
                             WHERE MaSP = @MaSP";
 
             SqlParameter[] parameters = new SqlParameter[]
             {
                 new SqlParameter("@MaSP", txtMaSP.Text.Trim()),
-                new SqlParameter("@TenSP", txtTenSP.Text.Trim()),
                 new SqlParameter("@LoaiSP", (object?)cboLoaiSP.Text ?? DBNull.Value),
-                new SqlParameter("@MauSac", (object?)cboMauSac.Text ?? DBNull.Value),
-                new SqlParameter("@Size", (object?)cboSize.Text ?? DBNull.Value),
-                new SqlParameter("@GiaNhap", nudGiaNhap.Value),
                 new SqlParameter("@GiaBan", nudGiaBan.Value),
-                new SqlParameter("@SoLuong", (int)nudSoLuong.Value),
                 new SqlParameter("@GhiChu", (object?)txtGhiChu.Text ?? DBNull.Value),
                 new SqlParameter("@HinhAnh", (object?)duongDanAnh ?? DBNull.Value)
             };
 
             if (Database.ExecuteNonQuery(query, parameters) > 0)
             {
-                MessageBox.Show("Cập nhật thông tin thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Cập nhật thông tin sản phẩm thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 TaiDanhSachSanPham();
                 XoaTrangForm();
             }
