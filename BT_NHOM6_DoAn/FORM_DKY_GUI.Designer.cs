@@ -41,6 +41,8 @@
             lblSDT = new Label();
             txtSDT = new TextBox();
             panel1 = new Panel();
+            btnPW = new Button();
+            btnCP = new Button();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
@@ -86,6 +88,7 @@
             // 
             txtPW.Location = new Point(151, 100);
             txtPW.Name = "txtPW";
+            txtPW.PasswordChar = '*';
             txtPW.Size = new Size(292, 23);
             txtPW.TabIndex = 7;
             // 
@@ -110,6 +113,7 @@
             // 
             TxtCP.Location = new Point(259, 171);
             TxtCP.Name = "TxtCP";
+            TxtCP.PasswordChar = '*';
             TxtCP.Size = new Size(184, 23);
             TxtCP.TabIndex = 8;
             // 
@@ -143,6 +147,10 @@
             // panel1
             // 
             panel1.BackColor = Color.Transparent;
+            panel1.Controls.Add(txtPW);
+            panel1.Controls.Add(btnPW);
+            panel1.Controls.Add(TxtCP);
+            panel1.Controls.Add(btnCP);
             panel1.Controls.Add(txtSDT);
             panel1.Controls.Add(txtName);
             panel1.Controls.Add(lblSDT);
@@ -152,12 +160,32 @@
             panel1.Controls.Add(label5);
             panel1.Controls.Add(label3);
             panel1.Controls.Add(label4);
-            panel1.Controls.Add(txtPW);
-            panel1.Controls.Add(TxtCP);
             panel1.Location = new Point(12, 41);
             panel1.Name = "panel1";
             panel1.Size = new Size(758, 388);
             panel1.TabIndex = 14;
+            // 
+            // btnPW
+            // 
+            btnPW.Location = new Point(433, 99);
+            btnPW.Name = "btnPW";
+            btnPW.Size = new Size(35, 23);
+            btnPW.TabIndex = 16;
+            btnPW.Text = "👁️";
+            btnPW.TextAlign = ContentAlignment.MiddleRight;
+            btnPW.UseVisualStyleBackColor = true;
+            btnPW.Click += btnPW_Click;
+            // 
+            // btnCP
+            // 
+            btnCP.Location = new Point(433, 171);
+            btnCP.Name = "btnCP";
+            btnCP.Size = new Size(35, 23);
+            btnCP.TabIndex = 15;
+            btnCP.Text = "👁️";
+            btnCP.TextAlign = ContentAlignment.MiddleRight;
+            btnCP.UseVisualStyleBackColor = true;
+            btnCP.Click += btnCP_Click;
             // 
             // FORM_DKY_GUI
             // 
@@ -165,7 +193,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             AutoScroll = true;
             BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(979, 630);
             Controls.Add(panel1);
             Name = "FORM_DKY_GUI";
             Text = "Form1";
@@ -191,5 +219,8 @@
         private Label lblSDT;
         private TextBox txtSDT;
         private Panel panel1;
+        private Button button1;
+        private Button btnCP;
+        private Button btnPW;
     }
 }

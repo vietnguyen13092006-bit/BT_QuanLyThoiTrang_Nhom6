@@ -36,6 +36,7 @@
             label2 = new Label();
             button2 = new Button();
             panel1 = new Panel();
+            btnMat = new Button();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
@@ -44,6 +45,7 @@
             txtPW.Font = new Font("Segoe UI", 15F);
             txtPW.Location = new Point(490, 232);
             txtPW.Name = "txtPW";
+            txtPW.PasswordChar = '*';
             txtPW.Size = new Size(275, 34);
             txtPW.TabIndex = 15;
             // 
@@ -52,7 +54,7 @@
             txtName.Font = new Font("Segoe UI", 15F);
             txtName.Location = new Point(401, 130);
             txtName.Name = "txtName";
-            txtName.Size = new Size(364, 34);
+            txtName.Size = new Size(402, 34);
             txtName.TabIndex = 14;
             // 
             // label3
@@ -114,18 +116,30 @@
             // 
             panel1.Anchor = AnchorStyles.None;
             panel1.BackColor = Color.Transparent;
+            panel1.Controls.Add(txtPW);
+            panel1.Controls.Add(btnMat);
             panel1.Controls.Add(label1);
             panel1.Controls.Add(button2);
             panel1.Controls.Add(label3);
             panel1.Controls.Add(label2);
             panel1.Controls.Add(txtName);
             panel1.Controls.Add(button1);
-            panel1.Controls.Add(txtPW);
             panel1.Location = new Point(29, 12);
             panel1.Name = "panel1";
             panel1.Padding = new Padding(0, 180, 0, 0);
             panel1.Size = new Size(892, 562);
             panel1.TabIndex = 21;
+            // 
+            // btnMat
+            // 
+            btnMat.Font = new Font("Segoe UI", 15F);
+            btnMat.Location = new Point(762, 232);
+            btnMat.Name = "btnMat";
+            btnMat.Size = new Size(41, 34);
+            btnMat.TabIndex = 21;
+            btnMat.Text = "👁️";
+            btnMat.UseVisualStyleBackColor = true;
+            btnMat.Click += btnMat_Click;
             // 
             // FormDangNhap
             // 
@@ -151,5 +165,6 @@
         private Label label2;
         private Button button2;
         private Panel panel1;
+        private Button btnMat;
     }
 }

@@ -15,6 +15,7 @@ namespace FORM_DKY
         public static string Mail { get; set; } = "";
         public static string SDT { get; set; } = "";
         public static string AvatarPath { get; set; } = "";
+        bool isShow = false;
         //private string connectionString = @"Data Source=localhost\SQLEXPRESS01;Initial Catalog=TAIKHOAN;Integrated Security=True;TrustServerCertificate=True";
         string connectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=TAIKHOAN;Integrated Security=True;TrustServerCertificate=True";
         public FormDangNhap()
@@ -106,6 +107,22 @@ namespace FORM_DKY
             FORM_DKY_GUI frmSignin = new FORM_DKY_GUI();
             frmSignin.Show();
             this.Hide();
+        }
+
+        private void btnMat_Click(object sender, EventArgs e)
+        {
+            if(isShow)
+            {
+                txtPW.PasswordChar = '*';
+                btnMat.Text = "👁️";
+                isShow = false;
+            }
+            else
+            {
+                txtPW.PasswordChar = '\0';
+                btnMat.Text = "🔒";
+                isShow = true;
+            }
         }
     }
 }

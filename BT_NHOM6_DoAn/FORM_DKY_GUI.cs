@@ -107,5 +107,37 @@ namespace FORM_DKY
                 CanGiuaPanel();
             }
         }
+        bool isShow1 = false, isShow2 = false;
+        private void btnPW_Click(object sender, EventArgs e)
+        {
+            if (isShow1)
+            {
+                txtPW.PasswordChar = '*';
+                btnPW.Text = "👁️";
+                isShow1 = false;
+            }
+            else
+            {
+                txtPW.PasswordChar = '\0';
+                btnPW.Text = "🔒";
+                isShow1 = true;
+            }
+        }
+
+        private void btnCP_Click(object sender, EventArgs e)
+        {
+            if (isShow2)
+            {
+                TxtCP.PasswordChar = '*';
+                btnCP.Text = "👁️";
+                isShow2 = false;
+            }
+            else
+            {
+                TxtCP.PasswordChar = '\0';
+                btnCP.Text = "🔒";
+                isShow2 = true;
+            }
+        }
     }
 }
