@@ -310,16 +310,22 @@ namespace FORM_DKY
         {
             try
             {
+                // Lấy toàn bộ danh sách sản phẩm từ cơ sở dữ liệu
                 DataTable dtSP = DatabaseHelper.ExecuteQuery("SELECT MaSP, TenSP, MauSac, Size, GiaBan FROM SanPham");
 
                 isBindingSP = true;
 
+                // 1. Bind cho ComboBox Mã SP
                 cboMaSP.DataSource = dtSP.Copy();
                 cboMaSP.DisplayMember = "MaSP";
                 cboMaSP.ValueMember = "MaSP";
 
-                cboSanPham.DataSource = dtSP;
-                cboSanPham.DisplayMember = "TenSP";
+                // 2. Tạo một bản sao riêng để ComboBox Tên SP hiển thị đầy đủ tên kèm Size, Màu giúp phân biệt các sản phẩm trùng tên
+                DataTable dtCboSanPham = dtSP.Copy();
+                dtCboSanPham.Columns.Add("HienThi", typeof(string), "TenSP + ' (Size: ' + ISNULL(Size, '') + ' - Màu: ' + ISNULL(MauSac, '') + ')'");
+
+                cboSanPham.DataSource = dtCboSanPham;
+                cboSanPham.DisplayMember = "HienThi"; // Hiển thị Tên kèm Size và Màu để không bị sót hay trùng lặp trực quan
                 cboSanPham.ValueMember = "MaSP";
 
                 cboSanPham.DropDownStyle = ComboBoxStyle.DropDown;
@@ -330,7 +336,11 @@ namespace FORM_DKY
 
                 if (cboSanPham.Items.Count > 0)
                 {
-                    CapNhatChiTietSPSelected((DataRowView)cboSanPham.SelectedItem);
+                    cboSanPham.SelectedIndex = 0;
+                    if (cboSanPham.SelectedItem is DataRowView drv)
+                    {
+                        CapNhatChiTietSPSelected(drv);
+                    }
                 }
             }
             catch (Exception ex)
