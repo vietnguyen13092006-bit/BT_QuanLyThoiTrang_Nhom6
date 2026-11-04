@@ -287,6 +287,7 @@ namespace FORM_DKY
                         sw.WriteLine($"Thời gian xuất báo cáo: {DateTime.Now:dd/MM/yyyy HH:mm:ss}");
                         sw.WriteLine("");
 
+                        // Đã cập nhật đầy đủ tiêu đề cột bao gồm cả Mã NV và Tên Nhân Viên
                         sw.WriteLine("DANH SÁCH HÓA ĐƠN TRONG KỲ");
                         sw.WriteLine("Số Hóa Đơn\tNgày Lập\tDoanh Thu (VNĐ)\tTổng Tiền Thuế (VNĐ)\tGiá Vốn (VNĐ)\tLợi Nhuận (VNĐ)\tMã NV\tTên Nhân Viên");
 
@@ -299,6 +300,7 @@ namespace FORM_DKY
                                 decimal giaVon = Convert.ToDecimal(row.Cells["Giá Vốn"].Value ?? 0);
                                 decimal loiNhuan = Convert.ToDecimal(row.Cells["Lợi Nhuận"].Value ?? 0);
 
+                                // Xuất chuẩn từng dòng dữ liệu kèm Mã NV và Tên Nhân Viên
                                 sw.WriteLine($"{row.Cells["Số Hóa Đơn"].Value}\t" +
                                              $"{row.Cells["Ngày Lập"].Value}\t" +
                                              $"{doanhThu}\t" +
