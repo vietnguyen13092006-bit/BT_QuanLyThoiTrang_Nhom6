@@ -118,7 +118,6 @@
             panelTong.Name = "panelTong";
             panelTong.Size = new Size(1037, 674);
             panelTong.TabIndex = 2;
-            panelTong.Paint += panelTong_Paint;
             // 
             // btnSua
             // 

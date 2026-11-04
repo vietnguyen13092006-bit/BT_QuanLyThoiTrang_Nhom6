@@ -36,6 +36,7 @@
             picAVT = new PictureBox();
             panel1 = new Panel();
             pictureBox1 = new PictureBox();
+            lblManv = new Label();
             ((System.ComponentModel.ISupportInitialize)picAVT).BeginInit();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
@@ -126,12 +127,25 @@
             pictureBox1.TabIndex = 9;
             pictureBox1.TabStop = false;
             // 
+            // lblManv
+            // 
+            lblManv.AllowDrop = true;
+            lblManv.AutoSize = true;
+            lblManv.BackColor = Color.Transparent;
+            lblManv.Font = new Font("Segoe UI", 25F);
+            lblManv.Location = new Point(487, 362);
+            lblManv.Name = "lblManv";
+            lblManv.Size = new Size(130, 46);
+            lblManv.TabIndex = 10;
+            lblManv.Text = "Mã NV:";
+            // 
             // Form_TTTKHOAN
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoScroll = true;
             ClientSize = new Size(968, 618);
+            Controls.Add(lblManv);
             Controls.Add(panel1);
             Controls.Add(lblSDT);
             Controls.Add(lblName);
@@ -158,5 +172,6 @@
         private PictureBox picAVT;
         private Panel panel1;
         private PictureBox pictureBox1;
+        private Label lblManv;
     }
 }

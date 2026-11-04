@@ -18,7 +18,6 @@ namespace FORM_DKY
             InitializeComponent();
             this.Load += FrmLichSuPhieuNhap_Load;
 
-            // Gắn sự kiện cho DataGridView và Nút sửa (giả sử tên nút trên Designer là btnSua và tên lưới là dgvLichSu)
             if (dgvLichSu != null) dgvLichSu.CellClick += DgvLichSu_CellClick;
             if (btnSua != null) btnSua.Click += BtnSua_Click;
         }
@@ -35,19 +34,23 @@ namespace FORM_DKY
                 try
                 {
                     conn.Open();
-                    // Bổ sung sp.MauSac và sp.Size vào câu SELECT
+                    // Bổ sung lấy thêm MaNV và TenNV để quản lý minh bạch, chống nhầm lẫn khi trùng tên nhân viên
                     string query = @"SELECT ct.MaPN AS [Mã Phiếu Nhập], 
-                                    ct.MaSP AS [Mã SP], 
-                                    sp.TenSP AS [Tên Sản Phẩm], 
-                                    sp.MauSac AS [Màu], 
-                                    sp.Size AS [Size], 
-                                    ct.SoLuong AS [Số Lượng], 
-                                    ct.GiaNhap AS [Giá Nhập], 
-                                    (ct.SoLuong * ct.GiaNhap * (1 + ISNULL(pn.Thue, 0) / 100.0)) AS [Thành Tiền] 
-                             FROM ChiTietPhieuNhap ct 
-                             JOIN SanPham sp ON ct.MaSP = sp.MaSP
-                             JOIN PhieuNhap pn ON ct.MaPN = pn.MaPN
-                             ORDER BY pn.NgayNhap DESC, pn.MaPN DESC";
+                                            pn.NgayNhap AS [Ngày Nhập],
+                                            pn.MaNV AS [Mã NV], 
+                                            nv.TenNV AS [Tên Nhân Viên],
+                                            ct.MaSP AS [Mã SP], 
+                                            sp.TenSP AS [Tên Sản Phẩm], 
+                                            sp.MauSac AS [Màu], 
+                                            sp.Size AS [Size], 
+                                            ct.SoLuong AS [Số Lượng], 
+                                            ct.GiaNhap AS [Giá Nhập], 
+                                            (ct.SoLuong * ct.GiaNhap * (1 + ISNULL(pn.Thue, 0) / 100.0)) AS [Thành Tiền] 
+                                     FROM ChiTietPhieuNhap ct 
+                                     JOIN SanPham sp ON ct.MaSP = sp.MaSP
+                                     JOIN PhieuNhap pn ON ct.MaPN = pn.MaPN
+                                     LEFT JOIN NhanVien nv ON pn.MaNV = nv.MaNV
+                                     ORDER BY pn.NgayNhap DESC, pn.MaPN DESC";
 
                     SqlDataAdapter da = new SqlDataAdapter(query, conn);
                     DataTable dt = new DataTable();
@@ -76,7 +79,6 @@ namespace FORM_DKY
                 selectedMaPN = row.Cells["Mã Phiếu Nhập"].Value.ToString() ?? "";
                 selectedMaSP = row.Cells["Mã SP"].Value.ToString() ?? "";
 
-                // Gán đúng số lượng đang hiển thị trên lưới vào biến oldSoLuong
                 int.TryParse(row.Cells["Số Lượng"].Value?.ToString(), out oldSoLuong);
             }
         }
@@ -99,7 +101,6 @@ namespace FORM_DKY
                 return;
             }
 
-            // Lấy số lượng mới trên lưới
             if (!int.TryParse(row.Cells["Số Lượng"].Value?.ToString(), out int soLuongMoi) || soLuongMoi <= 0)
             {
                 MessageBox.Show("Số lượng mới trên lưới không hợp lệ!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -119,7 +120,6 @@ namespace FORM_DKY
 
                 try
                 {
-                    // Lấy số lượng cũ thực sự đang nằm trong CSDL trước khi update
                     int soLuongCuDb = 0;
                     string queryGetOld = "SELECT SoLuong FROM ChiTietPhieuNhap WHERE MaPN = @MaPN AND MaSP = @MaSP";
                     using (SqlCommand cmdGet = new SqlCommand(queryGetOld, conn, transaction))
@@ -144,7 +144,7 @@ namespace FORM_DKY
                         cmd.ExecuteNonQuery();
                     }
 
-                    // 2. Tính chênh lệch dựa trên số lượng gốc trong CSDL (Mới - Cũ_DB)
+                    // 2. Đã sửa lỗi ngắt dòng tính chênh lệch tồn kho
                     int chenhLech = soLuongMoi - soLuongCuDb;
                     if (chenhLech != 0)
                     {
@@ -159,12 +159,10 @@ namespace FORM_DKY
 
                     transaction.Commit();
 
-                    // Cập nhật lại biến oldSoLuong thành số lượng mới để nếu bấm sửa tiếp lần nữa vẫn chuẩn
                     oldSoLuong = soLuongMoi;
 
                     MessageBox.Show("Cập nhật phiếu nhập và đồng bộ kho thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                    // Tải lại dữ liệu
                     TaiDuLieuLichSu();
                 }
                 catch (Exception ex)

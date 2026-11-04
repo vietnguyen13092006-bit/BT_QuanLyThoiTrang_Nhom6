@@ -1,6 +1,6 @@
+using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
-using Microsoft.Data.SqlClient;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -23,11 +23,11 @@ namespace FORM_DKY
         private TextBox txtSoLuongHD = null!;
         private ComboBox cboMaHoaDon = null!;
 
-        // 5 Thẻ Card Thống Kê (Bao gồm cả Thuế Đầu Vào)
+        // 5 Thẻ Card Thống Kê
         private Label lblValDoanhThu = null!;
         private Label lblValGiaVon = null!;
         private Label lblThueDauVao = null!;  // Thuế đầu vào từ PhieuNhap
-        private Label lblTienThue = null!;     // Thuế đầu ra (VAT) từ HoaDon
+        private Label lblTienThue = null!;      // Thuế đầu ra (VAT) từ HoaDon
         private Label lblValLoiNhuan = null!;
 
         private DataGridView dgvBaoCao = null!;
@@ -93,15 +93,16 @@ namespace FORM_DKY
                     denNgay = dtpDenNgay.Value.Date.AddDays(1).AddSeconds(-1);
                 }
 
-                // 1. Truy vấn báo cáo hóa đơn (Đầu ra)
+                // 1. Truy vấn báo cáo hóa đơn (Đã tách VAT ra khỏi lợi nhuận chuẩn xác)
                 string query = @"SELECT 
                                     h.MaHD AS [Số Hóa Đơn],
                                     h.NgayBan AS [Ngày Lập],
                                     h.TongTien AS [Doanh Thu],
                                     ISNULL(h.TienThue, 0) AS [Tổng Tiền Thuế],
                                     ISNULL(SUM(ct.SoLuong * ISNULL(pn.GiaNhapGoc, ct.DonGia * 0.6)), 0) AS [Giá Vốn],
-                                    (h.TongTien - ISNULL(SUM(ct.SoLuong * ISNULL(pn.GiaNhapGoc, ct.DonGia * 0.6)), 0)) AS [Lợi Nhuận],
-                                    n.TenNV AS [Nhân Viên Lập]
+                                    ((h.TongTien - ISNULL(h.TienThue, 0)) - ISNULL(SUM(ct.SoLuong * ISNULL(pn.GiaNhapGoc, ct.DonGia * 0.6)), 0)) AS [Lợi Nhuận],
+                                    n.MaNV AS [Mã NV],
+                                    n.TenNV AS [Tên Nhân Viên]
                                 FROM HoaDon h
                                 LEFT JOIN ChiTietHoaDon ct ON h.MaHD = ct.MaHD
                                 LEFT JOIN NhanVien n ON h.MaNV = n.MaNV
@@ -112,7 +113,7 @@ namespace FORM_DKY
                                     ORDER BY NgayBan DESC, MaPN DESC
                                 ) pn
                                 WHERE h.NgayBan BETWEEN @TuNgay AND @DenNgay
-                                GROUP BY h.MaHD, h.NgayBan, h.TongTien, h.TienThue, n.TenNV
+                                GROUP BY h.MaHD, h.NgayBan, h.TongTien, h.TienThue, n.MaNV, n.TenNV
                                 ORDER BY h.NgayBan DESC, h.MaHD DESC";
 
                 SqlParameter[] parameters = new SqlParameter[]
@@ -183,7 +184,6 @@ namespace FORM_DKY
                 lblTienThue.Text = tongThueVATRa.ToString("N0") + " VNĐ";
                 lblValLoiNhuan.Text = tongLoiNhuan.ToString("N0") + " VNĐ";
 
-                // Tự động load chi tiết của hóa đơn đầu tiên nếu có dữ liệu
                 if (dt.Rows.Count > 0)
                 {
                     dgvBaoCao.Rows[0].Selected = true;
@@ -283,35 +283,33 @@ namespace FORM_DKY
                 {
                     using (StreamWriter sw = new StreamWriter(sfd.FileName, false, System.Text.Encoding.Unicode))
                     {
-                        // Tiêu đề báo cáo tổng quan
                         sw.WriteLine("BÁO CÁO DOANH THU, THUẾ & LỢI NHUẬN CỬA HÀNG");
                         sw.WriteLine($"Thời gian xuất báo cáo: {DateTime.Now:dd/MM/yyyy HH:mm:ss}");
                         sw.WriteLine("");
 
-                        // Header bảng danh sách hóa đơn
                         sw.WriteLine("DANH SÁCH HÓA ĐƠN TRONG KỲ");
-                        sw.WriteLine("Số Hóa Đơn\tNgày Lập\tDoanh Thu (VNĐ)\tTổng Tiền Thuế (VNĐ)\tGiá Vốn (VNĐ)\tLợi Nhuận (VNĐ)\tNhân Viên Lập");
+                        sw.WriteLine("Số Hóa Đơn\tNgày Lập\tDoanh Thu (VNĐ)\tTổng Tiền Thuế (VNĐ)\tGiá Vốn (VNĐ)\tLợi Nhuận (VNĐ)\tMã NV\tTên Nhân Viên");
 
                         foreach (DataGridViewRow row in dgvBaoCao.Rows)
                         {
                             if (!row.IsNewRow)
                             {
-                                // Dùng decimal để bảo toàn tuyệt đối
                                 decimal doanhThu = Convert.ToDecimal(row.Cells["Doanh Thu"].Value ?? 0);
                                 decimal tienThue = Convert.ToDecimal(row.Cells["Tổng Tiền Thuế"].Value ?? 0);
                                 decimal giaVon = Convert.ToDecimal(row.Cells["Giá Vốn"].Value ?? 0);
                                 decimal loiNhuan = Convert.ToDecimal(row.Cells["Lợi Nhuận"].Value ?? 0);
+
                                 sw.WriteLine($"{row.Cells["Số Hóa Đơn"].Value}\t" +
                                              $"{row.Cells["Ngày Lập"].Value}\t" +
                                              $"{doanhThu}\t" +
                                              $"{tienThue}\t" +
                                              $"{giaVon}\t" +
                                              $"{loiNhuan}\t" +
-                                             $"{row.Cells["Nhân Viên Lập"].Value}");
+                                             $"{row.Cells["Mã NV"].Value}\t" +
+                                             $"{row.Cells["Tên Nhân Viên"].Value}");
                             }
                         }
 
-                        // Thêm phần tổng kết thông số các thẻ card thống kê lên file Excel
                         sw.WriteLine("");
                         sw.WriteLine("TỔNG KẾT CHỈ SỐ KINH DOANH:");
                         sw.WriteLine($"- Tổng Doanh Thu:\t{lblValDoanhThu.Text}");
@@ -346,7 +344,6 @@ namespace FORM_DKY
 
             pnlMainContainer = new Panel { Dock = DockStyle.Fill, AutoScroll = true };
 
-            // GroupBox cố định cho bảng Danh sách hóa đơn (Bảng trên)
             grpBaoCao = new GroupBox
             {
                 Text = "📋 DANH SÁCH HÓA ĐƠN TRONG KỲ",
@@ -367,7 +364,6 @@ namespace FORM_DKY
             dgvBaoCao.CellClick += DgvBaoCao_CellClick;
             grpBaoCao.Controls.Add(dgvBaoCao);
 
-            // GroupBox cố định cho bảng Chi tiết sản phẩm (Bảng dưới)
             grpChiTiet = new GroupBox
             {
                 Text = "📄 CHI TIẾT SẢN PHẨM TRONG HÓA ĐƠN ĐƯỢC CHỌN",
@@ -387,7 +383,6 @@ namespace FORM_DKY
             };
             grpChiTiet.Controls.Add(dgvChiTiet);
 
-            // Các Control trên thanh lọc (pnlTop)
             rdoHomNay = new RadioButton { Text = "Hôm nay", Location = new Point(15, 18), AutoSize = true };
             rdoThangNay = new RadioButton { Text = "Tháng này", Location = new Point(100, 18), AutoSize = true };
             rdoNamNay = new RadioButton { Text = "Năm nay", Location = new Point(190, 18), AutoSize = true };
@@ -412,14 +407,12 @@ namespace FORM_DKY
 
             pnlTop.Controls.AddRange(new Control[] { rdoHomNay, rdoThangNay, rdoNamNay, rdoTuChon, lblTu, dtpTuNgay, lblDen, dtpDenNgay, btnTraCuu, lblSL, txtSoLuongHD });
 
-            // 5 Thẻ Card Thống Kê
             lblValDoanhThu = CreateCard(pnlCards, "💵 TỔNG DOANH THU", Color.SeaGreen, 15, 200);
             lblValGiaVon = CreateCard(pnlCards, "💸 TỔNG GIÁ VỐN", Color.IndianRed, 275, 200);
             lblThueDauVao = CreateCard(pnlCards, "📥 THUẾ ĐẦU VÀO", Color.Teal, 535, 200);
             lblTienThue = CreateCard(pnlCards, "🧾 THUẾ ĐẦU RA", Color.DarkOrange, 795, 200);
             lblValLoiNhuan = CreateCard(pnlCards, "💰 TỔNG LỢI NHUẬN TRƯỚC THUẾ", Color.DarkBlue, 1055, 250);
 
-            // Các nút chức năng dưới đáy (pnlBottom)
             Label lblChonHD = new Label { Text = "🔍 Tìm HD:", Location = new Point(20, 18), AutoSize = true };
 
             cboMaHoaDon = new ComboBox
@@ -441,7 +434,6 @@ namespace FORM_DKY
             pnlBottom.Controls.Clear();
             pnlBottom.Controls.AddRange(new Control[] { lblChonHD, cboMaHoaDon, btnExcel, btnThoat });
 
-            // Thêm thứ tự các Control vào container chính (thứ tự ngược vì Dock = Top)
             pnlMainContainer.Controls.Add(grpChiTiet);
             pnlMainContainer.Controls.Add(grpBaoCao);
 

@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using Microsoft.Data.SqlClient;
-using System.Data.SqlClient;
+
 namespace FORM_DKY
 {
     public partial class FormDangNhap : Form
@@ -16,8 +16,9 @@ namespace FORM_DKY
         public static string SDT { get; set; } = "";
         public static string AvatarPath { get; set; } = "";
         bool isShow = false;
-        //private string connectionString = @"Data Source=localhost\SQLEXPRESS01;Initial Catalog=TAIKHOAN;Integrated Security=True;TrustServerCertificate=True";
-        string connectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=TAIKHOAN;Integrated Security=True;TrustServerCertificate=True";
+
+        string connectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=QuanLyCuaHangThoiTrang;Integrated Security=True;TrustServerCertificate=True";
+
         public FormDangNhap()
         {
             InitializeComponent();
@@ -28,39 +29,44 @@ namespace FORM_DKY
             string ten = txtName.Text.Trim();
             string password = txtPW.Text.Trim();
 
-            // 2. Kiểm tra ô trống
             if (string.IsNullOrEmpty(ten) || string.IsNullOrEmpty(password))
             {
                 MessageBox.Show("Vui lòng nhập đầy đủ Tên và Mật khẩu!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // 3. Kiểm tra thông tin trong Database
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 try
                 {
                     conn.Open();
-
-                    // Tìm tài khoản khớp cả tên và Password
-                    string query = "SELECT COUNT(*) FROM Users WHERE Username = @Username AND PassW = @PassW";
+                    // Truy vấn lấy cả MaNV và Username từ bảng Users (có liên kết sang NhanVien nếu có)
+                    string query = "SELECT Username, MaNV FROM Users WHERE Username = @Username AND PassW = @PassW";
 
                     using (SqlCommand cmd = new SqlCommand(query, conn))
                     {
                         cmd.Parameters.AddWithValue("@Username", ten);
                         cmd.Parameters.AddWithValue("@PassW", password);
 
-                        int count = (int)cmd.ExecuteScalar();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                Ten = reader["Username"].ToString();
 
-                        if (count > 0)
-                        {
-                            Ten = txtName.Text;
-                            MessageBox.Show("Đăng nhập thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            this.Close();
-                        }
-                        else
-                        {
-                            MessageBox.Show("Email hoặc Mật khẩu không chính xác!", "Lỗi đăng nhập", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                // GÁN THÔNG TIN VÀO USERSESSION ĐỂ DÙNG CHUNG TOÀN HỆ THỐNG
+                                UserSession.MaNV = reader["MaNV"] != DBNull.Value ? reader["MaNV"].ToString() : "";
+                                UserSession.TenNV = Ten;
+
+                                MessageBox.Show("Đăng nhập thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                                // Mở form chính hoặc form quản lý (ví dụ mở Form bán hàng hoặc menu chính)
+                                this.Close();
+                            }
+                            else
+                            {
+                                MessageBox.Show("Tên đăng nhập hoặc Mật khẩu không chính xác!", "Lỗi đăng nhập", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
                         }
                     }
                 }
@@ -73,20 +79,14 @@ namespace FORM_DKY
 
         private void FormDangNhap_Load(object sender, EventArgs e)
         {
-            // 1. Gán ảnh nền trực tiếp cho Form từ thư mục Images
-            this.BackgroundImage = ImageHelper.GetImage("NenDangNhap.jpg"); // Đổi đúng tên file ảnh 
-            this.BackgroundImageLayout = ImageLayout.Stretch; // Hoặc Zoom tùy nhu cầu
-
-            // 2. Chỉnh Panel thành trong suốt
+            this.BackgroundImage = ImageHelper.GetImage("NenDangNhap.jpg");
+            this.BackgroundImageLayout = ImageLayout.Stretch;
             panel1.BackColor = Color.Transparent;
-
-            // 3. Gọi hàm căn giữa Panel ngay khi mở Form
             CanGiuaPanel();
         }
 
         private void FormDangNhap_Resize(object sender, EventArgs e)
         {
-            // Giữ Panel luôn ở chính giữa khi phóng to / thu nhỏ Form
             CanGiuaPanel();
         }
 
@@ -94,10 +94,8 @@ namespace FORM_DKY
         {
             if (panel1 != null)
             {
-                // Tính toán vị trí X, Y để căn giữa Panel trong lòng Form
                 int x = (this.ClientSize.Width - panel1.Width) / 2;
                 int y = (this.ClientSize.Height - panel1.Height) / 2;
-
                 panel1.Location = new Point(x, y);
             }
         }
@@ -111,7 +109,7 @@ namespace FORM_DKY
 
         private void btnMat_Click(object sender, EventArgs e)
         {
-            if(isShow)
+            if (isShow)
             {
                 txtPW.PasswordChar = '*';
                 btnMat.Text = "👁️";

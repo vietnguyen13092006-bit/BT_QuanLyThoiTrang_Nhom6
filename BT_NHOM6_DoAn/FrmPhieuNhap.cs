@@ -24,6 +24,15 @@ namespace FORM_DKY
             txtPN.Text = "PN" + DateTime.Now.ToString("yyyyMMddHHmmss");
             dateTimePicker1.Value = DateTime.Now;
 
+            // =========================================================
+            // TỰ ĐỘNG LẤY MÃ NHÂN VIÊN TỪ USERSESSION VÀ KHÓA LẠI (READONLY)
+            // =========================================================
+            if (txtMaNV != null)
+            {
+                txtMaNV.Text = UserSession.MaNV;
+                txtMaNV.ReadOnly = true; // Khóa không cho nhập thủ công
+            }
+
             // Thiết lập cấu trúc cột cho dgvPN nếu chưa có (Có đầy đủ Mã SP, Tên, Màu, Size, SL, Giá, Thành tiền)
             if (dgvPN.Columns.Count == 0)
             {
@@ -307,11 +316,12 @@ namespace FORM_DKY
         // NÚT LƯU HÓA ĐƠN (ĐẨY TOÀN BỘ VÀO DATABASE BẰNG TRANSACTION)
         private void btnLuuPhieu_Click(object sender, EventArgs e)
         {
-            string maNV = txtMaNV.Text.Trim();
+            // Lấy MaNV từ UserSession, nếu không có mới lấy từ ô TextBox
+            string maNV = !string.IsNullOrEmpty(UserSession.MaNV) ? UserSession.MaNV : txtMaNV.Text.Trim();
+
             if (string.IsNullOrEmpty(maNV))
             {
-                MessageBox.Show("Vui lòng nhập mã nhân viên lập phiếu!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtMaNV.Focus();
+                MessageBox.Show("Không tìm thấy thông tin phiên đăng nhập! Vui lòng đăng nhập lại.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -441,7 +451,6 @@ namespace FORM_DKY
 
                     dgvPN.Rows.Clear();
                     FrmPhieuNhap_Load(sender, e);
-                    txtMaNV.Clear();
                 }
                 catch (Exception ex)
                 {
@@ -483,11 +492,6 @@ namespace FORM_DKY
         {
             FrmLichSuPhieuNhap popup = new FrmLichSuPhieuNhap();
             popup.ShowDialog();
-        }
-
-        private void panelTong_Paint(object sender, PaintEventArgs e)
-        {
-
         }
     }
 }

@@ -27,6 +27,8 @@ namespace FORM_DKY
         // Cờ chống lặp sự kiện giữa cboMaSP và cboSanPham
         private bool isBindingSP = false;
 
+        string connectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=QuanLyCuaHangThoiTrang;Integrated Security=True;TrustServerCertificate=True";
+
         public FrmQuanLyHoaDonBanHang()
         {
             InitializeComponent();
@@ -35,6 +37,7 @@ namespace FORM_DKY
             LoadDataToComboBoxes();
             TaoMaHoaDonMoi();
             LoadDanhSachHoaDonDaLuu();
+            ApDungUserSession();
         }
 
         private void InitializeComponentCustom()
@@ -310,22 +313,19 @@ namespace FORM_DKY
         {
             try
             {
-                // Lấy toàn bộ danh sách sản phẩm từ cơ sở dữ liệu
                 DataTable dtSP = DatabaseHelper.ExecuteQuery("SELECT MaSP, TenSP, MauSac, Size, GiaBan FROM SanPham");
 
                 isBindingSP = true;
 
-                // 1. Bind cho ComboBox Mã SP
                 cboMaSP.DataSource = dtSP.Copy();
                 cboMaSP.DisplayMember = "MaSP";
                 cboMaSP.ValueMember = "MaSP";
 
-                // 2. Tạo một bản sao riêng để ComboBox Tên SP hiển thị đầy đủ tên kèm Size, Màu giúp phân biệt các sản phẩm trùng tên
                 DataTable dtCboSanPham = dtSP.Copy();
                 dtCboSanPham.Columns.Add("HienThi", typeof(string), "TenSP + ' (Size: ' + ISNULL(Size, '') + ' - Màu: ' + ISNULL(MauSac, '') + ')'");
 
                 cboSanPham.DataSource = dtCboSanPham;
-                cboSanPham.DisplayMember = "HienThi"; // Hiển thị Tên kèm Size và Màu để không bị sót hay trùng lặp trực quan
+                cboSanPham.DisplayMember = "HienThi";
                 cboSanPham.ValueMember = "MaSP";
 
                 cboSanPham.DropDownStyle = ComboBoxStyle.DropDown;
@@ -392,7 +392,8 @@ namespace FORM_DKY
             {
                 string sql = @"SELECT hd.MaHD AS [Mã Hóa Đơn], 
                                       hd.NgayBan AS [Ngày Bán], 
-                                      nv.TenNV AS [Nhân Viên], 
+                                      hd.MaNV AS [Mã NV], 
+                                      nv.TenNV AS [Tên Nhân Viên], 
                                       ISNULL(hd.TenKhachHang, N'Khách lẻ') AS [Khách Hàng], 
                                       ISNULL(hd.SDT, '') AS [SĐT], 
                                       hd.TongTien AS [Tổng Tiền],
@@ -420,11 +421,11 @@ namespace FORM_DKY
             if (e.RowIndex >= 0)
             {
                 DataGridViewRow row = dgvDanhSachHD.Rows[e.RowIndex];
-                string maHD = row.Cells["Mã Hóa Đơn"].Value.ToString();
+                string maHD = row.Cells["Mã Hóa Đơn"].Value.ToString() ?? "";
                 string ngayBan = Convert.ToDateTime(row.Cells["Ngày Bán"].Value).ToString("dd/MM/yyyy");
-                string nhanVien = row.Cells["Nhân Viên"].Value.ToString();
-                string khachHang = row.Cells["Khách Hàng"].Value.ToString();
-                string sdt = row.Cells["SĐT"].Value.ToString();
+                string nhanVien = row.Cells["Tên Nhân Viên"].Value?.ToString() ?? "";
+                string khachHang = row.Cells["Khách Hàng"].Value?.ToString() ?? "";
+                string sdt = row.Cells["SĐT"].Value?.ToString() ?? "";
                 string tongTien = Convert.ToDecimal(row.Cells["Tổng Tiền"].Value).ToString("N0");
 
                 string sqlChiTiet = @"SELECT sp.MaSP, sp.TenSP, sp.MauSac AS Mau, sp.Size AS KichThuoc, ct.SoLuong, ct.DonGia, (ct.SoLuong * ct.DonGia) AS ThanhTien
@@ -445,8 +446,8 @@ namespace FORM_DKY
             if (cboSanPham.SelectedItem == null) return;
 
             DataRowView drv = (DataRowView)cboSanPham.SelectedItem;
-            string maSP = drv["MaSP"].ToString();
-            string tenSP = drv["TenSP"].ToString();
+            string maSP = drv["MaSP"].ToString() ?? "";
+            string tenSP = drv["TenSP"].ToString() ?? "";
             string mau = cboMau.Text;
             string kichThuoc = cboKichThuoc.Text;
             int soLuong = (int)nudSoLuong.Value;
@@ -457,7 +458,7 @@ namespace FORM_DKY
                 if (row["MaSP"].ToString() == maSP)
                 {
                     row["SoLuong"] = (int)row["SoLuong"] + soLuong;
-                    row["ThanhTien"] = (int)row["SoLuong"] * donGia;
+                    row["ThanhTien"] = Convert.ToInt32(row["SoLuong"]) * donGia;
                     TinhTongTien();
                     return;
                 }
@@ -542,15 +543,12 @@ namespace FORM_DKY
             dtGioHang.Rows.Clear();
             txtKhachHang.Clear();
             txtSDT.Clear();
-            txtNhanVien.Clear();
+            ApDungUserSession(); // Giữ nguyên tên nhân viên đang đăng nhập
             nudSoLuong.Value = 1;
             TaoMaHoaDonMoi();
             TinhTongTien();
         }
 
-        // ==========================================
-        // ❌ CHỨC NĂNG XÓA HÓA ĐƠN TRONG DATABASE
-        // ==========================================
         private void BtnXoaHDDB_Click(object sender, EventArgs e)
         {
             if (dgvDanhSachHD.SelectedRows.Count == 0)
@@ -573,7 +571,6 @@ namespace FORM_DKY
 
                     try
                     {
-                        // Nếu hóa đơn đã thanh toán, hoàn trả lại tồn kho
                         if (trangThai == "Đã thanh toán")
                         {
                             string returnStockSql = @"UPDATE SanPham 
@@ -588,7 +585,6 @@ namespace FORM_DKY
                             }
                         }
 
-                        // Xóa chi tiết hóa đơn
                         string delCT = "DELETE FROM ChiTietHoaDon WHERE MaHD = @MaHD";
                         using (SqlCommand cmdCT = new SqlCommand(delCT, conn, transaction))
                         {
@@ -596,7 +592,6 @@ namespace FORM_DKY
                             cmdCT.ExecuteNonQuery();
                         }
 
-                        // Xóa hóa đơn chính
                         string delHD = "DELETE FROM HoaDon WHERE MaHD = @MaHD";
                         using (SqlCommand cmdHD = new SqlCommand(delHD, conn, transaction))
                         {
@@ -617,9 +612,6 @@ namespace FORM_DKY
             }
         }
 
-        // ==========================================
-        // ✏️ CHỨC NĂNG SỬA HÓA ĐƠN ĐÃ LƯU
-        // ==========================================
         private void BtnSuaHDDB_Click(object sender, EventArgs e)
         {
             if (dgvDanhSachHD.SelectedRows.Count == 0)
@@ -644,7 +636,10 @@ namespace FORM_DKY
                 txtMaHD.Text = maHD;
                 txtKhachHang.Text = row.Cells["Khách Hàng"].Value?.ToString() == "Khách lẻ" ? "" : row.Cells["Khách Hàng"].Value?.ToString();
                 txtSDT.Text = row.Cells["SĐT"].Value?.ToString();
-                txtNhanVien.Text = row.Cells["Nhân Viên"].Value?.ToString();
+
+                // Lấy chính xác tên cột [Tên Nhân Viên]
+                txtNhanVien.Text = row.Cells["Tên Nhân Viên"].Value?.ToString();
+
                 if (DateTime.TryParse(row.Cells["Ngày Bán"].Value?.ToString(), out DateTime ngayBan))
                 {
                     dtpNgayBan.Value = ngayBan;
@@ -692,31 +687,6 @@ namespace FORM_DKY
             }
         }
 
-        private string XuLyVaLayMaNhanVien(SqlConnection conn, SqlTransaction transaction, string tenNV)
-        {
-            string checkQuery = "SELECT MaNV FROM NhanVien WHERE TenNV = @TenNV";
-            using (SqlCommand cmdCheck = new SqlCommand(checkQuery, conn, transaction))
-            {
-                cmdCheck.Parameters.AddWithValue("@TenNV", tenNV);
-                object result = cmdCheck.ExecuteScalar();
-                if (result != null)
-                {
-                    return result.ToString();
-                }
-            }
-
-            string newMaNV = "NV" + DateTime.Now.ToString("mmssff");
-            string insertNV = "INSERT INTO NhanVien (MaNV, TenNV) VALUES (@MaNV, @TenNV)";
-            using (SqlCommand cmdInsert = new SqlCommand(insertNV, conn, transaction))
-            {
-                cmdInsert.Parameters.AddWithValue("@MaNV", newMaNV);
-                cmdInsert.Parameters.AddWithValue("@TenNV", tenNV);
-                cmdInsert.ExecuteNonQuery();
-            }
-
-            return newMaNV;
-        }
-
         private bool LuuHoaDonBanDau()
         {
             if (dtGioHang.Rows.Count == 0)
@@ -725,10 +695,9 @@ namespace FORM_DKY
                 return false;
             }
 
-            if (string.IsNullOrWhiteSpace(txtNhanVien.Text))
+            if (string.IsNullOrWhiteSpace(UserSession.MaNV))
             {
-                MessageBox.Show("Vui lòng nhập tên nhân viên bán hàng!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                txtNhanVien.Focus();
+                MessageBox.Show("Phiên làm việc chưa có Mã NV. Vui lòng đăng nhập lại!", "Lỗi phiên", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
 
@@ -762,7 +731,8 @@ namespace FORM_DKY
                         }
                     }
 
-                    string maNV = XuLyVaLayMaNhanVien(conn, transaction, txtNhanVien.Text.Trim());
+                    // Sử dụng trực tiếp UserSession.MaNV chuẩn xác theo định danh toàn cục
+                    string maNV = UserSession.MaNV;
 
                     decimal tongTienHang = 0;
                     foreach (DataRow row in dtGioHang.Rows)
@@ -815,6 +785,8 @@ namespace FORM_DKY
 
         private void BtnXuatHoaDon_Click(object sender, EventArgs e)
         {
+            ApDungUserSession();
+
             if (LuuHoaDonBanDau())
             {
                 string maHD = txtMaHD.Text;
@@ -833,6 +805,15 @@ namespace FORM_DKY
             }
         }
 
+        private void ApDungUserSession()
+        {
+            if (txtNhanVien != null)
+            {
+                txtNhanVien.Text = UserSession.TenNV;
+                txtNhanVien.ReadOnly = true;
+            }
+        }
+
         private void BtnThanhToanHDDuoi_Click(object sender, EventArgs e)
         {
             if (dgvDanhSachHD.SelectedRows.Count == 0)
@@ -842,8 +823,8 @@ namespace FORM_DKY
             }
 
             DataGridViewRow row = dgvDanhSachHD.SelectedRows[0];
-            string maHD = row.Cells["Mã Hóa Đơn"].Value.ToString();
-            string trangThai = row.Cells["Trạng Thái"].Value.ToString();
+            string maHD = row.Cells["Mã Hóa Đơn"].Value.ToString() ?? "";
+            string trangThai = row.Cells["Trạng Thái"].Value.ToString() ?? "";
 
             if (trangThai == "Đã thanh toán")
             {
@@ -990,10 +971,10 @@ public class FrmXuatHoaDonPopup : Form
         {
             foreach (DataRow row in dtChiTiet.Rows)
             {
-                string maSP = row.Table.Columns.Contains("MaSP") ? row["MaSP"].ToString() : "";
-                string tenSP = row.Table.Columns.Contains("TenSP") ? row["TenSP"].ToString() : "";
-                string mau = row.Table.Columns.Contains("Mau") ? row["Mau"].ToString() : (row.Table.Columns.Contains("MauSac") ? row["MauSac"].ToString() : "");
-                string size = row.Table.Columns.Contains("KichThuoc") ? row["KichThuoc"].ToString() : (row.Table.Columns.Contains("Size") ? row["Size"].ToString() : "");
+                string maSP = row.Table.Columns.Contains("MaSP") ? row["MaSP"].ToString() ?? "" : "";
+                string tenSP = row.Table.Columns.Contains("TenSP") ? row["TenSP"].ToString() ?? "" : "";
+                string mau = row.Table.Columns.Contains("Mau") ? row["Mau"].ToString() ?? "" : (row.Table.Columns.Contains("MauSac") ? row["MauSac"].ToString() ?? "" : "");
+                string size = row.Table.Columns.Contains("KichThuoc") ? row["KichThuoc"].ToString() ?? "" : (row.Table.Columns.Contains("Size") ? row["Size"].ToString() ?? "" : "");
                 int soLuong = row.Table.Columns.Contains("SoLuong") && row["SoLuong"] != DBNull.Value ? Convert.ToInt32(row["SoLuong"]) : 0;
                 decimal donGia = row.Table.Columns.Contains("DonGia") && row["DonGia"] != DBNull.Value ? Convert.ToDecimal(row["DonGia"]) : 0;
                 decimal thanhTien = row.Table.Columns.Contains("ThanhTien") && row["ThanhTien"] != DBNull.Value ? Convert.ToDecimal(row["ThanhTien"]) : (soLuong * donGia);
