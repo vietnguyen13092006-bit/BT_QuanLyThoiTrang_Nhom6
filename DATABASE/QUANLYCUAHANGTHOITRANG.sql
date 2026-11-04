@@ -9,7 +9,7 @@ BEGIN
 END
 GO
 
--- 2. Tạo Database dùng chung cho cả 3 bạn
+-- 2. Tạo Database dùng chung
 CREATE DATABASE QuanLyCuaHangThoiTrang;
 GO
 
@@ -17,17 +17,31 @@ USE QuanLyCuaHangThoiTrang;
 GO
 
 -- =========================================================
--- BẢNG 1: NHÂN VIÊN (Dùng chung cho Quản lý & Báo cáo)
+-- BẢNG 1: NHÂN VIÊN (Lưu hồ sơ nhân sự)
 -- =========================================================
 CREATE TABLE NhanVien (
     MaNV VARCHAR(20) PRIMARY KEY,
     TenNV NVARCHAR(100) NOT NULL,
     SDT VARCHAR(15),
-    ChucVu NVARCHAR(50)
+    ChucVu NVARCHAR(50) DEFAULT N'Nhân viên'
 );
 
 -- =========================================================
--- BẢNG 2: SẢN PHẨM (Dùng chung cho Kho, Bán hàng & Báo cáo)
+-- BẢNG 2: TÀI KHOẢN (Gộp chung để đồng bộ với Nhân viên)
+-- =========================================================
+CREATE TABLE Users (
+    Userid INT IDENTITY(1,1) PRIMARY KEY,
+    Username NVARCHAR(50) NOT NULL UNIQUE,
+    PassW VARCHAR(250) NOT NULL,
+    SDT VARCHAR(15) NULL,
+    Email NVARCHAR(100) NULL,
+    AvatarPath NVARCHAR(255) NULL,
+    MaNV VARCHAR(20) NULL, -- Liên kết sang bảng Nhân viên
+    FOREIGN KEY (MaNV) REFERENCES NhanVien(MaNV) ON DELETE SET NULL
+);
+
+-- =========================================================
+-- BẢNG 3: SẢN PHẨM 
 -- =========================================================
 CREATE TABLE SanPham (
     MaSP VARCHAR(20) PRIMARY KEY,
@@ -35,21 +49,22 @@ CREATE TABLE SanPham (
     LoaiSP NVARCHAR(50),
     MauSac NVARCHAR(30),
     Size VARCHAR(10),
-    GiaNhap DECIMAL(18, 2) DEFAULT 0,  -- Dành cho bên Phiếu nhập
-    GiaBan DECIMAL(18, 2) DEFAULT 0,   -- Dành cho bên Hóa đơn bán
-    SoLuongTon INT DEFAULT 0,          -- Tự tăng khi nhập, tự giảm khi bán
-    HinhAnh VARCHAR(200),              -- Đường dẫn ảnh đại diện sản phẩm
+    GiaNhap DECIMAL(18, 2) DEFAULT 0,  
+    GiaBan DECIMAL(18, 2) DEFAULT 0,   
+    SoLuongTon INT DEFAULT 0,          
+    HinhAnh VARCHAR(200),              
     GhiChu NVARCHAR(255)
 );
 
 -- =========================================================
--- BẢNG 3 & 4: PHIẾU NHẬP HÀNG (Mô-đun Quản lý Kho / Thống kê)
+-- BẢNG 4 & 5: PHIẾU NHẬP HÀNG & CHI TIẾT PHIẾU NHẬP
 -- =========================================================
 CREATE TABLE PhieuNhap (
     MaPN VARCHAR(20) PRIMARY KEY,
     NgayNhap DATETIME DEFAULT GETDATE(),
     MaNV VARCHAR(20) FOREIGN KEY REFERENCES NhanVien(MaNV),
-    TongTienNhap DECIMAL(18,2) DEFAULT 0
+    TongTienNhap DECIMAL(18,2) DEFAULT 0,
+    Thue DECIMAL(18, 2) DEFAULT 0
 );
 
 CREATE TABLE ChiTietPhieuNhap (
@@ -62,7 +77,7 @@ CREATE TABLE ChiTietPhieuNhap (
 );
 
 -- =========================================================
--- BẢNG 5 & 6: HÓA ĐƠN BÁN HÀNG (Mô-đun Quản lý Hóa đơn)
+-- BẢNG 6 & 7: HÓA ĐƠN BÁN HÀNG & CHI TIẾT HÓA ĐƠN
 -- =========================================================
 CREATE TABLE HoaDon (
     MaHD VARCHAR(20) PRIMARY KEY,
@@ -71,6 +86,7 @@ CREATE TABLE HoaDon (
     TenKhachHang NVARCHAR(100),
     SDT VARCHAR(15),
     TongTien DECIMAL(18, 2) DEFAULT 0,
+    TienThue DECIMAL(18, 2) DEFAULT 0,
     TrangThai NVARCHAR(50) DEFAULT N'Đã thanh toán'
 );
 
@@ -87,20 +103,12 @@ GO
 -- =========================================================
 -- THÊM DỮ LIỆU MẪU ĐỂ CHẠY THỬ
 -- =========================================================
-
-GO
-use QuanLyCuaHangThoiTrang
-go
-ALTER TABLE HoaDon ADD TienThue DECIMAL(18, 2) DEFAULT 0;
-go
-select* from HoaDon
-go
+-- 1. Thêm nhân viên Quản lý mẫu
 INSERT INTO NhanVien (MaNV, TenNV, SDT, ChucVu) 
-VALUES 
-('NV01', N'Nguyễn Văn Việt', '0987654321', N'Quản lý')
-go
-SELECT* FROM PhieuNhap
-go
-ALTER TABLE PhieuNhap ADD Thue DECIMAL(18, 2) DEFAULT 0;
+VALUES ('NV01', N'Nguyễn Văn Việt', '0987654321', N'Quản lý');
 
-select* from PhieuNhap
+-- 2. Thêm tài khoản đăng nhập tương ứng cho Quản lý này (gắn MaNV = 'NV01')
+INSERT INTO Users (Username, PassW, SDT, Email, MaNV) 
+VALUES ('admin', '123456', '0987654321', 'viet@gmail.com', 'NV01');
+SELECT Username, MaNV FROM Users WHERE Username = 'admin';
+select* from Users
